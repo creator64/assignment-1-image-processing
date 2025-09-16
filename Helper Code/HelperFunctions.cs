@@ -21,7 +21,7 @@ namespace INFOIBV.Helper_Code
     /// </summary>
     public static class HelperFunctions
     {
-        private static int getFilterWeight(byte[,] filter)
+        private static int getFilterWeight(sbyte[,] filter)
         {
             int filterWeight = 0;
 
@@ -47,7 +47,7 @@ namespace INFOIBV.Helper_Code
         /// Causes the paddingmethod to pad with the given value, defaults to 0 (black)
         /// </param>
         /// <returns>The result of I * H</returns>
-        public static byte[,] applyUnevenFilter(byte[,] I, byte[,] H, Padder padder)
+        public static byte[,] applyUnevenFilter(byte[,] I, sbyte[,] H, Padder padder)
         {
             byte[,] paddedImage = padder.padImage(I);
 
@@ -73,7 +73,7 @@ namespace INFOIBV.Helper_Code
         /// <param name="filterHeight">the height of the filter (how far it extends to the top and bottom)</param>
         /// <param name="filterWeight">the total weight (sum) of all elements in the filter matrix</param>
         /// <returns>The pixel at (i, j) after applying the filter</returns>
-        private static byte applyUnevenFilterPass(int i, int j, byte[,] paddedImage, byte[,] filter, int filterWidth, int filterHeight, int filterWeight)
+        private static byte applyUnevenFilterPass(int i, int j, byte[,] paddedImage, sbyte[,] filter, int filterWidth, int filterHeight, int filterWeight)
         {
             int filteredValue = 0;
             for (int k = -filterWidth ; k <= filterWidth; k++)
@@ -84,7 +84,10 @@ namespace INFOIBV.Helper_Code
                 }
             }
 
-            return (byte)(filteredValue / filterWeight);
+            if (filterWeight != 0)
+                return (byte)(filteredValue / filterWeight);
+            else
+                return (byte)filteredValue;
         }
     }
 }
