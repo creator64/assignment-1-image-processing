@@ -291,9 +291,17 @@ namespace INFOIBV
             // create temporary grayscale image
             byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
 
-            Padder padder = new CopyPerimeterPadder(100, 100);
+            byte[,] shiftFilter = {
+                {0, 0, 0 },
+                {1, 0, 0 },
+                {0, 0, 0 }
+            };
 
-            return tempImage;
+            Padder padder = new ConstantValuePadder((int)(shiftFilter.GetLength(0) / 2), (int)(shiftFilter.GetLength(1) / 2), 0);
+
+            byte[,] filteredImage = HelperFunctions.applyUnevenFilter(inputImage, shiftFilter, padder);
+
+            return filteredImage;
         }
 
 

@@ -80,7 +80,7 @@ namespace INFOIBV.Helper_Code
             {
                 for (int l = -filterHeight; l <= filterHeight; l++)
                 {
-                    filteredValue += paddedImage[i + k, j = l] * filter[k + filterWidth, l + filterHeight];
+                    filteredValue += paddedImage[i + k, j + l] * filter[k + filterWidth, l + filterHeight];
                 }
             }
 
