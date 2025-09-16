@@ -6,10 +6,17 @@ using System.Threading.Tasks;
 
 namespace INFOIBV.Helper_Code
 {
+    /// <summary>
+    /// Helper class for padding images.
+    /// </summary>
     public abstract class Padder
     {
-        protected byte paddingWidth;
+        public byte paddingWidth { get; protected set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="paddingWidth"> The amount of pixels each of the side is padded with</param>
         protected Padder(byte paddingWidth)
         {
             this.paddingWidth = paddingWidth;
@@ -19,9 +26,18 @@ namespace INFOIBV.Helper_Code
 
     }
 
+    /// <summary>
+    /// Padder that pads an image with a given constant value
+    /// </summary>
     public class ConstantValuePadder : Padder
     {
         private byte paddingValue;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="paddingWidth">The amount of pixels each of the side is padded with</param>
+        /// <param name="paddingValue">The value that will be padded with</param>
         public ConstantValuePadder(byte paddingWidth, byte paddingValue) : base(paddingWidth)
         {
             this.paddingValue = paddingValue;
@@ -45,8 +61,15 @@ namespace INFOIBV.Helper_Code
         }
     }
 
+    /// <summary>
+    /// Padder that pads by copying the value at the border (perimeter)
+    /// </summary>
     public class CopyPerimeterPadder : Padder
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="paddingWidth"> The amount of pixels each of the side is padded with</param>
         public CopyPerimeterPadder(byte paddingWidth) : base(paddingWidth) { }
 
         public override byte[,] padImage(byte[,] image)

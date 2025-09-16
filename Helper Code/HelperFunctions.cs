@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using INFOIBV.Helper_Code;
 
 namespace INFOIBV.Helper_Code
@@ -20,8 +21,23 @@ namespace INFOIBV.Helper_Code
     /// </summary>
     public static class HelperFunctions
     {
+        private static int getFilterWeight(byte[,] filter)
+        {
+            int filterWeight = 0;
+
+            for (int i = 0, i < H.GetLength(0); i++)
+            {
+                for (int j = 0; j < H.GetLength(1); j++)
+                {
+                    filterWeight += H[i, j];
+                }
+            }
+
+            return filterWeight;
+        }
+
         /// <summary>
-        /// Applying an uneven filter 
+        /// Applying an uneven square filter 
         /// </summary>
         /// <param name="I">The Original Image</param>
         /// <param name="H">The filter-matrix you want to apply to I</param>
@@ -31,10 +47,43 @@ namespace INFOIBV.Helper_Code
         /// Causes the paddingmethod to pad with the given value, defaults to 0 (black)
         /// </param>
         /// <returns>The result of I * H</returns>
-        public static byte[,] applyUnevenFilter(byte[,] I, byte[,] H)
+        public static byte[,] applyUnevenFilter(byte[,] I, byte[,] H, Padder padder)
         {
+            byte[,] paddedImage = padder.padImage(I);
+
+            for (int i = padder.paddingWidth; i < I.GetLength(0) + padder.paddingWidth; i++)
+            {
+                for (int j = padder.paddingWidth; j < I.GetLength(1) + padder.paddingWidth; j++)
+                {
+                    //paddingWidth and filterWidth are equivalent to one another.
+                    I[i - padder.paddingWidth, j - padder.paddingWidth] = applyUnevenFilterPass(i, j, paddedImage, H, padder.paddingWidth, getFilterWeight(H));
+                }
+            }
 
             return I;
+        }
+        /// <summary>
+        /// Apply a single pass of an uneven square filter (3x3, 5x5, etc.) to one pixel.
+        /// </summary>
+        /// <param name="i">x coordinate of the padded image</param>
+        /// <param name="j">y coordinate of the padded image</param>
+        /// <param name="paddedImage">the padded image itself</param>
+        /// <param name="filter">the filter matrix H</param>
+        /// <param name="filterWidth">the width of the filter (how far it extends to the left, right, top and bottom)</param>
+        /// <param name="filterWeight">the total weight (sum) of all elements in the filter matrix</param>
+        /// <returns>The pixel at (i, j) after applying the filter</returns>
+        private static byte applyUnevenFilterPass(int i, int j, byte[,] paddedImage, byte[,] filter, int filterWidth, int filterWeight)
+        {
+            int filteredValue = 0;
+            for (int k = -filterWidth ; k <= filterWidth; k++)
+            {
+                for (int l = -filterWidth; l <= filterWidth; l++)
+                {
+                    filteredValue += paddedImage[i + k, j = l] * filter[k + filterWidth, l + filterWidth];
+                }
+            }
+
+            return (byte)(filteredValue / filterWeight);
         }
     }
 }
