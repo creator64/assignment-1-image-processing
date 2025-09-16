@@ -11,15 +11,17 @@ namespace INFOIBV.Helper_Code
     /// </summary>
     public abstract class Padder
     {
-        public byte paddingWidth { get; protected set; }
+        public int paddingWidth { get; protected set; }
+        public int paddingHeight { get; protected set; }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="paddingWidth"> The amount of pixels each of the side is padded with</param>
-        protected Padder(byte paddingWidth)
+        /// <param name="paddingWidth"> The amount of pixels the horizontal sides are padded with</param>
+        protected Padder(int paddingWidth, int paddingHeight)
         {
             this.paddingWidth = paddingWidth;
+            this.paddingHeight = paddingHeight;
         }
 
         public abstract byte[,] padImage(byte[,] image);
@@ -36,23 +38,23 @@ namespace INFOIBV.Helper_Code
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="paddingWidth">The amount of pixels each of the side is padded with</param>
+        /// <param name="paddingWidth">The amount of pixels each of the horizontal sides is padded with</param>
         /// <param name="paddingValue">The value that will be padded with</param>
-        public ConstantValuePadder(byte paddingWidth, byte paddingValue) : base(paddingWidth)
+        public ConstantValuePadder(int paddingWidth, int paddingHeight, byte paddingValue) : base(paddingWidth, paddingHeight)
         {
             this.paddingValue = paddingValue;
         }
 
         public override byte[,] padImage(byte[,] image)
         {
-            byte[,] newImage = new byte[image.GetLength(0) + (2 * paddingWidth), image.GetLength(1) + (2 * paddingWidth)];
+            byte[,] newImage = new byte[image.GetLength(0) + (2 * paddingWidth), image.GetLength(1) + (2 * paddingHeight)];
 
             for (int i = 0; i < newImage.GetLength(0); i++)
             {
                 for (int j = 0; j < newImage.GetLength(1); j++)
                 {
-                    if (i >= paddingWidth && j >= paddingWidth && (i - paddingWidth) < image.GetLength(0) && (j - paddingWidth) < image.GetLength(1))
-                        newImage[i, j] = image[i - paddingWidth, j - paddingWidth];
+                    if (i >= paddingWidth && j >= paddingHeight && (i - paddingWidth) < image.GetLength(0) && (j - paddingHeight) < image.GetLength(1))
+                        newImage[i, j] = image[i - paddingWidth, j - paddingHeight];
                     else
                         newImage[i, j] = paddingValue;
                 }
@@ -70,13 +72,13 @@ namespace INFOIBV.Helper_Code
         /// 
         /// </summary>
         /// <param name="paddingWidth"> The amount of pixels each of the side is padded with</param>
-        public CopyPerimeterPadder(byte paddingWidth) : base(paddingWidth) { }
+        public CopyPerimeterPadder(int paddingWidth, int paddingHeight) : base(paddingWidth, paddingHeight) { }
 
         public override byte[,] padImage(byte[,] image)
         {
-            byte[,] newImage = new byte[image.GetLength(0) + (2 * paddingWidth), image.GetLength(1) + (2 * paddingWidth)];
+            byte[,] newImage = new byte[image.GetLength(0) + (2 * paddingWidth), image.GetLength(1) + (2 * paddingHeight)];
 
-            for (int i = 0 i < newImage.GetLength(0); i++)
+            for (int i = 0; i < newImage.GetLength(0); i++)
             {
                 for (int j = 0; j < newImage.GetLength(1); j++)
                 {
@@ -86,7 +88,7 @@ namespace INFOIBV.Helper_Code
                     if (i < paddingWidth) x = 0;
                     else if (i >= image.GetLength(0)) x = image.GetLength(0) - 1;
 
-                    if (j < paddingWidth) y = 0;
+                    if (j < paddingHeight) y = 0;
                     else if (j >= image.GetLength(1)) y = image.GetLength(1) - 1;
 
                     newImage[i, j] = image[x, y];
