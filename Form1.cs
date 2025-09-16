@@ -107,7 +107,8 @@ namespace INFOIBV
                 for (int y = 0; y < workingImage.GetLength(1); y++)         // loop over rows
                 {
                     Color newColor = Color.FromArgb(workingImage[x, y], workingImage[x, y], workingImage[x, y]);
-                    OutputImage.SetPixel(x, y, newColor);                  // set the pixel color at coordinate (x,y)
+                    if (x < OutputImage.Size.Width && y < OutputImage.Size.Height)
+                        OutputImage.SetPixel(x, y, newColor);                  // set the pixel color at coordinate (x,y)
                 }
             
             pictureBox2.Image = (Image)OutputImage;                         // display output image
@@ -291,7 +292,9 @@ namespace INFOIBV
             // create temporary grayscale image
             byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
 
-            // TODO: add your functionality and checks, think about border handling and type conversion (negative values!)
+            Padder padder = new CopyPerimeterPadder(100, 100);
+
+            return padder.padImage(inputImage);
 
             return tempImage;
         }

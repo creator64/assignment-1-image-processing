@@ -87,9 +87,11 @@ namespace INFOIBV.Helper_Code
 
                     if (i < paddingWidth) x = 0;
                     else if (i >= image.GetLength(0)) x = image.GetLength(0) - 1;
+                    else x -= paddingWidth;
 
                     if (j < paddingHeight) y = 0;
                     else if (j >= image.GetLength(1)) y = image.GetLength(1) - 1;
+                    else y -= paddingHeight;
 
                     newImage[i, j] = image[x, y];
                 }
