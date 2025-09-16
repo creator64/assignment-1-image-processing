@@ -107,8 +107,7 @@ namespace INFOIBV
                 for (int y = 0; y < workingImage.GetLength(1); y++)         // loop over rows
                 {
                     Color newColor = Color.FromArgb(workingImage[x, y], workingImage[x, y], workingImage[x, y]);
-                    if (x < OutputImage.Size.Width && y < OutputImage.Size.Height)
-                        OutputImage.SetPixel(x, y, newColor);                  // set the pixel color at coordinate (x,y)
+                    OutputImage.SetPixel(x, y, newColor);                  // set the pixel color at coordinate (x,y)
                 }
             
             pictureBox2.Image = (Image)OutputImage;                         // display output image
@@ -293,8 +292,6 @@ namespace INFOIBV
             byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
 
             Padder padder = new CopyPerimeterPadder(100, 100);
-
-            return padder.padImage(inputImage);
 
             return tempImage;
         }
