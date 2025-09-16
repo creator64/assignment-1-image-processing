@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Text.RegularExpressions;
 using INFOIBV.Helper_Code;
+using System.Diagnostics;
 
 namespace INFOIBV
 {
@@ -292,14 +293,14 @@ namespace INFOIBV
             byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
 
             sbyte[,] hor = {
-                { -1, -1, -1},
+                { -1, -2, -1},
                 { 0, 0, 0},
-                { 1, 1, 1}
+                { 1, 2, 1}
             };
 
             sbyte[,] vert = {
                 { -1, 0, 1},
-                { -1, 0, 1},
+                { -2, 0, 2},
                 { -1, 0, 1}
             };
 
@@ -314,8 +315,7 @@ namespace INFOIBV
                 for (int j = 0; j < tempImage.GetLength(1); j++)
                 {
                     int result = (int)Math.Sqrt(Math.Pow(Dx[i, j], 2) + Math.Pow(Dy[i, j], 2));
-                    if (result < 0) result = 0;
-                    else if (result > 255) result = 255;
+
                     tempImage[i, j] = (byte)result;
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,7 +30,7 @@ namespace INFOIBV.Helper_Code
             {
                 for (int j = 0; j < filter.GetLength(1); j++)
                 {
-                    filterWeight += filter[i, j];
+                    filterWeight += Math.Abs(filter[i, j]);
                 }
             }
 
@@ -85,9 +86,13 @@ namespace INFOIBV.Helper_Code
             }
 
             if (filterWeight != 0)
+            {
                 return (byte)(filteredValue / filterWeight);
+            }
             else
+            {
                 return (byte)filteredValue;
+            }
         }
     }
 }
