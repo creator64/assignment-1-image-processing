@@ -292,16 +292,16 @@ namespace INFOIBV
             // create temporary grayscale image
             byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
 
-            sbyte[,] hor = {
-                { -1, -2, -1},
+            sbyte[,] vert = {
+                { -3, -10, -3},
                 { 0, 0, 0},
-                { 1, 2, 1}
+                { 3, 10, 3}
             };
 
-            sbyte[,] vert = {
-                { -1, 0, 1},
-                { -2, 0, 2},
-                { -1, 0, 1}
+            sbyte[,] hor = {
+                { -3, 0, 3},
+                { -10, 0, 10},
+                { -3, 0, 10}
             };
 
             Padder horizontalPadder = new CopyPerimeterPadder((int)(hor.GetLength(0) / 2), (int)(hor.GetLength(1) / 2));
@@ -314,7 +314,10 @@ namespace INFOIBV
             {
                 for (int j = 0; j < tempImage.GetLength(1); j++)
                 {
-                    int result = (int)Math.Sqrt(Math.Pow(Dx[i, j], 2) + Math.Pow(Dy[i, j], 2));
+                    int result = (int)Math.Round(Math.Sqrt(Math.Pow(Dx[i, j], 2) + Math.Pow(Dy[i, j], 2)));
+
+                    if (result < 0) result = 0;
+                    else if (result > 255) result = 255;
 
                     tempImage[i, j] = (byte)result;
                 }
@@ -322,7 +325,7 @@ namespace INFOIBV
 
             return tempImage;
         }
-
+        
 
         /*
          * thresholdImage: threshold a grayscale image

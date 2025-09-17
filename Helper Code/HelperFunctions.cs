@@ -76,18 +76,18 @@ namespace INFOIBV.Helper_Code
         /// <returns>The pixel at (i, j) after applying the filter</returns>
         private static byte applyUnevenFilterPass(int i, int j, byte[,] paddedImage, sbyte[,] filter, int filterWidth, int filterHeight, int filterWeight)
         {
-            int filteredValue = 0;
+            float filteredValue = 0;
             for (int k = -filterWidth ; k <= filterWidth; k++)
             {
                 for (int l = -filterHeight; l <= filterHeight; l++)
                 {
-                    filteredValue += paddedImage[i + k, j + l] * filter[k + filterWidth, l + filterHeight];
+                    filteredValue += (float)paddedImage[i + k, j + l] * (float)filter[k + filterWidth, l + filterHeight];
                 }
             }
 
             if (filterWeight != 0)
             {
-                return (byte)(filteredValue / filterWeight);
+                return (byte)(filteredValue / (float)filterWeight);
             }
             else
             {
