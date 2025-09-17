@@ -314,7 +314,7 @@ namespace INFOIBV
             float[,] Dx = HelperFunctions.applyUnevenFilter(inputImage, hor, horizontalPadder);
             float[,] Dy = HelperFunctions.applyUnevenFilter(inputImage, vert, verticalPadder);
 
-            float min = 0.0f;
+            float min = 255.0f;
             float max = 0.0f;
 
             // calculate edge magnitude
