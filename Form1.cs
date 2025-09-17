@@ -293,15 +293,15 @@ namespace INFOIBV
             byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
 
             sbyte[,] vert = {
-                { -3, -10, -3},
+                { -1, -2, -1},
                 { 0, 0, 0},
-                { 3, 10, 3}
+                { 1, 2, 1}
             };
 
             sbyte[,] hor = {
-                { -3, 0, 3},
-                { -10, 0, 10},
-                { -3, 0, 10}
+                { -1, 0, 1},
+                { -2, 0, 1},
+                { -1, 0, 1}
             };
 
             Padder horizontalPadder = new CopyPerimeterPadder((int)(hor.GetLength(0) / 2), (int)(hor.GetLength(1) / 2));
