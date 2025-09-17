@@ -291,7 +291,7 @@ namespace INFOIBV
         {
             // create temporary grayscale image
             byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-
+            
             sbyte[,] vert = {
                 { -1, -2, -1},
                 { 0, 0, 0},
@@ -300,26 +300,32 @@ namespace INFOIBV
 
             sbyte[,] hor = {
                 { -1, 0, 1},
-                { -2, 0, 1},
+                { -2, 0, 2},
                 { -1, 0, 1}
             };
 
             Padder horizontalPadder = new CopyPerimeterPadder((int)(hor.GetLength(0) / 2), (int)(hor.GetLength(1) / 2));
             Padder verticalPadder = new CopyPerimeterPadder((int)(vert.GetLength(0) / 2), (int)(vert.GetLength(1) / 2));
 
-            byte[,] Dx = HelperFunctions.applyUnevenFilter(inputImage, hor, horizontalPadder);
-            byte[,] Dy = HelperFunctions.applyUnevenFilter(inputImage, vert, verticalPadder);
-
+            float[,] Dx = HelperFunctions.applyUnevenFilter(inputImage, hor, horizontalPadder);
+            float[,] Dy = HelperFunctions.applyUnevenFilter(inputImage, vert, verticalPadder);
+            
             for (int i = 0; i < tempImage.GetLength(0); i++)
             {
                 for (int j = 0; j < tempImage.GetLength(1); j++)
                 {
-                    int result = (int)Math.Round(Math.Sqrt(Math.Pow(Dx[i, j], 2) + Math.Pow(Dy[i, j], 2)));
+                    bool flag = false;
 
-                    if (result < 0) result = 0;
-                    else if (result > 255) result = 255;
+                    if (flag) tempImage[i, j] = (byte)Dx[i, j];
+                    else
+                    {
+                        int result = (int)Math.Round(Math.Sqrt(Math.Pow(Dx[i, j], 2) + Math.Pow(Dy[i, j], 2)));
 
-                    tempImage[i, j] = (byte)result;
+                        if (result < 0) result = 0;
+                        else if (result > 255) result = 255;
+
+                        tempImage[i, j] = (byte)result;
+                    }
                 }
             }
 
