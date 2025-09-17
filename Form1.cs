@@ -290,8 +290,11 @@ namespace INFOIBV
         private byte[,] edgeMagnitude(byte[,] inputImage, sbyte[,] horizontalKernel, sbyte[,] verticalKernel)
         {
             // create temporary grayscale image
-            byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            
+            byte[,] resultImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+            float[,] tempImage = new float[inputImage.GetLength(0), inputImage.GetLength(1)];
+
+            #region test values
+            //change these around later for the horizontalKernel and verticalKernel parameters
             sbyte[,] vert = {
                 { -1, -2, -1},
                 { 0, 0, 0},
@@ -303,33 +306,46 @@ namespace INFOIBV
                 { -2, 0, 2},
                 { -1, 0, 1}
             };
+            #endregion
 
             Padder horizontalPadder = new CopyPerimeterPadder((int)(hor.GetLength(0) / 2), (int)(hor.GetLength(1) / 2));
             Padder verticalPadder = new CopyPerimeterPadder((int)(vert.GetLength(0) / 2), (int)(vert.GetLength(1) / 2));
 
             float[,] Dx = HelperFunctions.applyUnevenFilter(inputImage, hor, horizontalPadder);
             float[,] Dy = HelperFunctions.applyUnevenFilter(inputImage, vert, verticalPadder);
-            
+
+            float min = 0.0f;
+            float max = 0.0f;
+
+            // calculate edge magnitude
             for (int i = 0; i < tempImage.GetLength(0); i++)
             {
                 for (int j = 0; j < tempImage.GetLength(1); j++)
                 {
-                    bool flag = false;
+                    float result = (float)Math.Sqrt(Math.Pow(Dx[i, j], 2) + Math.Pow(Dy[i, j], 2));
 
-                    if (flag) tempImage[i, j] = (byte)Dx[i, j];
-                    else
-                    {
-                        int result = (int)Math.Round(Math.Sqrt(Math.Pow(Dx[i, j], 2) + Math.Pow(Dy[i, j], 2)));
+                    if (result < min) min = result;
+                    if (result > max) max = result;
 
-                        if (result < 0) result = 0;
-                        else if (result > 255) result = 255;
-
-                        tempImage[i, j] = (byte)result;
-                    }
+                    tempImage[i, j] = (float)result;
                 }
             }
 
-            return tempImage;
+            //normalise edge magnitudes to range 0 - 255
+            // and copy to the resulting image
+            float trueRange = max - min; //the entire range of values that's currently used
+
+            for (int i = 0; i < tempImage.GetLength(0); i++)
+            {
+                for (int j = 0; j < tempImage.GetLength(1); j++)
+                {
+
+                    resultImage[i, j] = (byte)(255.0f * ((tempImage[i, j] - min) / trueRange));
+                }
+            }
+
+
+            return resultImage;
         }
         
 
