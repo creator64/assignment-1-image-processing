@@ -221,11 +221,14 @@ namespace INFOIBV
          */
         private byte[,] invertImage(byte[,] inputImage)
         {
-            // create temporary grayscale image
-            byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-
-            // TODO: add your functionality and checks
+            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
             
+            // create temporary grayscale image
+            byte[,] tempImage = new byte[width, height];
+            
+            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+                tempImage[x, y] = (byte)(255 - inputImage[x, y]);
+
             return tempImage;
         }
 
@@ -237,10 +240,21 @@ namespace INFOIBV
          */
         private byte[,] adjustContrast(byte[,] inputImage)
         {
+            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
+            
+            int alow = 255, ahigh = 0;
+            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+            { 
+                if (inputImage[x, y] > ahigh) ahigh = inputImage[x, y];
+                if (inputImage[x, y] < alow) alow = inputImage[x, y]; 
+            }
+
             // create temporary grayscale image
             byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-
-            // TODO: add your functionality and checks
+            
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                    tempImage[x, y] = (byte)((inputImage[x, y] - alow) * 255 / (ahigh - alow));
 
             return tempImage;
         }
@@ -254,10 +268,23 @@ namespace INFOIBV
          */
         private float[,] createGaussianFilter(byte size, float sigma)
         {
+            if (size % 2 == 0) throw new Exception("size of gaussian filter cannot be even");
+            int halfSize = size / 2;
+            
             // create temporary grayscale image
             float[,] filter = new float[size, size];
 
-            // TODO: add your functionality and checks
+            for (int x = -halfSize; x <= halfSize; x++) for (int y = -halfSize; y <= halfSize; y++)
+                filter[x + halfSize, y + halfSize] = (float)Math.Exp(
+                    -Math.Pow(x, 2) - Math.Pow(y, 2) / (2 * Math.Pow(sigma, 2))
+                );
+
+            float sum = 0;
+            for (int x = 0; x < size; x++) for (int y = 0; y < size; y++)
+                sum += filter[x, y];
+            
+            for (int x = 0; x < size; x++) for (int y = 0; y < size; y++)
+                filter[x, y] /= sum;
 
             return filter;
         }
@@ -271,12 +298,15 @@ namespace INFOIBV
          */
         private byte[,] convolveImage(byte[,] inputImage, float[,] filter)
         {
-            // create temporary grayscale image
-            byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+            int filterLengthX = filter.GetLength(0), filterLengthY = filter.GetLength(1);
+            
+            if (filterLengthX % 2 == 0 || filterLengthY % 2 == 0)
+                throw new Exception("incorrect filter");
+            
+            Padder padder = new ConstantValuePadder(filterLengthX / 2, filterLengthY / 2, 0);
+            float[,] tempImage = HelperFunctions.applyUnevenFilter(inputImage, filter, padder);
 
-            // TODO: add your functionality and checks, think about border handling and type conversion
-
-            return tempImage;
+            return HelperFunctions.convertToBytes(tempImage);
         }
 
 
@@ -295,13 +325,13 @@ namespace INFOIBV
 
             #region test values
             //change these around later for the horizontalKernel and verticalKernel parameters
-            sbyte[,] vert = {
+            float[,] vert = {
                 { -1, -2, -1},
                 { 0, 0, 0},
                 { 1, 2, 1}
             };
 
-            sbyte[,] hor = {
+            float[,] hor = {
                 { -1, 0, 1},
                 { -2, 0, 2},
                 { -1, 0, 1}
@@ -356,11 +386,14 @@ namespace INFOIBV
          */
         private byte[,] thresholdImage(byte[,] inputImage, byte threshold)
         {
-            // create temporary grayscale image
-            byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-
-            // TODO: add your functionality and checks, think about how to represent the binary values
+            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
             
+            // create temporary grayscale image
+            byte[,] tempImage = new byte[width, height];
+            
+            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+                tempImage[x, y] = (byte)(inputImage[x, y] > threshold ? 255 : 0);
+
             return tempImage;
         }
 

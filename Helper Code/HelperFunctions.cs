@@ -22,9 +22,9 @@ namespace INFOIBV.Helper_Code
     /// </summary>
     public static class HelperFunctions
     {
-        private static int getFilterWeight(sbyte[,] filter)
+        private static float getFilterWeight(float[,] filter)
         {
-            int filterWeight = 0;
+            float filterWeight = 0;
 
             for (int i = 0; i < filter.GetLength(0); i++)
             {
@@ -38,6 +38,20 @@ namespace INFOIBV.Helper_Code
         }
 
         /// <summary>
+        /// convert a 2D array of floats to a 2D array of bytes
+        /// </summary>
+        /// <param name="I">the 2D float array to be converted</param>
+        public static byte[,] convertToBytes(float[,] I)
+        {
+            int width = I.GetLength(0), height = I.GetLength(1);
+            byte[,] tempImage = new byte[width, height];
+            for (int i = 0; i < width; i++) for (int j = 0; j < height; j++) 
+                tempImage[i, j] = (byte)I[i, j];
+
+            return tempImage;
+        }
+
+        /// <summary>
         /// Applying an uneven filter 
         /// </summary>
         /// <param name="I">The Original Image</param>
@@ -48,19 +62,14 @@ namespace INFOIBV.Helper_Code
         /// Causes the paddingmethod to pad with the given value, defaults to 0 (black)
         /// </param>
         /// <returns>The result of I * H</returns>
-        public static float[,] applyUnevenFilter(byte[,] I, sbyte[,] H, Padder padder)
+        public static float[,] applyUnevenFilter(byte[,] I, float[,] H, Padder padder)
         {
             byte[,] paddedImage = padder.padImage(I);
 
             float[,] backupImage = new float[I.GetLength(0), I.GetLength(1)];
 
-            for(int i = 0; i < backupImage.GetLength(0); i++)
-            {
-                for(int j = 0; j < backupImage.GetLength(1); j++)
-                {
-                    backupImage[i, j] = I[i, j];
-                }
-            }
+            for(int i = 0; i < backupImage.GetLength(0); i++) for(int j = 0; j < backupImage.GetLength(1); j++)
+                backupImage[i, j] = I[i, j];
 
             for (int i = padder.paddingWidth; i < backupImage.GetLength(0) + padder.paddingWidth; i++)
             {
@@ -84,7 +93,7 @@ namespace INFOIBV.Helper_Code
         /// <param name="filterHeight">the height of the filter (how far it extends to the top and bottom)</param>
         /// <param name="filterWeight">the total weight (sum) of all elements in the filter matrix</param>
         /// <returns>The pixel at (i, j) after applying the filter</returns>
-        private static float applyUnevenFilterPass(int i, int j, byte[,] paddedImage, sbyte[,] filter, int filterWidth, int filterHeight, int filterWeight)
+        private static float applyUnevenFilterPass(int i, int j, byte[,] paddedImage, float[,] filter, int filterWidth, int filterHeight, float filterWeight)
         {
             float filteredValue = 0.0f;
             for (int k = -filterWidth ; k <= filterWidth; k++)
