@@ -268,13 +268,23 @@ namespace INFOIBV
          */
         private float[,] createGaussianFilter(byte size, float sigma)
         {
+            if (size % 2 == 0) throw new Exception("size of gaussian filter cannot be even");
+            int halfSize = size / 2;
+            
             // create temporary grayscale image
             float[,] filter = new float[size, size];
 
-            for (int x = 0; x < size; x++) for (int y = 0; y < size; y++)
-                filter[x, y] = (float)Math.Exp(
-                    Math.Pow(x, 2) + Math.Pow(y, 2) / (-2 * Math.Pow(sigma, 2))
+            for (int x = -halfSize; x <= halfSize; x++) for (int y = -halfSize; y <= halfSize; y++)
+                filter[x + halfSize, y + halfSize] = (float)Math.Exp(
+                    -Math.Pow(x, 2) - Math.Pow(y, 2) / (2 * Math.Pow(sigma, 2))
                 );
+
+            float sum = 0;
+            for (int x = 0; x < size; x++) for (int y = 0; y < size; y++)
+                sum += filter[x, y];
+            
+            for (int x = 0; x < size; x++) for (int y = 0; y < size; y++)
+                filter[x, y] /= sum;
 
             return filter;
         }
@@ -288,30 +298,15 @@ namespace INFOIBV
          */
         private byte[,] convolveImage(byte[,] inputImage, float[,] filter)
         {
-            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
             int filterLengthX = filter.GetLength(0), filterLengthY = filter.GetLength(1);
             
             if (filterLengthX % 2 == 0 || filterLengthY % 2 == 0)
                 throw new Exception("incorrect filter");
+            
+            Padder padder = new ConstantValuePadder(filterLengthX / 2, filterLengthY / 2, 0);
+            float[,] tempImage = HelperFunctions.applyUnevenFilter(inputImage, filter, padder);
 
-            // create temporary grayscale image
-            byte[,] tempImage = new byte[width, height];
-
-            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
-            {
-                float sum = 0;
-                int filterOriginX = x - filterLengthX / 2, filterOriginY = y - filterLengthY / 2;
-                for (int i = 0; i <= filterLengthX; i++) for (int j = 0; j <= filterLengthY; j++)
-                {
-                    int posX = filterOriginX + i, posY = filterOriginY + j;
-                    if (posX < 0 || posY < 0 || posX >= width || posY >= height) continue;
-                    sum += filter[i, j] * tempImage[filterOriginX + i, filterOriginY + j]; // TODO: Fix
-                }
-
-                tempImage[x, y] = (byte)sum;
-            }
-
-            return tempImage;
+            return HelperFunctions.convertToBytes(tempImage);
         }
 
 
@@ -330,13 +325,13 @@ namespace INFOIBV
 
             #region test values
             //change these around later for the horizontalKernel and verticalKernel parameters
-            sbyte[,] vert = {
+            float[,] vert = {
                 { -1, -2, -1},
                 { 0, 0, 0},
                 { 1, 2, 1}
             };
 
-            sbyte[,] hor = {
+            float[,] hor = {
                 { -1, 0, 1},
                 { -2, 0, 2},
                 { -1, 0, 1}
