@@ -219,11 +219,14 @@ namespace INFOIBV
          */
         private byte[,] invertImage(byte[,] inputImage)
         {
-            // create temporary grayscale image
-            byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-
-            // TODO: add your functionality and checks
+            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
             
+            // create temporary grayscale image
+            byte[,] tempImage = new byte[width, height];
+            
+            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+                tempImage[x, y] = (byte)(255 - inputImage[x, y]);
+
             return tempImage;
         }
 
@@ -235,10 +238,21 @@ namespace INFOIBV
          */
         private byte[,] adjustContrast(byte[,] inputImage)
         {
+            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
+            
+            int alow = 255, ahigh = 0;
+            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+            { 
+                if (inputImage[x, y] > ahigh) ahigh = inputImage[x, y];
+                if (inputImage[x, y] < alow) alow = inputImage[x, y]; 
+            }
+
             // create temporary grayscale image
             byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-
-            // TODO: add your functionality and checks
+            
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                    tempImage[x, y] = (byte)((inputImage[x, y] - alow) * 255 / (ahigh - alow));
 
             return tempImage;
         }
@@ -255,7 +269,10 @@ namespace INFOIBV
             // create temporary grayscale image
             float[,] filter = new float[size, size];
 
-            // TODO: add your functionality and checks
+            for (int x = 0; x < size; x++) for (int y = 0; y < size; y++)
+                filter[x, y] = (float)Math.Exp(
+                    Math.Pow(x, 2) + Math.Pow(y, 2) / (-2 * Math.Pow(sigma, 2))
+                );
 
             return filter;
         }
@@ -269,10 +286,28 @@ namespace INFOIBV
          */
         private byte[,] convolveImage(byte[,] inputImage, float[,] filter)
         {
-            // create temporary grayscale image
-            byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
+            int filterLengthX = filter.GetLength(0), filterLengthY = filter.GetLength(1);
+            
+            if (filterLengthX % 2 == 0 || filterLengthY % 2 == 0)
+                throw new Exception("incorrect filter");
 
-            // TODO: add your functionality and checks, think about border handling and type conversion
+            // create temporary grayscale image
+            byte[,] tempImage = new byte[width, height];
+
+            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+            {
+                float sum = 0;
+                int filterOriginX = x - filterLengthX / 2, filterOriginY = y - filterLengthY / 2;
+                for (int i = 0; i <= filterLengthX; i++) for (int j = 0; j <= filterLengthY; j++)
+                {
+                    int posX = filterOriginX + i, posY = filterOriginY + j;
+                    if (posX < 0 || posY < 0 || posX >= width || posY >= height) continue;
+                    sum += filter[i, j] * tempImage[filterOriginX + i, filterOriginY + j]; // TODO: Fix
+                }
+
+                tempImage[x, y] = (byte)sum;
+            }
 
             return tempImage;
         }
@@ -303,11 +338,14 @@ namespace INFOIBV
          */
         private byte[,] thresholdImage(byte[,] inputImage, byte threshold)
         {
-            // create temporary grayscale image
-            byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-
-            // TODO: add your functionality and checks, think about how to represent the binary values
+            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
             
+            // create temporary grayscale image
+            byte[,] tempImage = new byte[width, height];
+            
+            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+                tempImage[x, y] = (byte)(inputImage[x, y] > threshold ? 255 : 0);
+
             return tempImage;
         }
 
