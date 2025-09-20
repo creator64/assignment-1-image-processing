@@ -421,7 +421,7 @@ namespace INFOIBV
             float[,] floatStructElem = HelperFunctions.floatifyBoolArray(structElem);
             Padder padder = new ConstantValuePadder(floatStructElem, 0);
 
-            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Math.Min, 255);
+            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Min<float>, (x, y) => x - y);
 
             byte[,] output = HelperFunctions.convertToBytes(floatyresult);
 
@@ -429,7 +429,7 @@ namespace INFOIBV
         }
 
         /*
-         * binaryDilateImage: perform binary dilation on a binary image using a structuring element
+         * binaryDilateImage: perform binary dilation on a binary image using a structuring element 
          * input:   inputImage          single-channel (byte) binary image 
          *          structElem          binary structuring element (true = foreground)
          * output:                      single-channel (byte) binary image after dilation
@@ -440,13 +440,13 @@ namespace INFOIBV
             float[,] floatStructElem = HelperFunctions.floatifyBoolArray(structElem);
             Padder padder = new ConstantValuePadder(floatStructElem, 0);
 
-            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Math.Max, 125);
+            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Max<float>, (x, y) => x + y);
 
             byte[,] output = HelperFunctions.convertToBytes(floatyresult);
 
             for (int i = 0; i < 5; i++)
             {
-                float[,] interres = HelperFunctions.applyMorphologicalFilter(output, floatStructElem, padder, Math.Max, 125);
+                float[,] interres = HelperFunctions.applyMorphologicalFilter(output, floatStructElem, padder, Enumerable.Max<float>, (x, y) => x + y);
 
                 output = HelperFunctions.convertToBytes(interres);
             }

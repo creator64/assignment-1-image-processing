@@ -153,10 +153,11 @@ namespace INFOIBV.Helper_Code
         /// <param name="selector">The function with which to select the output of the filterpass, like the Math.Min or Math.Max functions</param>
         /// <param name="threshold">The threshold for a pixel to be considered a foreground element, 255 for binary, 0 for grayscale</param>
         /// <returns></returns>
-        public static float[,] applyMorphologicalFilter(byte[,] I, float[,] H, Padder padder, Func<float,float, float> selector, int threshold = 0)
+        public static float[,] applyMorphologicalFilter(byte[,] I, float[,] H, Padder padder, Func<List<float>, float> selector, Func<float, float, float> arithmeticOperator, int threshold = 0)
         {
             byte[,] paddedImage = padder.padImage(I);
 
+            float[,] backupPadded = copyImage(paddedImage);
             float[,] backupImage = copyImage(I);
 
             for (int i = padder.paddingWidth; i < backupImage.GetLength(0) + padder.paddingWidth; i++)
@@ -165,7 +166,7 @@ namespace INFOIBV.Helper_Code
                 {
                     if (I[i - padder.paddingWidth, j - padder.paddingWidth] >= threshold)
                     {
-                        applyMorphologicalFilterPass(i, j, paddedImage, H, padder.paddingWidth, padder.paddingHeight, selector);
+                        applyMorphologicalFilterPass(i, j, backupPadded, paddedImage, H, padder.paddingWidth, padder.paddingHeight, selector, arithmeticOperator);
                     }
                 }
             }
@@ -175,16 +176,19 @@ namespace INFOIBV.Helper_Code
             return backupImage;
         }
         
-        private static void applyMorphologicalFilterPass(int i, int j, byte[,] paddedImage, float[,] filter, int filterWidth, int filterHeight, Func<float, float, float> selector)
+        private static void applyMorphologicalFilterPass(int i, int j, float[,] backupPadded, byte[,] paddedImage, float[,] filter, int filterWidth, int filterHeight, Func<List<float>, float> selector, Func<float, float, float> arithmeticOperator)
         {
-           
+            List<float> Values = new List<float>();
+
             for (int k = -filterWidth; k <= filterWidth; k++)
             {
                 for (int l = -filterHeight; l <= filterHeight; l++)
                 {
-                    paddedImage[i + k, j + l] = (byte)Math.Round(selector(paddedImage[i + k, j + l], filter[k + filterWidth, l + filterHeight]));
+                    Values.Add(arithmeticOperator(backupPadded[i + k, j + l], filter[k + filterWidth, l + filterHeight]));
                 }
             }
+
+            paddedImage[i, j] = (byte)selector(Values);
         }
     }
 }
