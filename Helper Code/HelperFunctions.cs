@@ -163,7 +163,7 @@ namespace INFOIBV.Helper_Code
             {
                 for (int j = padder.paddingHeight; j < backupImage.GetLength(1) + padder.paddingHeight; j++)
                 {
-                    if (paddedImage[i, j] >= threshold)
+                    if (I[i - padder.paddingWidth, j - padder.paddingWidth] >= threshold)
                     {
                         applyMorphologicalFilterPass(i, j, paddedImage, H, padder.paddingWidth, padder.paddingHeight, selector);
                     }
@@ -177,11 +177,12 @@ namespace INFOIBV.Helper_Code
         
         private static void applyMorphologicalFilterPass(int i, int j, byte[,] paddedImage, float[,] filter, int filterWidth, int filterHeight, Func<float, float, float> selector)
         {
+           
             for (int k = -filterWidth; k <= filterWidth; k++)
             {
                 for (int l = -filterHeight; l <= filterHeight; l++)
                 {
-                    paddedImage[i + k, j + l] = (byte)selector(paddedImage[i + k, j + l], filter[k + filterWidth, l + filterHeight]);
+                    paddedImage[i + k, j + l] = (byte)Math.Round(selector(paddedImage[i + k, j + l], filter[k + filterWidth, l + filterHeight]));
                 }
             }
         }

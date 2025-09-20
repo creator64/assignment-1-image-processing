@@ -418,8 +418,13 @@ namespace INFOIBV
          */
         private byte[,] binaryErodeImage(byte[,] inputImage, bool[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement binary erosion
+            float[,] floatStructElem = HelperFunctions.floatifyBoolArray(structElem);
+            Padder padder = new ConstantValuePadder(floatStructElem, 0);
+
+            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Math.Min, 255);
+
+            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
+
             return output;
         }
 
@@ -435,9 +440,16 @@ namespace INFOIBV
             float[,] floatStructElem = HelperFunctions.floatifyBoolArray(structElem);
             Padder padder = new ConstantValuePadder(floatStructElem, 0);
 
-            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Math.Max, 255);
+            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Math.Max, 125);
 
             byte[,] output = HelperFunctions.convertToBytes(floatyresult);
+
+            for (int i = 0; i < 5; i++)
+            {
+                float[,] interres = HelperFunctions.applyMorphologicalFilter(output, floatStructElem, padder, Math.Max, 125);
+
+                output = HelperFunctions.convertToBytes(interres);
+            }
             return output;
         }
 
