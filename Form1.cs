@@ -136,20 +136,36 @@ namespace INFOIBV
                     return thresholdImage(workingImage, threshold);
 
                 case ProcessingFunctions.BinaryErosion:
-                    bool[,] structElem = null; // Define this structuring element yourself
+                    bool[,] structElem = {
+                        { false, true, false},
+                        { true, false, true},
+                        { false, true, false}
+                    }; // Define this structuring element yourself
                     return binaryErodeImage(workingImage, structElem);
 
                 case ProcessingFunctions.BinaryDilation:
-                    structElem = null;
-                    return binaryDilateImage(workingImage, structElem);
+                    bool[,] structElem2 = {
+                        { false, true, false},
+                        { true, false, true},
+                        { false, true, false}
+                    };
+                    return binaryDilateImage(workingImage, structElem2);
 
                 case ProcessingFunctions.BinaryOpening:
-                    structElem = null;
-                    return binaryOpenImage(workingImage, structElem);
+                    bool[,] structElem3 = {
+                        { false, true, false},
+                        { true, false, true},
+                        { false, true, false}
+                    };
+                    return binaryOpenImage(workingImage, structElem3);
 
                 case ProcessingFunctions.BinaryClosing:
-                    structElem = null;
-                    return binaryCloseImage(workingImage, structElem);
+                    bool[,] structElem4 = {
+                        { false, true, false},
+                        { true, false, true},
+                        { false, true, false}
+                    };
+                    return binaryCloseImage(workingImage, structElem4);
 
                 case ProcessingFunctions.GrayscaleErosion:
                     int[,] grayStructElem = null; // Define this structuring element yourself
@@ -297,13 +313,8 @@ namespace INFOIBV
          * output:                      single-channel (byte) image
          */
         private byte[,] convolveImage(byte[,] inputImage, float[,] filter)
-        {
-            int filterLengthX = filter.GetLength(0), filterLengthY = filter.GetLength(1);
-            
-            if (filterLengthX % 2 == 0 || filterLengthY % 2 == 0)
-                throw new Exception("incorrect filter");
-            
-            Padder padder = new ConstantValuePadder(filterLengthX / 2, filterLengthY / 2, 0);
+        {          
+            Padder padder = new ConstantValuePadder(filter, 0);
             float[,] tempImage = HelperFunctions.applyUnevenFilter(inputImage, filter, padder);
 
             return HelperFunctions.convertToBytes(tempImage);
@@ -338,8 +349,8 @@ namespace INFOIBV
             };
             #endregion
 
-            Padder horizontalPadder = new CopyPerimeterPadder((int)(hor.GetLength(0) / 2), (int)(hor.GetLength(1) / 2));
-            Padder verticalPadder = new CopyPerimeterPadder((int)(vert.GetLength(0) / 2), (int)(vert.GetLength(1) / 2));
+            Padder horizontalPadder = new CopyPerimeterPadder(hor);
+            Padder verticalPadder = new CopyPerimeterPadder(vert);
 
             float[,] Dx = HelperFunctions.applyUnevenFilter(inputImage, hor, horizontalPadder);
             float[,] Dy = HelperFunctions.applyUnevenFilter(inputImage, vert, verticalPadder);
@@ -420,13 +431,19 @@ namespace INFOIBV
          */
         private byte[,] binaryDilateImage(byte[,] inputImage, bool[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement binary dilation
+            
+            float[,] floatStructElem = HelperFunctions.floatifyBoolArray(structElem);
+            Padder padder = new ConstantValuePadder(floatStructElem, 0);
+
+            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Math.Max, 255);
+
+            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
             return output;
         }
 
         /*
-         * binaryOpenImage: perform binary opening on a binary image
+         * binaryOpen
+         * Image: perform binary opening on a binary image
          * input:   inputImage          single-channel (byte) binary image 
          *          structElem          binary structuring element (true = foreground)
          * output:                      single-channel (byte) binary image after opening
