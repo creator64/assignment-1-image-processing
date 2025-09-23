@@ -1,4 +1,8 @@
-﻿namespace INFOIBV
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace INFOIBV
 {
     partial class INFOIBV
     {
@@ -38,6 +42,10 @@
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.comboBox = new System.Windows.Forms.ComboBox();
+            this.gaussianSize = new System.Windows.Forms.NumericUpDown();
+            this.gaussianLabel = new Label();
+            this.sigmaInput = new System.Windows.Forms.NumericUpDown();
+            this.sigmaLabel = new Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
@@ -68,7 +76,7 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(13, 45);
+            this.pictureBox1.Location = new System.Drawing.Point(13, 100);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(512, 512);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -102,7 +110,7 @@
             // 
             // pictureBox2
             // 
-            this.pictureBox2.Location = new System.Drawing.Point(531, 45);
+            this.pictureBox2.Location = new System.Drawing.Point(531, 100);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(512, 512);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -126,7 +134,44 @@
             this.comboBox.Name = "comboBox";
             this.comboBox.Size = new System.Drawing.Size(201, 21);
             this.comboBox.TabIndex = 7;
+            this.comboBox.SelectedIndexChanged += (sender, args) =>
+            {
+                // sorry for the hardcode im lazy
+                bool task1Selected = this.comboBox.Text == "Task 1";
+                sigmaInput.Visible = sigmaLabel.Visible = gaussianLabel.Visible = gaussianSize.Visible = task1Selected;
+            };
+            //
+            // Gaussian Size number input
             // 
+            this.gaussianLabel.Text = "Size of Gaussian matrix";
+            this.gaussianLabel.Location = new System.Drawing.Point(12, 41);
+            this.gaussianLabel.Size = new Size(125, 20);
+            this.gaussianSize.Location = new System.Drawing.Point(15, 60);
+            this.gaussianSize.Name = "GaussianSizeInput";
+            this.gaussianSize.Size = new System.Drawing.Size(98, 50);
+            this.gaussianSize.ValueChanged += new System.EventHandler((object sender, System.EventArgs e) =>
+            {
+                if (gaussianSize.Value % 2 == 0) gaussianSize.Value += 1;
+            });
+            this.gaussianSize.Increment = 2;
+            this.gaussianSize.Value = 3;
+            this.gaussianSize.Maximum = 15;
+            this.gaussianSize.Minimum = 1;
+            //
+            // Gaussian Size number input
+            // 
+            this.sigmaLabel.Text = "sigma";
+            this.sigmaLabel.Location = new System.Drawing.Point(142, 41);
+            this.sigmaLabel.Size = new Size(50, 20);
+            this.sigmaInput.Location = new System.Drawing.Point(145, 60);
+            this.sigmaInput.Name = "GaussianSizeInput";
+            this.sigmaInput.Size = new System.Drawing.Size(98, 50);
+            this.sigmaInput.Increment = 0.25m;
+            this.sigmaInput.DecimalPlaces = 2;
+            this.sigmaInput.Value = 2.25m;
+            this.sigmaInput.Minimum = 0;
+
+            //
             // INFOIBV
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -140,6 +185,8 @@
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.imageFileName);
             this.Controls.Add(this.LoadImageButton);
+            this.Controls.AddRange(new Control[] {this.gaussianSize, gaussianLabel});
+            this.Controls.AddRange(new Control[] {this.sigmaInput, sigmaLabel});
             this.Location = new System.Drawing.Point(10, 10);
             this.Name = "INFOIBV";
             this.ShowIcon = false;
@@ -163,6 +210,10 @@
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.ComboBox comboBox;
+        private System.Windows.Forms.NumericUpDown gaussianSize;
+        private System.Windows.Forms.NumericUpDown sigmaInput;
+        private System.Windows.Forms.Label gaussianLabel;
+        private System.Windows.Forms.Label sigmaLabel;
     }
 }
 
