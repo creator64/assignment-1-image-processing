@@ -10,6 +10,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using INFOIBV.Helper_Code;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace INFOIBV
 {
@@ -418,14 +419,50 @@ namespace INFOIBV
          */
         private byte[,] binaryErodeImage(byte[,] inputImage, bool[,] structElem)
         {
-            float[,] floatStructElem = HelperFunctions.floatifyBoolArray(structElem);
-            Padder padder = new ConstantValuePadder(floatStructElem, 0);
+            HashSet<Vector2> imageSet = BinaryMorphologyHelpers.pointSetFromImage(inputImage);
+            HashSet<Vector2> structSet = BinaryMorphologyHelpers.pointSetFromFilter(structElem);
 
-            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Math.Min, 255);
+            HashSet<Vector2> resultSet = new HashSet<Vector2>();
 
-            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
+            foreach (Vector2 pixel in imageSet)
+            {
+                bool pixelMayRemain = true;
+                foreach (Vector2 element in structSet)
+                {
+                    if (!imageSet.Contains(pixel + element))
+                    {
+                        pixelMayRemain = false;
+                        break;
+                    }
 
-            return output;
+                }
+
+                if (pixelMayRemain) resultSet.Add(pixel);
+            }
+
+            for (int i = 0; i < 5; i++)
+            {
+                imageSet = resultSet;
+                resultSet = new HashSet<Vector2>();
+
+                foreach (Vector2 pixel in imageSet)
+                {
+                    bool pixelMayRemain = true;
+                    foreach (Vector2 element in structSet)
+                    {
+                        if (!imageSet.Contains(pixel + element))
+                        {
+                            pixelMayRemain = false;
+                            break;
+                        }
+
+                    }
+
+                    if (pixelMayRemain) resultSet.Add(pixel);
+                }
+            }
+
+            return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
         }
 
         /*
@@ -437,20 +474,25 @@ namespace INFOIBV
         private byte[,] binaryDilateImage(byte[,] inputImage, bool[,] structElem)
         {
             
-            float[,] floatStructElem = HelperFunctions.floatifyBoolArray(structElem);
-            Padder padder = new ConstantValuePadder(floatStructElem, 0);
+            HashSet<Vector2> imageSet = BinaryMorphologyHelpers.pointSetFromImage(inputImage);
+            HashSet<Vector2> structSet = BinaryMorphologyHelpers.pointSetFromFilter(structElem);
 
-            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Math.Max, 125);
-
-            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
+            HashSet<Vector2> resultSet = new HashSet<Vector2>();
+            foreach(Vector2 pixel in imageSet)
+                foreach(Vector2 element in structSet)
+                    resultSet.Add(pixel + element);
 
             for (int i = 0; i < 5; i++)
             {
-                float[,] interres = HelperFunctions.applyMorphologicalFilter(output, floatStructElem, padder, Math.Max, 125);
+                imageSet = resultSet;
+                resultSet = new HashSet<Vector2>();
 
-                output = HelperFunctions.convertToBytes(interres);
+                foreach (Vector2 pixel in imageSet)
+                    foreach (Vector2 element in structSet)
+                        resultSet.Add(pixel + element);
             }
-            return output;
+
+            return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
         }
 
         /*
