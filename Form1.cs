@@ -173,12 +173,20 @@ namespace INFOIBV
                     return binaryCloseImage(workingImage, structElem4);
 
                 case ProcessingFunctions.GrayscaleErosion:
-                    int[,] grayStructElem = null; // Define this structuring element yourself
+                    int[,] grayStructElem = {
+                        { 1, 1, 1},
+                        { 1, 2, 1},
+                        { 1, 2, 1}
+                    };
                     return grayscaleErodeImage(workingImage, grayStructElem);
 
                 case ProcessingFunctions.GrayscaleDilation:
-                    grayStructElem = null;
-                    return grayscaleDilateImage(workingImage, grayStructElem);
+                    int[,] grayStructElem2 = {
+                        { 1, 1, 1},
+                        { 1, 2, 1},
+                        { 1, 2, 1}
+                    };
+                    return grayscaleDilateImage(workingImage, grayStructElem2);
 
 
                 default:
@@ -500,8 +508,13 @@ namespace INFOIBV
          */
         private byte[,] grayscaleErodeImage(byte[,] inputImage, int[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement grayscale erosion
+            float[,] floatStructElem = HelperFunctions.floatifyIntArray(structElem);
+            Padder padder = new ConstantValuePadder(floatStructElem, 0);
+
+            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Min<float>, (x, y) => x - y);
+
+            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
+
             return output;
         }
 
@@ -513,8 +526,13 @@ namespace INFOIBV
          */
         private byte[,] grayscaleDilateImage(byte[,] inputImage, int[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement grayscale dilation
+            float[,] floatStructElem = HelperFunctions.floatifyIntArray(structElem);
+            Padder padder = new ConstantValuePadder(floatStructElem, 0);
+
+            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Max<float>, (x, y) => x + y);
+
+            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
+
             return output;
         }
 
