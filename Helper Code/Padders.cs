@@ -14,14 +14,16 @@ namespace INFOIBV.Helper_Code
         public int paddingWidth { get; protected set; }
         public int paddingHeight { get; protected set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="paddingWidth"> The amount of pixels the horizontal sides are padded with</param>
-        protected Padder(int paddingWidth, int paddingHeight)
+
+        protected Padder(float[,] filter)
         {
-            this.paddingWidth = paddingWidth;
-            this.paddingHeight = paddingHeight;
+            int filterLengthX = filter.GetLength(0), filterLengthY = filter.GetLength(1);
+
+            if (filterLengthX % 2 == 0 || filterLengthY % 2 == 0)
+                throw new Exception("incorrect filter");
+
+            paddingWidth = filterLengthX / 2;
+            paddingHeight = filterLengthY / 2;
         }
 
         public abstract byte[,] padImage(byte[,] image);
@@ -40,7 +42,7 @@ namespace INFOIBV.Helper_Code
         /// </summary>
         /// <param name="paddingWidth">The amount of pixels each of the horizontal sides is padded with</param>
         /// <param name="paddingValue">The value that will be padded with</param>
-        public ConstantValuePadder(int paddingWidth, int paddingHeight, byte paddingValue) : base(paddingWidth, paddingHeight)
+        public ConstantValuePadder(float[,] filter, byte paddingValue) : base(filter)
         {
             this.paddingValue = paddingValue;
         }
@@ -53,7 +55,9 @@ namespace INFOIBV.Helper_Code
             {
                 for (int j = 0; j < newImage.GetLength(1); j++)
                 {
-                    if (i >= paddingWidth && j >= paddingHeight && (i - paddingWidth) < image.GetLength(0) && (j - paddingHeight) < image.GetLength(1))
+                    if (i >= paddingWidth && j >= paddingHeight 
+                        && (i - paddingWidth) < image.GetLength(0) 
+                        && (j - paddingHeight) < image.GetLength(1)) //if we are currently iterating over the original core image, not the padded border
                         newImage[i, j] = image[i - paddingWidth, j - paddingHeight];
                     else
                         newImage[i, j] = paddingValue;
@@ -72,7 +76,7 @@ namespace INFOIBV.Helper_Code
         /// 
         /// </summary>
         /// <param name="paddingWidth"> The amount of pixels each of the side is padded with</param>
-        public CopyPerimeterPadder(int paddingWidth, int paddingHeight) : base(paddingWidth, paddingHeight) { }
+        public CopyPerimeterPadder(float[,] filter) : base(filter) { }
 
         public override byte[,] padImage(byte[,] image)
         {

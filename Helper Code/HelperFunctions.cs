@@ -9,16 +9,8 @@ using INFOIBV.Helper_Code;
 
 namespace INFOIBV.Helper_Code
 {
-    public enum PaddingMethods : byte
-    {
-        ConstantValue,  // pad the image with a constant value
-        CopyPerimeter,  // pad the image with the same value the neighbour on the perimeter has
-        MirrorImage,    // pad the image with mirrored copies of the image
-        CopyImage       // pad the image with non-mirrored copies of the image
-    }
-
     /// <summary>
-    /// A static class with helper functions to cut down
+    /// A static class with helper functions to make main codebase more readable.
     /// </summary>
     public static class HelperFunctions
     {
@@ -51,6 +43,44 @@ namespace INFOIBV.Helper_Code
             return tempImage;
         }
 
+        public static float[,] floatifyIntArray(int[,] a)
+        {
+            float[,] result = new float[a.GetLength(0), a.GetLength(1)];
+
+            for (int i = 0; i < a.GetLength(0); i++)
+                for (int j = 0; j < a.GetLength(1); j++)
+                    result[i, j] = (float)a[i, j];
+
+            return result;
+        }
+
+        public static float[,] copyImage(byte[,] I)
+        {
+            float[,] copy = new float[I.GetLength(0), I.GetLength(1)];
+
+            for (int i = 0; i < copy.GetLength(0); i++) for (int j = 0; j < copy.GetLength(1); j++)
+                    copy[i, j] = I[i, j];
+            return copy;
+        }
+
+        /// <summary>
+        /// A Function to copy an altered (padded) image back to its original (unpadded) source Image
+        /// </summary>
+        /// <param name="source">the source Image (unpadded)</param>
+        /// <param name="Ipadded">the padded variant of the source Image</param>
+        /// <param name="padder">the padder used to pad the source Image</param>
+        public static void overwriteImage(float[,] source, byte[,] Ipadded, Padder padder)
+        {
+            for (int i = padder.paddingWidth; i < source.GetLength(0) + padder.paddingWidth; i++)
+            {
+                for (int j = padder.paddingHeight; j < source.GetLength(1) + padder.paddingHeight; j++)
+                {
+                    //paddingWidth and filterWidth are equivalent to one another.
+                    source[i - padder.paddingWidth, j - padder.paddingHeight] = Ipadded[i, j];
+                }
+            }
+        }
+
         /// <summary>
         /// Applying an uneven filter 
         /// </summary>
@@ -66,10 +96,7 @@ namespace INFOIBV.Helper_Code
         {
             byte[,] paddedImage = padder.padImage(I);
 
-            float[,] backupImage = new float[I.GetLength(0), I.GetLength(1)];
-
-            for(int i = 0; i < backupImage.GetLength(0); i++) for(int j = 0; j < backupImage.GetLength(1); j++)
-                backupImage[i, j] = I[i, j];
+            float[,] backupImage = copyImage(I);
 
             for (int i = padder.paddingWidth; i < backupImage.GetLength(0) + padder.paddingWidth; i++)
             {
@@ -105,13 +132,55 @@ namespace INFOIBV.Helper_Code
             }
 
             if (filterWeight != 0.0f)
-            {
                 return (filteredValue / (float)filterWeight);
-            }
             else
-            {
                 return filteredValue;
+        }
+
+        public static float[,] applyMorphologicalFilter(byte[,] I, float[,] H, Padder padder, Func<List<float>, float> selector, Func<float, float, float> arithmeticOperator, int threshold = 0)
+        {
+            byte[,] paddedImage = padder.padImage(I);
+
+            float[,] backupPadded = copyImage(paddedImage);
+            float[,] backupImage = copyImage(I);
+
+            for (int i = padder.paddingWidth; i < backupImage.GetLength(0) + padder.paddingWidth; i++)
+            {
+                for (int j = padder.paddingHeight; j < backupImage.GetLength(1) + padder.paddingHeight; j++)
+                {
+                    if (I[i - padder.paddingWidth, j - padder.paddingWidth] >= threshold)
+                    {
+                        applyMorphologicalFilterPass(i, j, backupPadded, paddedImage, H, padder.paddingWidth, padder.paddingHeight, selector, arithmeticOperator);
+                    }
+                }
             }
+
+            overwriteImage(backupImage, paddedImage, padder);
+
+            return backupImage;
+        }
+
+        private static void applyMorphologicalFilterPass(int i, int j, float[,] backupPadded, byte[,] paddedImage, float[,] filter, int filterWidth, int filterHeight, Func<List<float>, float> selector, Func<float, float, float> arithmeticOperator)
+        {
+            List<float> Values = new List<float>();
+
+            for (int k = -filterWidth; k <= filterWidth; k++)
+            {
+                for (int l = -filterHeight; l <= filterHeight; l++)
+                {
+                    if (filter[k + filterWidth, l + filterHeight] < 0)
+                        continue; //skip, negative values are the unused values
+
+                    float newVal = arithmeticOperator(backupPadded[i + k, j + l], filter[k + filterWidth, l + filterHeight]);
+
+                    if (newVal < 0) newVal = 0;
+                    else if (newVal > 255) newVal = 255; 
+
+                    Values.Add(newVal);
+                }
+            }
+
+            paddedImage[i, j] = (byte)selector(Values);
         }
     }
 }

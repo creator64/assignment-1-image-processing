@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,6 +10,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using INFOIBV.Helper_Code;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace INFOIBV
 {
@@ -146,28 +147,56 @@ namespace INFOIBV
                     return thresholdImage(workingImage, threshold);
 
                 case ProcessingFunctions.BinaryErosion:
-                    bool[,] structElem = null; // Define this structuring element yourself
+                    bool[,] structElem = {
+                        { false, true, false},
+                        { true, false, true},
+                        { false, true, false}
+                    }; // Define this structuring element yourself
                     return binaryErodeImage(workingImage, structElem);
 
                 case ProcessingFunctions.BinaryDilation:
-                    structElem = null;
-                    return binaryDilateImage(workingImage, structElem);
+                    bool[,] structElem2 = {
+                        { false, true, false},
+                        { true, false, true},
+                        { false, true, false}
+                    };
+                    return binaryDilateImage(workingImage, structElem2);
 
                 case ProcessingFunctions.BinaryOpening:
-                    structElem = null;
-                    return binaryOpenImage(workingImage, structElem);
+                    bool[,] structElem3 = {
+                        { false, false, true, false, false},
+                        { false, true, true, true, false},
+                        { true, true, true, true, true},
+                        { false, true, true, true, false },
+                        { false, false, true, false, false }
+                    };
+                    return binaryOpenImage(workingImage, structElem3);
 
                 case ProcessingFunctions.BinaryClosing:
-                    structElem = null;
-                    return binaryCloseImage(workingImage, structElem);
+                    bool[,] structElem4 = {
+                        { false, false, true, false, false},
+                        { false, true, true, true, false},
+                        { true, true, true, true, true},
+                        { false, true, true, true, false },
+                        { false, false, true, false, false }
+                    };
+                    return binaryCloseImage(workingImage, structElem4);
 
                 case ProcessingFunctions.GrayscaleErosion:
-                    int[,] grayStructElem = null; // Define this structuring element yourself
+                    int[,] grayStructElem = {
+                        { 1, 1, 1},
+                        { 1, 2, 1},
+                        { 1, 2, 1}
+                    };
                     return grayscaleErodeImage(workingImage, grayStructElem);
 
                 case ProcessingFunctions.GrayscaleDilation:
-                    grayStructElem = null;
-                    return grayscaleDilateImage(workingImage, grayStructElem);
+                    int[,] grayStructElem2 = {
+                        { 1, 1, 1},
+                        { 1, 2, 1},
+                        { 1, 2, 1}
+                    };
+                    return grayscaleDilateImage(workingImage, grayStructElem2);
                 
                 case ProcessingFunctions.Task1:
                     decimal sigma = sigmaInput.Value, gaussianMatrixSize = gaussianSize.Value;
@@ -313,13 +342,8 @@ namespace INFOIBV
          * output:                      single-channel (byte) image
          */
         private byte[,] convolveImage(byte[,] inputImage, float[,] filter)
-        {
-            int filterLengthX = filter.GetLength(0), filterLengthY = filter.GetLength(1);
-            
-            if (filterLengthX % 2 == 0 || filterLengthY % 2 == 0)
-                throw new Exception("incorrect filter");
-            
-            Padder padder = new ConstantValuePadder(filterLengthX / 2, filterLengthY / 2, 0);
+        {          
+            Padder padder = new ConstantValuePadder(filter, 0);
             float[,] tempImage = HelperFunctions.applyUnevenFilter(inputImage, filter, padder);
 
             return HelperFunctions.convertToBytes(tempImage);
@@ -344,8 +368,8 @@ namespace INFOIBV
             
             #endregion
 
-            Padder horizontalPadder = new CopyPerimeterPadder((int)(horizontalKernel.GetLength(0) / 2), (int)(horizontalKernel.GetLength(1) / 2));
-            Padder verticalPadder = new CopyPerimeterPadder((int)(verticalKernel.GetLength(0) / 2), (int)(verticalKernel.GetLength(1) / 2));
+            Padder horizontalPadder = new CopyPerimeterPadder(horizontalKernel);
+            Padder verticalPadder = new CopyPerimeterPadder(verticalKernel);
 
             float[,] Dx = HelperFunctions.applyUnevenFilter(inputImage, horizontalKernel, horizontalPadder);
             float[,] Dy = HelperFunctions.applyUnevenFilter(inputImage, verticalKernel, verticalPadder);
@@ -403,9 +427,28 @@ namespace INFOIBV
          */
         private byte[,] binaryErodeImage(byte[,] inputImage, bool[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement binary erosion
-            return output;
+            HashSet<Vector2> imageSet = BinaryMorphologyHelpers.pointSetFromImage(inputImage);
+            HashSet<Vector2> structSet = BinaryMorphologyHelpers.pointSetFromFilter(structElem);
+
+            HashSet<Vector2> resultSet = new HashSet<Vector2>();
+
+            foreach (Vector2 pixel in imageSet)
+            {
+                bool pixelMayRemain = true;
+                foreach (Vector2 element in structSet)
+                {
+                    if (!imageSet.Contains(pixel + element))
+                    {
+                        pixelMayRemain = false;
+                        break;
+                    }
+
+                }
+
+                if (pixelMayRemain) resultSet.Add(pixel);
+            }
+
+            return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
         }
 
         /*
@@ -416,22 +459,28 @@ namespace INFOIBV
          */
         private byte[,] binaryDilateImage(byte[,] inputImage, bool[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement binary dilation
-            return output;
+            
+            HashSet<Vector2> imageSet = BinaryMorphologyHelpers.pointSetFromImage(inputImage);
+            HashSet<Vector2> structSet = BinaryMorphologyHelpers.pointSetFromFilter(structElem);
+
+            HashSet<Vector2> resultSet = new HashSet<Vector2>();
+            foreach(Vector2 pixel in imageSet)
+                foreach(Vector2 element in structSet)
+                    resultSet.Add(pixel + element);
+
+            return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
         }
 
         /*
-         * binaryOpenImage: perform binary opening on a binary image
+         * binaryOpen
+         * Image: perform binary opening on a binary image
          * input:   inputImage          single-channel (byte) binary image 
          *          structElem          binary structuring element (true = foreground)
          * output:                      single-channel (byte) binary image after opening
          */
         private byte[,] binaryOpenImage(byte[,] inputImage, bool[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement binary opening
-            return output;
+            return binaryDilateImage(binaryErodeImage(inputImage, structElem), structElem);
         }
 
         /*
@@ -442,9 +491,7 @@ namespace INFOIBV
          */
         private byte[,] binaryCloseImage(byte[,] inputImage, bool[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement binary closing
-            return output;
+            return binaryErodeImage(binaryDilateImage(inputImage, structElem), structElem);
         }
 
         // Grayscale morphology
@@ -457,8 +504,13 @@ namespace INFOIBV
          */
         private byte[,] grayscaleErodeImage(byte[,] inputImage, int[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement grayscale erosion
+            float[,] floatStructElem = HelperFunctions.floatifyIntArray(structElem);
+            Padder padder = new ConstantValuePadder(floatStructElem, 0);
+
+            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Min<float>, (x, y) => x - y);
+
+            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
+
             return output;
         }
 
@@ -470,8 +522,13 @@ namespace INFOIBV
          */
         private byte[,] grayscaleDilateImage(byte[,] inputImage, int[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement grayscale dilation
+            float[,] floatStructElem = HelperFunctions.floatifyIntArray(structElem);
+            Padder padder = new ConstantValuePadder(floatStructElem, 0);
+
+            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Max<float>, (x, y) => x + y);
+
+            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
+
             return output;
         }
 
