@@ -154,17 +154,21 @@ namespace INFOIBV
 
                 case ProcessingFunctions.BinaryOpening:
                     bool[,] structElem3 = {
-                        { false, true, false},
-                        { true, false, true},
-                        { false, true, false}
+                        { false, false, true, false, false},
+                        { false, true, true, true, false},
+                        { true, true, true, true, true},
+                        { false, true, true, true, false },
+                        { false, false, true, false, false }
                     };
                     return binaryOpenImage(workingImage, structElem3);
 
                 case ProcessingFunctions.BinaryClosing:
                     bool[,] structElem4 = {
-                        { false, true, false},
-                        { true, false, true},
-                        { false, true, false}
+                        { false, false, true, false, false},
+                        { false, true, true, true, false},
+                        { true, true, true, true, true},
+                        { false, true, true, true, false },
+                        { false, false, true, false, false }
                     };
                     return binaryCloseImage(workingImage, structElem4);
 
@@ -440,28 +444,6 @@ namespace INFOIBV
                 if (pixelMayRemain) resultSet.Add(pixel);
             }
 
-            for (int i = 0; i < 5; i++)
-            {
-                imageSet = resultSet;
-                resultSet = new HashSet<Vector2>();
-
-                foreach (Vector2 pixel in imageSet)
-                {
-                    bool pixelMayRemain = true;
-                    foreach (Vector2 element in structSet)
-                    {
-                        if (!imageSet.Contains(pixel + element))
-                        {
-                            pixelMayRemain = false;
-                            break;
-                        }
-
-                    }
-
-                    if (pixelMayRemain) resultSet.Add(pixel);
-                }
-            }
-
             return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
         }
 
@@ -482,16 +464,6 @@ namespace INFOIBV
                 foreach(Vector2 element in structSet)
                     resultSet.Add(pixel + element);
 
-            for (int i = 0; i < 5; i++)
-            {
-                imageSet = resultSet;
-                resultSet = new HashSet<Vector2>();
-
-                foreach (Vector2 pixel in imageSet)
-                    foreach (Vector2 element in structSet)
-                        resultSet.Add(pixel + element);
-            }
-
             return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
         }
 
@@ -504,9 +476,7 @@ namespace INFOIBV
          */
         private byte[,] binaryOpenImage(byte[,] inputImage, bool[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement binary opening
-            return output;
+            return binaryDilateImage(binaryErodeImage(inputImage, structElem), structElem);
         }
 
         /*
@@ -517,9 +487,7 @@ namespace INFOIBV
          */
         private byte[,] binaryCloseImage(byte[,] inputImage, bool[,] structElem)
         {
-            byte[,] output = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            // TODO: implement binary closing
-            return output;
+            return binaryErodeImage(binaryDilateImage(inputImage, structElem), structElem);
         }
 
         // Grayscale morphology
