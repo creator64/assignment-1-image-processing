@@ -40,7 +40,7 @@ namespace INFOIBV.Helper_Code
             foreach(Vector2 point in pointSet)
             {
                 if (point.X < 0 || point.X >= imageDimensions.X || point.Y < 0 || point.Y >= imageDimensions.Y)
-                    throw new Exception($"Image dimensions too small for the pointset given: \n X: {point.X}, Y: {point.Y} doesn't fit in dimensions ({imageDimensions.X}, {imageDimensions.Y}");
+                    continue; //skip this pixel
 
                 result[(int)point.X, (int)point.Y] = 255;
             }
