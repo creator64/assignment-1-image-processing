@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -35,7 +35,8 @@ namespace INFOIBV
             BinaryOpening,
             BinaryClosing,
             GrayscaleErosion,
-            GrayscaleDilation
+            GrayscaleDilation,
+            Task1
         }
 
         /*
@@ -120,6 +121,17 @@ namespace INFOIBV
          */
         private byte[,] applyProcessingFunction(byte[,] workingImage)
         {
+            float[,] horizontalKernel = {
+                { -1, -2, -1},
+                { 0, 0, 0},
+                { 1, 2, 1}
+            };
+
+            float[,] verticalKernel = {
+                { -1, 0, 1},
+                { -2, 0, 2},
+                { -1, 0, 1}
+            };
             switch ((ProcessingFunctions)comboBox.SelectedIndex)
             {
                 case ProcessingFunctions.Invert:
@@ -130,8 +142,6 @@ namespace INFOIBV
                     float[,] filter = createGaussianFilter(filterSize, filterSigma);
                     return convolveImage(workingImage, filter);
                 case ProcessingFunctions.DetectEdges:
-                    sbyte[,] horizontalKernel = null;                       // Define this kernel yourself
-                    sbyte[,] verticalKernel = null;                         // Define this kernel yourself
                     return edgeMagnitude(workingImage, horizontalKernel, verticalKernel);
                 case ProcessingFunctions.Threshold:
                     return thresholdImage(workingImage, threshold);
@@ -187,8 +197,14 @@ namespace INFOIBV
                         { 1, 2, 1}
                     };
                     return grayscaleDilateImage(workingImage, grayStructElem2);
-
-
+                
+                case ProcessingFunctions.Task1:
+                    decimal sigma = sigmaInput.Value, gaussianMatrixSize = gaussianSize.Value;
+                    float[,] gaussianFilter = createGaussianFilter((byte)gaussianMatrixSize, (float)sigma);
+                    byte[,] convolvedImage = convolveImage(workingImage, gaussianFilter);
+                    byte[,] edgedImage = edgeMagnitude(convolvedImage, horizontalKernel, verticalKernel);
+                    return thresholdImage(edgedImage, 30);
+                
                 default:
                     return null;
             }
@@ -341,7 +357,7 @@ namespace INFOIBV
          *          verticalKernel      vertical edge kernel
          * output:                      single-channel (byte) image
          */
-        private byte[,] edgeMagnitude(byte[,] inputImage, sbyte[,] horizontalKernel, sbyte[,] verticalKernel)
+        private byte[,] edgeMagnitude(byte[,] inputImage, float[,] horizontalKernel, float[,] verticalKernel)
         {
             // create temporary grayscale image
             byte[,] resultImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
@@ -349,55 +365,35 @@ namespace INFOIBV
 
             #region test values
             //change these around later for the horizontalKernel and verticalKernel parameters
-            float[,] vert = {
-                { -1, -2, -1},
-                { 0, 0, 0},
-                { 1, 2, 1}
-            };
-
-            float[,] hor = {
-                { -1, 0, 1},
-                { -2, 0, 2},
-                { -1, 0, 1}
-            };
+            
             #endregion
 
-            Padder horizontalPadder = new CopyPerimeterPadder(hor);
-            Padder verticalPadder = new CopyPerimeterPadder(vert);
+            Padder horizontalPadder = new CopyPerimeterPadder(horizontalKernel);
+            Padder verticalPadder = new CopyPerimeterPadder(verticalKernel);
 
-            float[,] Dx = HelperFunctions.applyUnevenFilter(inputImage, hor, horizontalPadder);
-            float[,] Dy = HelperFunctions.applyUnevenFilter(inputImage, vert, verticalPadder);
+            float[,] Dx = HelperFunctions.applyUnevenFilter(inputImage, horizontalKernel, horizontalPadder);
+            float[,] Dy = HelperFunctions.applyUnevenFilter(inputImage, verticalKernel, verticalPadder);
 
             float min = 0.0f;
             float max = 0.0f;
 
             // calculate edge magnitude
-            for (int i = 0; i < tempImage.GetLength(0); i++)
+            for (int i = 0; i < tempImage.GetLength(0); i++) for (int j = 0; j < tempImage.GetLength(1); j++)
             {
-                for (int j = 0; j < tempImage.GetLength(1); j++)
-                {
-                    float result = (float)Math.Sqrt(Math.Pow(Dx[i, j], 2) + Math.Pow(Dy[i, j], 2));
+                float result = (float)Math.Sqrt(Math.Pow(Dx[i, j], 2) + Math.Pow(Dy[i, j], 2));
 
-                    if (result < min) min = result;
-                    if (result > max) max = result;
+                if (result < min) min = result;
+                if (result > max) max = result;
 
-                    tempImage[i, j] = (float)result;
-                }
+                tempImage[i, j] = result;
             }
 
             //normalise edge magnitudes to range 0 - 255
             // and copy to the resulting image
             float trueRange = max - min; //the entire range of values that's currently used
 
-            for (int i = 0; i < tempImage.GetLength(0); i++)
-            {
-                for (int j = 0; j < tempImage.GetLength(1); j++)
-                {
-
-                    resultImage[i, j] = (byte)(255.0f * ((tempImage[i, j] - min) / trueRange));
-                }
-            }
-
+            for (int i = 0; i < tempImage.GetLength(0); i++) for (int j = 0; j < tempImage.GetLength(1); j++)
+                resultImage[i, j] = (byte)(255.0f * ((tempImage[i, j] - min) / trueRange));
 
             return resultImage;
         }
