@@ -1,16 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.IO;
 using System.Text.RegularExpressions;
-using INFOIBV.Helper_Code;
-using System.Diagnostics;
-using System.Numerics;
 
 namespace INFOIBV
 {
@@ -135,16 +126,16 @@ namespace INFOIBV
             switch ((ProcessingFunctions)comboBox.SelectedIndex)
             {
                 case ProcessingFunctions.Invert:
-                    return invertImage(workingImage);
+                    return CoreFunctions.invertImage(workingImage);
                 case ProcessingFunctions.AdjustContrast:
-                    return adjustContrast(workingImage);
+                    return CoreFunctions.adjustContrast(workingImage);
                 case ProcessingFunctions.ConvolveImage:
-                    float[,] filter = createGaussianFilter(filterSize, filterSigma);
-                    return convolveImage(workingImage, filter);
+                    float[,] filter = CoreFunctions.createGaussianFilter(filterSize, filterSigma);
+                    return CoreFunctions.convolveImage(workingImage, filter);
                 case ProcessingFunctions.DetectEdges:
-                    return edgeMagnitude(workingImage, horizontalKernel, verticalKernel);
+                    return CoreFunctions.edgeMagnitude(workingImage, horizontalKernel, verticalKernel);
                 case ProcessingFunctions.Threshold:
-                    return thresholdImage(workingImage, threshold);
+                    return CoreFunctions.thresholdImage(workingImage, threshold);
 
                 case ProcessingFunctions.BinaryErosion:
                     bool[,] structElem = {
@@ -152,7 +143,7 @@ namespace INFOIBV
                         { true, false, true},
                         { false, true, false}
                     }; // Define this structuring element yourself
-                    return binaryErodeImage(workingImage, structElem);
+                    return CoreFunctions.binaryErodeImage(workingImage, structElem);
 
                 case ProcessingFunctions.BinaryDilation:
                     bool[,] structElem2 = {
@@ -160,7 +151,7 @@ namespace INFOIBV
                         { true, false, true},
                         { false, true, false}
                     };
-                    return binaryDilateImage(workingImage, structElem2);
+                    return CoreFunctions.binaryDilateImage(workingImage, structElem2);
 
                 case ProcessingFunctions.BinaryOpening:
                     bool[,] structElem3 = {
@@ -170,7 +161,7 @@ namespace INFOIBV
                         { false, true, true, true, false },
                         { false, false, true, false, false }
                     };
-                    return binaryOpenImage(workingImage, structElem3);
+                    return CoreFunctions.binaryOpenImage(workingImage, structElem3);
 
                 case ProcessingFunctions.BinaryClosing:
                     bool[,] structElem4 = {
@@ -180,7 +171,7 @@ namespace INFOIBV
                         { false, true, true, true, false },
                         { false, false, true, false, false }
                     };
-                    return binaryCloseImage(workingImage, structElem4);
+                    return CoreFunctions.binaryCloseImage(workingImage, structElem4);
 
                 case ProcessingFunctions.GrayscaleErosion:
                     int[,] grayStructElem = {
@@ -188,7 +179,7 @@ namespace INFOIBV
                         { 1, 2, 1},
                         { 1, 2, 1}
                     };
-                    return grayscaleErodeImage(workingImage, grayStructElem);
+                    return CoreFunctions.grayscaleErodeImage(workingImage, grayStructElem);
 
                 case ProcessingFunctions.GrayscaleDilation:
                     int[,] grayStructElem2 = {
@@ -196,14 +187,14 @@ namespace INFOIBV
                         { 1, 2, 1},
                         { 1, 2, 1}
                     };
-                    return grayscaleDilateImage(workingImage, grayStructElem2);
+                    return CoreFunctions.grayscaleDilateImage(workingImage, grayStructElem2);
                 
                 case ProcessingFunctions.Task1:
                     decimal sigma = sigmaInput.Value, gaussianMatrixSize = gaussianSize.Value;
-                    float[,] gaussianFilter = createGaussianFilter((byte)gaussianMatrixSize, (float)sigma);
-                    byte[,] convolvedImage = convolveImage(workingImage, gaussianFilter);
-                    byte[,] edgedImage = edgeMagnitude(convolvedImage, horizontalKernel, verticalKernel);
-                    return thresholdImage(edgedImage, 30);
+                    float[,] gaussianFilter = CoreFunctions.createGaussianFilter((byte)gaussianMatrixSize, (float)sigma);
+                    byte[,] convolvedImage = CoreFunctions.convolveImage(workingImage, gaussianFilter);
+                    byte[,] edgedImage = CoreFunctions.edgeMagnitude(convolvedImage, horizontalKernel, verticalKernel);
+                    return CoreFunctions.thresholdImage(edgedImage, 30);
                 
                 default:
                     return null;
@@ -220,8 +211,7 @@ namespace INFOIBV
             if (saveImageDialog.ShowDialog() == DialogResult.OK)
                 OutputImage.Save(saveImageDialog.FileName);                 // save the output image
         }
-
-
+        
         /*
          * convertToGrayScale: convert a three-channel color image to a single channel grayscale image
          * input:   inputImage          three-channel (Color) image
@@ -241,296 +231,19 @@ namespace INFOIBV
 
             // process all pixels in the image
             for (int x = 0; x < InputImage.Size.Width; x++)                 // loop over columns
-                for (int y = 0; y < InputImage.Size.Height; y++)            // loop over rows
-                {
-                    Color pixelColor = inputImage[x, y];                    // get pixel color
-                    byte average = (byte)((pixelColor.R + pixelColor.B + pixelColor.G) / 3); // calculate average over the three channels
-                    tempImage[x, y] = average;                              // set the new pixel color at coordinate (x,y)
-                    progressBar.PerformStep();                              // increment progress bar
-                }
+            for (int y = 0; y < InputImage.Size.Height; y++)            // loop over rows
+            {
+                Color pixelColor = inputImage[x, y];                    // get pixel color
+                byte average = (byte)((pixelColor.R + pixelColor.B + pixelColor.G) / 3); // calculate average over the three channels
+                tempImage[x, y] = average;                              // set the new pixel color at coordinate (x,y)
+                progressBar.PerformStep();                              // increment progress bar
+            }
 
             progressBar.Visible = false;                                    // hide progress bar
 
             return tempImage;
         }
 
-
-        // ====================================================================
-        // ============= YOUR FUNCTIONS FOR ASSIGNMENT 1 GO HERE ==============
-        // ====================================================================
-
-        /*
-         * invertImage: invert a single channel (grayscale) image
-         * input:   inputImage          single-channel (byte) image
-         * output:                      single-channel (byte) image
-         */
-        private byte[,] invertImage(byte[,] inputImage)
-        {
-            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
-            
-            // create temporary grayscale image
-            byte[,] tempImage = new byte[width, height];
-            
-            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
-                tempImage[x, y] = (byte)(255 - inputImage[x, y]);
-
-            return tempImage;
-        }
-
-
-        /*
-         * adjustContrast: create an image with the full range of intensity values used
-         * input:   inputImage          single-channel (byte) image
-         * output:                      single-channel (byte) image
-         */
-        private byte[,] adjustContrast(byte[,] inputImage)
-        {
-            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
-            
-            int alow = 255, ahigh = 0;
-            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
-            { 
-                if (inputImage[x, y] > ahigh) ahigh = inputImage[x, y];
-                if (inputImage[x, y] < alow) alow = inputImage[x, y]; 
-            }
-
-            // create temporary grayscale image
-            byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            
-            for (int x = 0; x < width; x++)
-                for (int y = 0; y < height; y++)
-                    tempImage[x, y] = (byte)((inputImage[x, y] - alow) * 255 / (ahigh - alow));
-
-            return tempImage;
-        }
-
-
-        /*
-         * createGaussianFilter: create a Gaussian filter of specific square size and with a specified sigma
-         * input:   size                length and width of the Gaussian filter (only odd sizes)
-         *          sigma               standard deviation of the Gaussian distribution
-         * output:                      Gaussian filter
-         */
-        private float[,] createGaussianFilter(byte size, float sigma)
-        {
-            if (size % 2 == 0) throw new Exception("size of gaussian filter cannot be even");
-            int halfSize = size / 2;
-            
-            // create temporary grayscale image
-            float[,] filter = new float[size, size];
-
-            for (int x = -halfSize; x <= halfSize; x++) for (int y = -halfSize; y <= halfSize; y++)
-                filter[x + halfSize, y + halfSize] = (float)Math.Exp(
-                    -Math.Pow(x, 2) - Math.Pow(y, 2) / (2 * Math.Pow(sigma, 2))
-                );
-
-            float sum = 0;
-            for (int x = 0; x < size; x++) for (int y = 0; y < size; y++)
-                sum += filter[x, y];
-            
-            for (int x = 0; x < size; x++) for (int y = 0; y < size; y++)
-                filter[x, y] /= sum;
-
-            return filter;
-        }
-
-
-        /*
-         * convolveImage: apply linear filtering of an input image
-         * input:   inputImage          single-channel (byte) image
-         *          filter              linear kernel
-         * output:                      single-channel (byte) image
-         */
-        private byte[,] convolveImage(byte[,] inputImage, float[,] filter)
-        {          
-            Padder padder = new ConstantValuePadder(filter, 0);
-            float[,] tempImage = HelperFunctions.applyUnevenFilter(inputImage, filter, padder);
-
-            return HelperFunctions.convertToBytes(tempImage);
-        }
-
-
-        /*
-         * edgeMagnitude: calculate the image derivative of an input image and a provided edge kernel
-         * input:   inputImage          single-channel (byte) image
-         *          horizontalKernel    horizontal edge kernel
-         *          verticalKernel      vertical edge kernel
-         * output:                      single-channel (byte) image
-         */
-        private byte[,] edgeMagnitude(byte[,] inputImage, float[,] horizontalKernel, float[,] verticalKernel)
-        {
-            // create temporary grayscale image
-            byte[,] resultImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            float[,] tempImage = new float[inputImage.GetLength(0), inputImage.GetLength(1)];
-
-            #region test values
-            //change these around later for the horizontalKernel and verticalKernel parameters
-            
-            #endregion
-
-            Padder horizontalPadder = new CopyPerimeterPadder(horizontalKernel);
-            Padder verticalPadder = new CopyPerimeterPadder(verticalKernel);
-
-            float[,] Dx = HelperFunctions.applyUnevenFilter(inputImage, horizontalKernel, horizontalPadder);
-            float[,] Dy = HelperFunctions.applyUnevenFilter(inputImage, verticalKernel, verticalPadder);
-
-            float min = 0.0f;
-            float max = 0.0f;
-
-            // calculate edge magnitude
-            for (int i = 0; i < tempImage.GetLength(0); i++) for (int j = 0; j < tempImage.GetLength(1); j++)
-            {
-                float result = (float)Math.Sqrt(Math.Pow(Dx[i, j], 2) + Math.Pow(Dy[i, j], 2));
-
-                if (result < min) min = result;
-                if (result > max) max = result;
-
-                tempImage[i, j] = result;
-            }
-
-            //normalise edge magnitudes to range 0 - 255
-            // and copy to the resulting image
-            float trueRange = max - min; //the entire range of values that's currently used
-
-            for (int i = 0; i < tempImage.GetLength(0); i++) for (int j = 0; j < tempImage.GetLength(1); j++)
-                resultImage[i, j] = (byte)(255.0f * ((tempImage[i, j] - min) / trueRange));
-
-            return resultImage;
-        }
-        
-
-        /*
-         * thresholdImage: threshold a grayscale image
-         * input:   inputImage          single-channel (byte) image
-         * output:                      single-channel (byte) image with on/off values
-         */
-        private byte[,] thresholdImage(byte[,] inputImage, byte threshold)
-        {
-            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
-            
-            // create temporary grayscale image
-            byte[,] tempImage = new byte[width, height];
-            
-            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
-                tempImage[x, y] = (byte)(inputImage[x, y] > threshold ? 255 : 0);
-
-            return tempImage;
-        }
-
-        // Binary morphology
-
-        /*
-         * binaryErodeImage: perform binary erosion on a binary image using a structuring element
-         * input:   inputImage          single-channel (byte) binary image 
-         *          structElem          binary structuring element (true = foreground)
-         * output:                      single-channel (byte) binary image after erosion
-         */
-        private byte[,] binaryErodeImage(byte[,] inputImage, bool[,] structElem)
-        {
-            HashSet<Vector2> imageSet = BinaryMorphologyHelpers.pointSetFromImage(inputImage);
-            HashSet<Vector2> structSet = BinaryMorphologyHelpers.pointSetFromFilter(structElem);
-
-            HashSet<Vector2> resultSet = new HashSet<Vector2>();
-
-            foreach (Vector2 pixel in imageSet)
-            {
-                bool pixelMayRemain = true;
-                foreach (Vector2 element in structSet)
-                {
-                    if (!imageSet.Contains(pixel + element))
-                    {
-                        pixelMayRemain = false;
-                        break;
-                    }
-
-                }
-
-                if (pixelMayRemain) resultSet.Add(pixel);
-            }
-
-            return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
-        }
-
-        /*
-         * binaryDilateImage: perform binary dilation on a binary image using a structuring element
-         * input:   inputImage          single-channel (byte) binary image 
-         *          structElem          binary structuring element (true = foreground)
-         * output:                      single-channel (byte) binary image after dilation
-         */
-        private byte[,] binaryDilateImage(byte[,] inputImage, bool[,] structElem)
-        {
-            
-            HashSet<Vector2> imageSet = BinaryMorphologyHelpers.pointSetFromImage(inputImage);
-            HashSet<Vector2> structSet = BinaryMorphologyHelpers.pointSetFromFilter(structElem);
-
-            HashSet<Vector2> resultSet = new HashSet<Vector2>();
-            foreach(Vector2 pixel in imageSet)
-                foreach(Vector2 element in structSet)
-                    resultSet.Add(pixel + element);
-
-            return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
-        }
-
-        /*
-         * binaryOpen
-         * Image: perform binary opening on a binary image
-         * input:   inputImage          single-channel (byte) binary image 
-         *          structElem          binary structuring element (true = foreground)
-         * output:                      single-channel (byte) binary image after opening
-         */
-        private byte[,] binaryOpenImage(byte[,] inputImage, bool[,] structElem)
-        {
-            return binaryDilateImage(binaryErodeImage(inputImage, structElem), structElem);
-        }
-
-        /*
-         * binaryCloseImage: perform binary closing on a binary image
-         * input:   inputImage          single-channel (byte) binary image
-         *          structElem          binary structuring element (true = foreground)
-         * output:                      single-channel (byte) binary image after closing
-         */
-        private byte[,] binaryCloseImage(byte[,] inputImage, bool[,] structElem)
-        {
-            return binaryErodeImage(binaryDilateImage(inputImage, structElem), structElem);
-        }
-
-        // Grayscale morphology
-
-        /*
-         * grayscaleErodeImage: perform grayscale erosion on a grayscale image using a structuring element
-         * input:   inputImage          single-channel (byte) grayscale image
-         *          structElem          integer structuring element 
-         * output:                      single-channel (byte) grayscale image after erosion
-         */
-        private byte[,] grayscaleErodeImage(byte[,] inputImage, int[,] structElem)
-        {
-            float[,] floatStructElem = HelperFunctions.floatifyIntArray(structElem);
-            Padder padder = new ConstantValuePadder(floatStructElem, 0);
-
-            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Min<float>, (x, y) => x - y);
-
-            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
-
-            return output;
-        }
-
-        /*
-         * grayscaleDilateImage: perform grayscale dilation on a grayscale image using a structuring element
-         * input:   inputImage          single-channel (byte) grayscale image
-         *          structElem          integer structuring element
-         * output:                      single-channel (byte) grayscale image after dilation
-         */
-        private byte[,] grayscaleDilateImage(byte[,] inputImage, int[,] structElem)
-        {
-            float[,] floatStructElem = HelperFunctions.floatifyIntArray(structElem);
-            Padder padder = new ConstantValuePadder(floatStructElem, 0);
-
-            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Max<float>, (x, y) => x + y);
-
-            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
-
-            return output;
-        }
 
         // ====================================================================
         // ============= YOUR FUNCTIONS FOR ASSIGNMENT 2 GO HERE ==============
