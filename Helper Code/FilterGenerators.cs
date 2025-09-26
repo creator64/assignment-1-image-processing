@@ -47,5 +47,10 @@ namespace INFOIBV.Helper_Code
 
             return (int)Math.Round(hotspot * Math.Exp(-((x - hotspot) * (x - hotspot) / (2 * sigma * sigma)) - ((y - hotspot) * (y - hotspot) / (2 * sigma * sigma))));
         }
+
+        public static bool createUniformBinaryStructElem(int i, int j, bool[,] filter)
+        {
+            return true;
+        }
     }
 }

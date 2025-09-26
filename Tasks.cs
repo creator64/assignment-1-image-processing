@@ -93,28 +93,33 @@ namespace INFOIBV
             Color[,] Image = HelperFunctions.convertBitmapToColor(InputImage);
             byte[,] workingImage = HelperFunctions.convertToGrayscale(Image);
 
+            byte[,] imageF = ProcessingFunctions.thresholdImage(workingImage, 127);
+
+            string imgPath = Path.Combine(basePath, "out", "task3", "images");
+            string dataPath = Path.Combine(basePath, "out", "task3", "data");
+
+            if (!Directory.Exists(imgPath))
+                Directory.CreateDirectory(imgPath);
+            if (!Directory.Exists(dataPath))
+                Directory.CreateDirectory(dataPath);
+
+            Image img_imageF = HelperFunctions.convertToImage(imageF);
+            img_imageF.Save(Path.Combine(imgPath, "Image_F.bmp"), ImageFormat.Bmp);
+
             int[] sizes = { 3, 7, 11, 15, 19 };
 
             for (int i = 0; i < sizes.Length; i++)
             {
-                int[,] structElem = FilterGenerators.createSquareFilter<int>(sizes[i], FilterValueGenerators.createGaussianSquareFilter);
-                byte[,] processedImage = ProcessingFunctions.grayscaleDilateImage(workingImage, structElem);
-
-                string imgPath = Path.Combine(basePath, "out", "task2", "images");
-                string dataPath = Path.Combine(basePath, "out", "task2", "data");
-
-                if (!Directory.Exists(imgPath))
-                    Directory.CreateDirectory(imgPath);
-                if (!Directory.Exists(dataPath))
-                    Directory.CreateDirectory(dataPath);
+                bool[,] structElem = FilterGenerators.createSquareFilter<bool>(sizes[i], FilterValueGenerators.createUniformBinaryStructElem);
+                byte[,] processedImage = ProcessingFunctions.binaryCloseImage(imageF, structElem);
 
                 ImageData data = new ImageData(processedImage);
                 string jsonString = JsonSerializer.Serialize(data);
-                File.WriteAllText(Path.Combine(dataPath, "image_data_C" + (i + 1) + ".json"), jsonString);
+                File.WriteAllText(Path.Combine(dataPath, "image_data_G" + (i + 1) + ".json"), jsonString);
 
                 Image outputImage = HelperFunctions.convertToImage(processedImage);
 
-                outputImage.Save(Path.Combine(imgPath, "C" + (i + 1) + ".bmp"), ImageFormat.Bmp);
+                outputImage.Save(Path.Combine(imgPath, "G" + (i + 1) + ".bmp"), ImageFormat.Bmp);
 
             }
         }
