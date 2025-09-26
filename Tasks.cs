@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using INFOIBV.Core;
 using INFOIBV.Helper_Code;
@@ -32,11 +33,15 @@ namespace INFOIBV
 
             for (int i = 0; i < sizes.Length; i++)
             {
-                byte[,] outputImage = Pipelines.GaussianFilterAndEdgeDetection(sigma, sizes[i], horizontalKernel,
+                byte[,] processedImage = Pipelines.GaussianFilterAndEdgeDetection(sigma, sizes[i], horizontalKernel,
                     verticalKernel, workingImage);
-                string outputPath = Path.Combine(basePath, "out", "task1", "sigma=" + sigma, "B" + (i + 1));
-                
-                // save image
+                string outputPath = Path.Combine(basePath, "out", "task1", "sigma=" + sigma);
+
+                if (!Directory.Exists(outputPath))
+                    Directory.CreateDirectory(outputPath);
+
+                Image outputImage = HelperFunctions.convertToImage(processedImage);
+                outputImage.Save(Path.Combine(outputPath, "B" + (i + 1) + ".bmp"), ImageFormat.Bmp);
             }
         }
     }
