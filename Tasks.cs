@@ -44,5 +44,23 @@ namespace INFOIBV
                 outputImage.Save(Path.Combine(outputPath, "B" + (i + 1) + ".bmp"), ImageFormat.Bmp);
             }
         }
+
+        public void Task2(string path)
+        {
+            var enviroment = System.Environment.CurrentDirectory;
+            string basePath = enviroment;
+
+            Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
+            Color[,] Image = HelperFunctions.convertBitmapToColor(InputImage);
+            byte[,] workingImage = HelperFunctions.convertToGrayscale(Image);
+
+            int[] sizes = { 3, 7, 11, 15, 19 };
+
+            for (int i = 0; i < sizes.Length; i++)
+            {
+                int[,] structElem = FilterGenerators.createSquareFilter<int>(sizes[i], FilterValueGenerators.createUniformSquareFilter);
+                byte[,] processedImage = ProcessingFunctions.grayscaleDilateImage(workingImage, structElem);
+            }
+        }
     }
 }

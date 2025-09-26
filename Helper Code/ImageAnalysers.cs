@@ -11,6 +11,10 @@ namespace INFOIBV.Helper_Code
     {
         public int[] histogram { get; private set; }
         public float averageIntensity { get; private set; }
+
+        public int amountForegroundPixels { get { return histogram[255]; } }
+        public int amountBackgroundPixels { get { return histogram[0]; } }
+
         public ImageData(byte[,] I)
         {
             histogram = createHistogram(I);

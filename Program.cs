@@ -1,5 +1,7 @@
-﻿using System;
+﻿using INFOIBV.Helper_Code;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -13,6 +15,16 @@ namespace INFOIBV
         [STAThread]
         static void Main(string[] args)
         {
+            int[,] filter = FilterGenerators.createSquareFilter<int>(13, FilterValueGenerators.createGaussianSquareFilter);
+            for(int i = 0; i < filter.GetLength(0); i++)
+            {
+                Debug.Write("[\t");
+                for(int j = 0;  j < filter.GetLength(1); j++)
+                {
+                    Debug.Write($"{filter[i, j]},\t");
+                }
+                Debug.Write("]\n");
+            }
             if (args.Length == 0) startApplication();
             Tasks tasks = new Tasks();
             if (args[0] == "task1")
