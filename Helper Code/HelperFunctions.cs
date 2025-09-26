@@ -213,5 +213,18 @@ namespace INFOIBV.Helper_Code
 
             return Image;
         }
+
+        public static Bitmap convertToImage(byte[,] workingImage)
+        {
+            Bitmap OutputImage = new Bitmap(workingImage.GetLength(0), workingImage.GetLength(1)); // create new output image
+            for (int x = 0; x < workingImage.GetLength(0); x++)             // loop over columns
+            for (int y = 0; y < workingImage.GetLength(1); y++)         // loop over rows
+            {
+                Color newColor = Color.FromArgb(workingImage[x, y], workingImage[x, y], workingImage[x, y]);
+                OutputImage.SetPixel(x, y, newColor);                  // set the pixel color at coordinate (x,y)
+            }
+
+            return OutputImage;
+        }
     }
 }
