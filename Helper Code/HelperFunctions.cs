@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -181,6 +182,24 @@ namespace INFOIBV.Helper_Code
             }
 
             paddedImage[i, j] = (byte)selector(Values);
+        }
+        
+        public static byte[,] convertToGrayscale(Color[,] inputImage, ProgressBar progressBar = null)
+        {
+            // create temporary grayscale image of the same size as input, with a single channel
+            byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+
+            // process all pixels in the image
+            for (int x = 0; x < inputImage.GetLength(0); x++)                 // loop over columns
+            for (int y = 0; y < inputImage.GetLength(1); y++)            // loop over rows
+            {
+                Color pixelColor = inputImage[x, y];                    // get pixel color
+                byte average = (byte)((pixelColor.R + pixelColor.B + pixelColor.G) / 3); // calculate average over the three channels
+                tempImage[x, y] = average;                              // set the new pixel color at coordinate (x,y)
+                if (progressBar != null) progressBar.PerformStep();                              // increment progress bar
+            }
+
+            return tempImage;
         }
     }
 }

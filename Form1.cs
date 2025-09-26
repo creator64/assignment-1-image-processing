@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using INFOIBV.Core;
+using INFOIBV.Helper_Code;
 
 namespace INFOIBV
 {
@@ -192,11 +193,9 @@ namespace INFOIBV
                 
                 case ProcessingFunctions.Task1:
                     decimal sigma = sigmaInput.Value, gaussianMatrixSize = gaussianSize.Value;
-                    float[,] gaussianFilter = Core.ProcessingFunctions.createGaussianFilter((byte)gaussianMatrixSize, (float)sigma);
-                    byte[,] convolvedImage = Core.ProcessingFunctions.convolveImage(workingImage, gaussianFilter);
-                    byte[,] edgedImage = Core.ProcessingFunctions.edgeMagnitude(convolvedImage, horizontalKernel, verticalKernel);
-                    return Core.ProcessingFunctions.thresholdImage(edgedImage, 30);
-                
+                    return Pipelines.GaussianFilterAndEdgeDetection(sigma, gaussianMatrixSize, horizontalKernel,
+                        verticalKernel, workingImage);
+
                 default:
                     return null;
             }
@@ -220,9 +219,6 @@ namespace INFOIBV
          */
         private byte[,] convertToGrayscale(Color[,] inputImage)
         {
-            // create temporary grayscale image of the same size as input, with a single channel
-            byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-
             // setup progress bar
             progressBar.Visible = true;
             progressBar.Minimum = 1;
@@ -230,16 +226,8 @@ namespace INFOIBV
             progressBar.Value = 1;
             progressBar.Step = 1;
 
-            // process all pixels in the image
-            for (int x = 0; x < InputImage.Size.Width; x++)                 // loop over columns
-            for (int y = 0; y < InputImage.Size.Height; y++)            // loop over rows
-            {
-                Color pixelColor = inputImage[x, y];                    // get pixel color
-                byte average = (byte)((pixelColor.R + pixelColor.B + pixelColor.G) / 3); // calculate average over the three channels
-                tempImage[x, y] = average;                              // set the new pixel color at coordinate (x,y)
-                progressBar.PerformStep();                              // increment progress bar
-            }
-
+            byte[,] tempImage = HelperFunctions.convertToGrayscale(inputImage, progressBar);
+            
             progressBar.Visible = false;                                    // hide progress bar
 
             return tempImage;
