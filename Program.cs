@@ -25,12 +25,23 @@ namespace INFOIBV
                 }
                 Debug.Write("]\n");
             }
-            if (args.Length == 0) startApplication();
             Tasks tasks = new Tasks();
-            if (args[0] == "task1")
+
+            if (args.Length == 0) startApplication();
+            else
             {
-                decimal sigma = decimal.Parse(args[1]);
-                tasks.Task1("images/image_for_tasks_1_and_2.jpg", sigma);
+                switch (args[0])
+                {
+                    case "task1":
+                        decimal sigma = decimal.Parse(args[1]);
+                        tasks.Task1("images/image_for_tasks_1_and_2.jpg", sigma);
+                        break;
+                    case "task2":
+                        tasks.Task2("images/image_for_tasks_1_and_2.jpg");
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
