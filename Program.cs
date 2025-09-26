@@ -14,6 +14,12 @@ namespace INFOIBV
         static void Main(string[] args)
         {
             if (args.Length == 0) startApplication();
+            Tasks tasks = new Tasks();
+            if (args[0] == "task1")
+            {
+                decimal sigma = decimal.Parse(args[1]);
+                tasks.Task1("images/image_for_tasks_1_and_2.jpg", sigma);
+            }
         }
 
         static void startApplication()
