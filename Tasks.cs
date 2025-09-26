@@ -106,7 +106,7 @@ namespace INFOIBV
             Image img_imageF = HelperFunctions.convertToImage(imageF);
             img_imageF.Save(Path.Combine(imgPath, "Image_F.bmp"), ImageFormat.Bmp);
 
-            int[] sizes = { 3, 7, 11, 15, 19 };
+            int[] sizes = { 3, 13, 23, 33 };
 
             for (int i = 0; i < sizes.Length; i++)
             {
