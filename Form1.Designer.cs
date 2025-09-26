@@ -155,7 +155,7 @@ namespace INFOIBV
             });
             this.gaussianSize.Increment = 2;
             this.gaussianSize.Value = 3;
-            this.gaussianSize.Maximum = 15;
+            this.gaussianSize.Maximum = 19;
             this.gaussianSize.Minimum = 1;
             //
             // Gaussian Size number input
