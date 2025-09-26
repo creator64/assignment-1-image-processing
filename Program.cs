@@ -41,6 +41,7 @@ namespace INFOIBV
                         break;
                     case "task3":
                         tasks.Task3("images/image_for_task3.jpg");
+                        break;
                     default:
                         break;
                 }
