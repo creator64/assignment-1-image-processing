@@ -87,12 +87,7 @@ namespace INFOIBV
             if (InputImage == null) return;                                 // get out if no input image
             if (OutputImage != null) OutputImage.Dispose();                 // reset output image
             OutputImage = new Bitmap(InputImage.Size.Width, InputImage.Size.Height); // create new output image
-            Color[,] Image = new Color[InputImage.Size.Width, InputImage.Size.Height]; // create array to speed-up operations (Bitmap functions are very slow)
-
-            // copy input Bitmap to array            
-            for (int x = 0; x < InputImage.Size.Width; x++)                 // loop over columns
-                for (int y = 0; y < InputImage.Size.Height; y++)            // loop over rows
-                    Image[x, y] = InputImage.GetPixel(x, y);                // set pixel color in array at (x,y)
+            Color[,] Image = HelperFunctions.convertBitmapToColor(InputImage);
 
             // execute image processing steps
             byte[,] workingImage = convertToGrayscale(Image);               // convert image to grayscale
