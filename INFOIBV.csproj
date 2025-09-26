@@ -59,6 +59,8 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Helper Code\BinaryMorphologyHelpers.cs" />
+    <Compile Include="Helper Code\FilterGenerators.cs" />
+    <Compile Include="Helper Code\ImageAnalysers.cs" />
     <Compile Include="Helper Code\HelperFunctions.cs" />
     <Compile Include="Helper Code\Padders.cs" />
     <Compile Include="Tasks.cs" />
