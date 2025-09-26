@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using INFOIBV.Core;
 
 namespace INFOIBV
 {
@@ -126,16 +127,16 @@ namespace INFOIBV
             switch ((ProcessingFunctions)comboBox.SelectedIndex)
             {
                 case ProcessingFunctions.Invert:
-                    return CoreFunctions.invertImage(workingImage);
+                    return Core.ProcessingFunctions.invertImage(workingImage);
                 case ProcessingFunctions.AdjustContrast:
-                    return CoreFunctions.adjustContrast(workingImage);
+                    return Core.ProcessingFunctions.adjustContrast(workingImage);
                 case ProcessingFunctions.ConvolveImage:
-                    float[,] filter = CoreFunctions.createGaussianFilter(filterSize, filterSigma);
-                    return CoreFunctions.convolveImage(workingImage, filter);
+                    float[,] filter = Core.ProcessingFunctions.createGaussianFilter(filterSize, filterSigma);
+                    return Core.ProcessingFunctions.convolveImage(workingImage, filter);
                 case ProcessingFunctions.DetectEdges:
-                    return CoreFunctions.edgeMagnitude(workingImage, horizontalKernel, verticalKernel);
+                    return Core.ProcessingFunctions.edgeMagnitude(workingImage, horizontalKernel, verticalKernel);
                 case ProcessingFunctions.Threshold:
-                    return CoreFunctions.thresholdImage(workingImage, threshold);
+                    return Core.ProcessingFunctions.thresholdImage(workingImage, threshold);
 
                 case ProcessingFunctions.BinaryErosion:
                     bool[,] structElem = {
@@ -143,7 +144,7 @@ namespace INFOIBV
                         { true, false, true},
                         { false, true, false}
                     }; // Define this structuring element yourself
-                    return CoreFunctions.binaryErodeImage(workingImage, structElem);
+                    return Core.ProcessingFunctions.binaryErodeImage(workingImage, structElem);
 
                 case ProcessingFunctions.BinaryDilation:
                     bool[,] structElem2 = {
@@ -151,7 +152,7 @@ namespace INFOIBV
                         { true, false, true},
                         { false, true, false}
                     };
-                    return CoreFunctions.binaryDilateImage(workingImage, structElem2);
+                    return Core.ProcessingFunctions.binaryDilateImage(workingImage, structElem2);
 
                 case ProcessingFunctions.BinaryOpening:
                     bool[,] structElem3 = {
@@ -161,7 +162,7 @@ namespace INFOIBV
                         { false, true, true, true, false },
                         { false, false, true, false, false }
                     };
-                    return CoreFunctions.binaryOpenImage(workingImage, structElem3);
+                    return Core.ProcessingFunctions.binaryOpenImage(workingImage, structElem3);
 
                 case ProcessingFunctions.BinaryClosing:
                     bool[,] structElem4 = {
@@ -171,7 +172,7 @@ namespace INFOIBV
                         { false, true, true, true, false },
                         { false, false, true, false, false }
                     };
-                    return CoreFunctions.binaryCloseImage(workingImage, structElem4);
+                    return Core.ProcessingFunctions.binaryCloseImage(workingImage, structElem4);
 
                 case ProcessingFunctions.GrayscaleErosion:
                     int[,] grayStructElem = {
@@ -179,7 +180,7 @@ namespace INFOIBV
                         { 1, 2, 1},
                         { 1, 2, 1}
                     };
-                    return CoreFunctions.grayscaleErodeImage(workingImage, grayStructElem);
+                    return Core.ProcessingFunctions.grayscaleErodeImage(workingImage, grayStructElem);
 
                 case ProcessingFunctions.GrayscaleDilation:
                     int[,] grayStructElem2 = {
@@ -187,14 +188,14 @@ namespace INFOIBV
                         { 1, 2, 1},
                         { 1, 2, 1}
                     };
-                    return CoreFunctions.grayscaleDilateImage(workingImage, grayStructElem2);
+                    return Core.ProcessingFunctions.grayscaleDilateImage(workingImage, grayStructElem2);
                 
                 case ProcessingFunctions.Task1:
                     decimal sigma = sigmaInput.Value, gaussianMatrixSize = gaussianSize.Value;
-                    float[,] gaussianFilter = CoreFunctions.createGaussianFilter((byte)gaussianMatrixSize, (float)sigma);
-                    byte[,] convolvedImage = CoreFunctions.convolveImage(workingImage, gaussianFilter);
-                    byte[,] edgedImage = CoreFunctions.edgeMagnitude(convolvedImage, horizontalKernel, verticalKernel);
-                    return CoreFunctions.thresholdImage(edgedImage, 30);
+                    float[,] gaussianFilter = Core.ProcessingFunctions.createGaussianFilter((byte)gaussianMatrixSize, (float)sigma);
+                    byte[,] convolvedImage = Core.ProcessingFunctions.convolveImage(workingImage, gaussianFilter);
+                    byte[,] edgedImage = Core.ProcessingFunctions.edgeMagnitude(convolvedImage, horizontalKernel, verticalKernel);
+                    return Core.ProcessingFunctions.thresholdImage(edgedImage, 30);
                 
                 default:
                     return null;

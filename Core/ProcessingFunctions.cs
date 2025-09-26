@@ -5,9 +5,9 @@ using INFOIBV.Helper_Code;
 using System.Numerics;
 
 
-namespace INFOIBV
+namespace INFOIBV.Core
 {
-    public static class CoreFunctions
+    public static class ProcessingFunctions
     {
         // ====================================================================
         // ============= YOUR FUNCTIONS FOR ASSIGNMENT 1 GO HERE ==============
