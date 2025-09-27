@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using INFOIBV.Helper_Code;
 using System.Numerics;
+using System.Windows.Forms;
 
 
 namespace INFOIBV.Core
@@ -181,28 +182,38 @@ namespace INFOIBV.Core
          */
         public static byte[,] binaryErodeImage(byte[,] inputImage, bool[,] structElem)
         {
-            HashSet<Vector2> imageSet = BinaryMorphologyHelpers.pointSetFromImage(inputImage);
-            HashSet<Vector2> structSet = BinaryMorphologyHelpers.pointSetFromFilter(structElem);
+            ImageData data = new ImageData(inputImage);
 
-            HashSet<Vector2> resultSet = new HashSet<Vector2>();
-
-            foreach (Vector2 pixel in imageSet)
+            if (data.amountDistinctValues > 2)
             {
-                bool pixelMayRemain = true;
-                foreach (Vector2 element in structSet)
+                MessageBox.Show("You can only perform binary morphology over binary images. Threshold this image first");
+                return inputImage;
+            }
+            else
+            {
+                HashSet<Vector2> imageSet = BinaryMorphologyHelpers.pointSetFromImage(inputImage);
+                HashSet<Vector2> structSet = BinaryMorphologyHelpers.pointSetFromFilter(structElem);
+
+                HashSet<Vector2> resultSet = new HashSet<Vector2>();
+
+                foreach (Vector2 pixel in imageSet)
                 {
-                    if (!imageSet.Contains(pixel + element))
+                    bool pixelMayRemain = true;
+                    foreach (Vector2 element in structSet)
                     {
-                        pixelMayRemain = false;
-                        break;
+                        if (!imageSet.Contains(pixel + element))
+                        {
+                            pixelMayRemain = false;
+                            break;
+                        }
+
                     }
 
+                    if (pixelMayRemain) resultSet.Add(pixel);
                 }
 
-                if (pixelMayRemain) resultSet.Add(pixel);
+                return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
             }
-
-            return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
         }
 
         /*

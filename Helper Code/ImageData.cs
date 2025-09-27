@@ -12,6 +12,7 @@ namespace INFOIBV.Helper_Code
         public int[] histogram { get; private set; }
         public float averageIntensity { get; private set; }
 
+        public int amountDistinctValues { get; private set; }
         public int amountForegroundPixels { get { return histogram[255]; } }
         public int amountBackgroundPixels { get { return histogram[0]; } }
 
@@ -19,8 +20,22 @@ namespace INFOIBV.Helper_Code
         {
             histogram = createHistogram(I);
             averageIntensity = getAverageIntensityValue(I, histogram);
+            amountDistinctValues = countDistinctValues(histogram);
         }
+        /// <summary>
+        /// Function that counts the amount of distinct grayscale values from
+        /// the histogram of an image.
+        /// </summary>
+        /// <param name="histogram"></param>
+        /// <returns></returns>
+        private int countDistinctValues(int[] histogram)
+        {
+            int distinctValues = 0;
+            for(int i = 0; i < histogram.Length; i++)
+                if (histogram[i] > 0) distinctValues++;
 
+            return distinctValues;
+        }
         /// <param name="I">The image in the form of a 2D byte array</param>
         /// <returns>An array with indices 0 to 255, the value contained in each index is the amount of pixels of that intensity value</returns>
         private int[] createHistogram(byte[,] I)
