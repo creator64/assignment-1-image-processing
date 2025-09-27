@@ -100,10 +100,12 @@ namespace INFOIBV
                 && data.amountDistinctValues != 2)
                 MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform binary morphological operations over it. Threshold it first to turn it into a binary iamge.");
             else
+            { 
                 workingImage = applyProcessingFunction(workingImage);           // processing functions
 
-            OutputImage = HelperFunctions.convertToImage(workingImage);
-            pictureBox2.Image = (Image)OutputImage;                         // display output image
+                OutputImage = HelperFunctions.convertToImage(workingImage);
+                pictureBox2.Image = (Image)OutputImage;                         // display output image
+            }
         }
 
         /*
