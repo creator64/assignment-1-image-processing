@@ -57,6 +57,8 @@ namespace INFOIBV.Helper_Code
             float dist = (float)Math.Sqrt((xCoord * xCoord) + (yCoord * yCoord));
 
             return dist <= r;
+        }
+
         public static int createUniformSquareFilter(int i, int j, int[,] filter)
         {
             return 1;
