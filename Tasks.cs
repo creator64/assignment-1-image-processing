@@ -62,7 +62,7 @@ namespace INFOIBV
 
             for (int i = 0; i < sizes.Length; i++)
             {
-                int[,] structElem = FilterGenerators.createSquareFilter<int>(sizes[i], FilterValueGenerators.createGaussianSquareFilter);
+                int[,] structElem = FilterGenerators.createSquareFilter<int>(sizes[i], FilterValueGenerators.createUniformSquareFilter);
                 byte[,] processedImage = ProcessingFunctions.grayscaleDilateImage(workingImage, structElem);
 
                 string imgPath = Path.Combine(basePath, "out", "task2", "images");
@@ -73,7 +73,7 @@ namespace INFOIBV
                 if (!Directory.Exists(dataPath))
                     Directory.CreateDirectory(dataPath);
 
-                ImageData data = new ImageData(processedImage);
+                TaskData<int> data = new TaskData<int>(structElem, processedImage);
                 string jsonString = JsonSerializer.Serialize(data);
                 File.WriteAllText(Path.Combine(dataPath, "image_data_C" + (i + 1) + ".json"), jsonString);
 

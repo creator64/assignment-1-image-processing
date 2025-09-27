@@ -45,11 +45,43 @@ def getImgDataFileNames(imgTag : str, imgCount : int) -> list[str]:
         fileNameList.append(f"image_data_{imgTag}{i}.json")
     return fileNameList
 
-def plot_task1():
-    return None;
-
 def plot_task2():
-    return None
+    datafiles = getImgDataFileNames('C', 5)
+
+    D = [] # the distinct grayscale values of images C1 ... C5
+    E = [] # the average of all pixel intenisty values of images C1 ... C5
+    sizes = []
+
+    for file in datafiles:
+        filewrapper = open(os.path.join(task2_data_dir, file), "r")
+
+        jsonstring = filewrapper.read()
+
+        data = json.loads(jsonstring)
+
+        histogram = data["imgData"]["histogram"]
+        D.append(countDistinctGrayscaleValues(histogram))
+        E.append(data["imgData"]["averageIntensity"])
+        sizes.append(f"{file[-7]}{file[-6]}: {data["filterWidth"]}x{data["filterHeight"]}")
+
+    # Create plot of average grayscale intensity valeus
+    plt.figure(0);
+    plt.bar(sizes, E)
+    plt.ylim([min(E) - 0.50 * (max(E) - min(E)), max(E) + 0.50 * (max(E) - min(E))])
+    plt.ylabel("Average Grayscale Intensity Values")
+    plt.xlabel("The images C1 until C4 and their respective Filter Dimensions")
+    plt.savefig(os.path.join(task2_plot_dir, "average_grayscale_values.png"))
+    
+    # Create plot of # of distinct grayscale intensity values
+    plt.figure(1)
+    plt.bar(sizes, D)
+    plt.ylim([min(D) - 0.50 * (max(D) - min(D)), max(D) + 0.50 * (max(D) - min(D))])
+    plt.ylabel("Amount of Distinct Grayscale Intensity Values")
+    plt.xlabel("The images C1 until C4 and their respective Filter Dimensions")
+    if not (os.path.exists(task2_plot_dir)): os.mkdir(task2_plot_dir)
+    plt.savefig(os.path.join(task2_plot_dir, "amount_of_distinct_grayscale_values.png"))
+
+
 
 def plot_task3():
     datafiles = getImgDataFileNames('G', 4)
@@ -73,11 +105,21 @@ def plot_task3():
     if not (os.path.exists(task3_plot_dir)): os.mkdir(task3_plot_dir)
     plt.savefig(os.path.join(task3_plot_dir, "foreground_pixels_over_filter_size.png"))
 
+# Helper functions for plotting
+
+def countDistinctGrayscaleValues(histogram : list[int]) -> int:
+    n_grayscaleValues = 0;
+    for grayscaleValue in histogram:
+        if grayscaleValue > 0: n_grayscaleValues += 1
+    
+    return n_grayscaleValues
+
 # Loading animationf or terminal, just a quality of life feature
 def loading_animation(loadingMsg : str):
     global task
     while not doneLoading:
         for i in range(1, 4):
+            if doneLoading: break
             print('\r' + loadingMsg + "." * i, end="", flush=True)
             time.sleep(1)
         print("\33[2K\r", end="");
@@ -100,16 +142,7 @@ if __name__ == "__main__":
             print(f"\033[32mDone running code for {task}!\033[0m")
 
 
-        if (task == "task1") and plotData:
-            print(f"\033[33mPlotting data for {task}, this can take a bit\033[0m")
-            t = threading.Thread(target=loading_animation, args=(f"{task} is being analysed and plotted",))
-            doneLoading = False
-            t.start()
-            plot_task1()
-            doneLoading = True
-            t.join();
-            print(f"\033[32mDone analysing {task}!\033[0m")
-        elif task == "task2" and plotData:
+        if task == "task2" and plotData:
             print(f"\033[33mPlotting data for {task}, this can take a bit\033[0m")
             t = threading.Thread(target=loading_animation, args=(f"{task} is being analysed and plotted",))
             doneLoading = False
