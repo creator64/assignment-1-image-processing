@@ -68,15 +68,17 @@ def plot_task3():
     
     plt.bar(sizes, H)
     plt.ylim([min(H) - 0.20 * (max(H) - min(H)), max(H) + 0.20 * (max(H) - min(H))])
+    plt.ylabel("Amount of Foreground Pixels")
+    plt.xlabel("The images G1 until G4 and their respective Filter Dimensions")
     if not (os.path.exists(task3_plot_dir)): os.mkdir(task3_plot_dir)
     plt.savefig(os.path.join(task3_plot_dir, "foreground_pixels_over_filter_size.png"))
 
 # Loading animationf or terminal, just a quality of life feature
-def loading_animation():
+def loading_animation(loadingMsg : str):
     global task
     while not doneLoading:
         for i in range(1, 4):
-            print('\r' + f"{task} is being executed" + "." * i, end="", flush=True)
+            print('\r' + loadingMsg + "." * i, end="", flush=True)
             time.sleep(1)
         print("\33[2K\r", end="");
 
@@ -89,7 +91,7 @@ if __name__ == "__main__":
     else:
         if not noRun: 
             print(f"\033[33mRunning code for {task}, this can take a bit\033[0m")
-            t = threading.Thread(target=loading_animation)
+            t = threading.Thread(target=loading_animation, args=(f"{task} is being executed",))
             doneLoading = False
             t.start()
             subprocess.call([exe_dir, task])
@@ -99,10 +101,31 @@ if __name__ == "__main__":
 
 
         if (task == "task1") and plotData:
+            print(f"\033[33mPlotting data for {task}, this can take a bit\033[0m")
+            t = threading.Thread(target=loading_animation, args=(f"{task} is being analysed and plotted",))
+            doneLoading = False
+            t.start()
             plot_task1()
+            doneLoading = True
+            t.join();
+            print(f"\033[32mDone analysing {task}!\033[0m")
         elif task == "task2" and plotData:
+            print(f"\033[33mPlotting data for {task}, this can take a bit\033[0m")
+            t = threading.Thread(target=loading_animation, args=(f"{task} is being analysed and plotted",))
+            doneLoading = False
+            t.start()
             plot_task2()
+            doneLoading = True
+            t.join();
+            print(f"\033[32mDone analysing {task}!\033[0m")
         elif task == "task3" and plotData:
+            print(f"\033[33mPlotting data for {task}, this can take a bit\033[0m")
+            t = threading.Thread(target=loading_animation, args=(f"{task} is being analysed and plotted",))
+            doneLoading = False
+            t.start()
             plot_task3()
+            doneLoading = True
+            t.join();
+            print(f"\033[32mDone analysing {task}!\033[0m")
             
 
