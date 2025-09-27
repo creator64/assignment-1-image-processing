@@ -113,7 +113,7 @@ namespace INFOIBV
                 bool[,] structElem = FilterGenerators.createSquareFilter<bool>(sizes[i], FilterValueGenerators.createUniformBinaryStructElem);
                 byte[,] processedImage = ProcessingFunctions.binaryCloseImage(imageF, structElem);
 
-                ImageData data = new ImageData(processedImage);
+                TaskData<bool> data = new TaskData<bool>(structElem, processedImage);
                 string jsonString = JsonSerializer.Serialize(data);
                 File.WriteAllText(Path.Combine(dataPath, "image_data_G" + (i + 1) + ".json"), jsonString);
 
@@ -122,6 +122,35 @@ namespace INFOIBV
                 outputImage.Save(Path.Combine(imgPath, "G" + (i + 1) + ".bmp"), ImageFormat.Bmp);
 
             }
+        }
+    }
+    public class TaskData<T>
+    {
+        public T[] flattenedFilter { get; private set; }
+
+        public int filterWidth { get; private set; }
+
+        public int filterHeight { get; private set; }
+
+        public ImageData imgData { get; private set; } 
+
+        public TaskData(T[,] filter, byte[,] image)
+        {
+            flattenedFilter = new T[filter.LongLength];
+
+            for(int i = 0; i < filter.GetLength(0); i++)
+            {
+                for(int j = 0; j < filter.GetLength(1); j++)
+                {
+                    flattenedFilter[i + (j * filter.GetLength(1))] = filter[i, j];
+                }
+            }
+
+            filterWidth = filter.GetLength(0);
+            filterHeight = filter.GetLength(1);
+
+
+            imgData = new ImageData(image);
         }
     }
 }

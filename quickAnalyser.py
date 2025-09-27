@@ -18,14 +18,14 @@ task2_img_dir   = os.path.join(out_dir, "task2", "images")
 task3_data_dir  = os.path.join(out_dir, "task3", "data")
 task3_img_dir   = os.path.join(out_dir, "task3", "images")
 
-# settings of the script
+# Settings of the script
 plotData= False
 noRun= False
 task = None
 
 doneLoading = True;
 
-# code
+# The actual methods for the script
 def parseSettingsFromArgs(argslist):
     global plotData, noRun, task
     for arg in argslist:
@@ -49,9 +49,19 @@ def plot_task2():
     return None
 
 def plot_task3():
-    imgData = getImgDataFileNames('G', 4)
-    for dat in imgData: print(dat)
+    datafiles = getImgDataFileNames('G', 4)
+    
+    for file in datafiles:
+        filewrapper = open(os.path.join(task3_data_dir, file), "r")
 
+        jsonstring = filewrapper.read()
+
+        data = json.loads(jsonstring)
+
+        print(data["histogram"])
+        print("--------------------------------")
+
+# Loading animationf or terminal, just a quality of life feature
 def loading_animation():
     global task
     while not doneLoading:
@@ -59,7 +69,6 @@ def loading_animation():
             print('\r' + f"{task} is being executed" + "." * i, end="", flush=True)
             time.sleep(1)
         print("\33[2K\r", end="");
-
 
 
 if __name__ == "__main__":
