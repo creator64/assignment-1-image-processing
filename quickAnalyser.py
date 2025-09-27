@@ -3,7 +3,7 @@ import sys
 import os
 import subprocess
 import threading, time
-import matplotlib
+import matplotlib.pyplot as plt
 
 
 
@@ -14,9 +14,12 @@ out_dir         = os.path.join(current_dir, "out")
 
 task2_data_dir  = os.path.join(out_dir, "task2", "data")
 task2_img_dir   = os.path.join(out_dir, "task2", "images")
+task2_plot_dir  = os.path.join(out_dir, "task2", "plots")
 
 task3_data_dir  = os.path.join(out_dir, "task3", "data")
 task3_img_dir   = os.path.join(out_dir, "task3", "images")
+task3_plot_dir  = os.path.join(out_dir, "task3", "plots")
+
 
 # Settings of the script
 plotData= False
@@ -51,6 +54,8 @@ def plot_task2():
 def plot_task3():
     datafiles = getImgDataFileNames('G', 4)
     
+    H = []
+    sizes = []
     for file in datafiles:
         filewrapper = open(os.path.join(task3_data_dir, file), "r")
 
@@ -58,8 +63,13 @@ def plot_task3():
 
         data = json.loads(jsonstring)
 
-        print(data["histogram"])
-        print("--------------------------------")
+        H.append(data["imgData"]["amountForegroundPixels"]);
+        sizes.append(f"{file[-7]}{file[-6]}: {data["filterWidth"]}x{data["filterHeight"]}")
+    
+    plt.bar(sizes, H)
+    plt.ylim([min(H) - 0.20 * (max(H) - min(H)), max(H) + 0.20 * (max(H) - min(H))])
+    if not (os.path.exists(task3_plot_dir)): os.mkdir(task3_plot_dir)
+    plt.savefig(os.path.join(task3_plot_dir, "foreground_pixels_over_filter_size.png"))
 
 # Loading animationf or terminal, just a quality of life feature
 def loading_animation():
