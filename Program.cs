@@ -1,5 +1,7 @@
-﻿using System;
+﻿using INFOIBV.Helper_Code;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -13,12 +15,36 @@ namespace INFOIBV
         [STAThread]
         static void Main(string[] args)
         {
-            if (args.Length == 0) startApplication();
-            Tasks tasks = new Tasks();
-            if (args[0] == "task1")
+            int[,] filter = FilterGenerators.createSquareFilter<int>(13, FilterValueGenerators.createGaussianSquareFilter);
+            for(int i = 0; i < filter.GetLength(0); i++)
             {
-                decimal sigma = decimal.Parse(args[1]);
-                tasks.Task1("images/image_for_tasks_1_and_2.jpg", sigma);
+                Debug.Write("[\t");
+                for(int j = 0;  j < filter.GetLength(1); j++)
+                {
+                    Debug.Write($"{filter[i, j]},\t");
+                }
+                Debug.Write("]\n");
+            }
+            Tasks tasks = new Tasks();
+
+            if (args.Length == 0) startApplication();
+            else
+            {
+                switch (args[0])
+                {
+                    case "task1":
+                        decimal sigma = decimal.Parse(args[1]);
+                        tasks.Task1("images/image_for_tasks_1_and_2.jpg", sigma);
+                        break;
+                    case "task2":
+                        tasks.Task2("images/image_for_tasks_1_and_2.jpg");
+                        break;
+                    case "task3":
+                        tasks.Task3("images/image_for_task3.jpg");
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 

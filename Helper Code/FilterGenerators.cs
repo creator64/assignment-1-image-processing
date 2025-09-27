@@ -20,7 +20,7 @@ namespace INFOIBV.Helper_Code
         /// <exception cref="ArgumentException"></exception>
         public static T[,] createSquareFilter<T>(int size, Func<int, int, T[,], T> valueGenerator)
         {
-            if (size % 2 != 0) throw new ArgumentException($"The size given to createEvenSquareFilter should be uneven, otherwise there will be no clear hotspot. \nCurrent size given is {size}");
+            if (size % 2 != 1) throw new ArgumentException($"The size given to createEvenSquareFilter should be uneven, otherwise there will be no clear hotspot. \nCurrent size given is {size}");
 
             T[,] filter = new T[size, size];
 
@@ -38,11 +38,10 @@ namespace INFOIBV.Helper_Code
         /// A FilterValueGenerator with the purpose of creating structuring elements for binary morphology.
         /// This specific FilterValueGenerator generates only "true" values.
         /// </summary>
-        public static bool binaryBlock(int i, int j, bool[,] filter)
+        public static bool createUniformBinaryStructElem(int i, int j, bool[,] filter)
         {
             return true;
         }
-
 
         /// <summary>
         /// A FilterValueGenerator with the purpose of creating structuring elements for binary morphology.
@@ -58,6 +57,21 @@ namespace INFOIBV.Helper_Code
             float dist = (float)Math.Sqrt((xCoord * xCoord) + (yCoord * yCoord));
 
             return dist <= r;
+        public static int createUniformSquareFilter(int i, int j, int[,] filter)
+        {
+            return 1;
+        }
+
+        public static int createGaussianSquareFilter(int i, int j, int[,] filter)
+        {
+            int r = filter.GetLength(0);
+
+            int x = i + 1;
+            int y = j + 1;
+            float sigma = r / 4; //value that works well
+            int hotspot = (int)Math.Ceiling((float)r / 2);
+
+            return (int)Math.Round(hotspot * Math.Exp(-((x - hotspot) * (x - hotspot) / (2 * sigma * sigma)) - ((y - hotspot) * (y - hotspot) / (2 * sigma * sigma))));
         }
     }
 }

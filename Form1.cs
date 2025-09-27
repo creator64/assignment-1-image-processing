@@ -65,7 +65,7 @@ namespace INFOIBV
         private void loadImageButton_Click(object sender, EventArgs e)
         {
            if (openImageDialog.ShowDialog() == DialogResult.OK)             // open file dialog
-            {
+           {
                 string file = openImageDialog.FileName;                     // get the file name
                 imageFileName.Text = file;                                  // show file name
                 if (InputImage != null) InputImage.Dispose();               // reset image
@@ -75,7 +75,7 @@ namespace INFOIBV
                     MessageBox.Show("Error in image dimensions (have to be > 0 and <= 512)");
                 else
                     pictureBox1.Image = (Image) InputImage;                 // display input image
-            }
+           }
         }
 
 
@@ -93,14 +93,7 @@ namespace INFOIBV
             byte[,] workingImage = convertToGrayscale(Image);               // convert image to grayscale
             workingImage = applyProcessingFunction(workingImage);           // processing functions
 
-            // copy array to output Bitmap
-            for (int x = 0; x < workingImage.GetLength(0); x++)             // loop over columns
-                for (int y = 0; y < workingImage.GetLength(1); y++)         // loop over rows
-                {
-                    Color newColor = Color.FromArgb(workingImage[x, y], workingImage[x, y], workingImage[x, y]);
-                    OutputImage.SetPixel(x, y, newColor);                  // set the pixel color at coordinate (x,y)
-                }
-            
+            OutputImage = HelperFunctions.convertToImage(workingImage);
             pictureBox2.Image = (Image)OutputImage;                         // display output image
         }
 
