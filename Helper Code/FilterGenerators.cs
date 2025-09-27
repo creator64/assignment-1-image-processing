@@ -13,9 +13,12 @@ namespace INFOIBV.Helper_Code
         /// - a filter that has an equal size in both the x and y direction
         /// - a filter that has a clear center, hence the size must be uneven.
         /// </summary>
+        /// <typeparam name="T">The type (bool, byte, float, etc.) of the elements contained in the filter matrix/typeparam>
         /// <param name="size">The size of of the filter in both the x and y direction</param>
+        /// <param name="valueGenerator"></param>
         /// <returns></returns>
-        public static T[,] createSquareFilter<T>(int size, Func<int, int, T> valueGenerator)
+        /// <exception cref="ArgumentException"></exception>
+        public static T[,] createSquareFilter<T>(int size, Func<int, int, T[,], T> valueGenerator)
         {
             if (size % 2 != 0) throw new ArgumentException($"The size given to createEvenSquareFilter should be uneven, otherwise there will be no clear hotspot. \nCurrent size given is {size}");
 
@@ -23,7 +26,7 @@ namespace INFOIBV.Helper_Code
 
             for (int i = 0; i < size; i++)
                 for (int j = 0; j < size; j++)
-                    filter[i, j] = valueGenerator(i, j);
+                    filter[i, j] = valueGenerator(i, j, filter);
 
             return filter;
         }
@@ -31,6 +34,30 @@ namespace INFOIBV.Helper_Code
 
     public static class FilterValueGenerators
     {
+        /// <summary>
+        /// A FilterValueGenerator with the purpose of creating structuring elements for binary morphology.
+        /// This specific FilterValueGenerator generates only "true" values.
+        /// </summary>
+        public static bool binaryBlock(int i, int j, bool[,] filter)
+        {
+            return true;
+        }
 
+
+        /// <summary>
+        /// A FilterValueGenerator with the purpose of creating structuring elements for binary morphology.
+        /// This specific FilterValueGenerator creates a circle of true values around the hotspot.
+        /// </summary>
+        public static bool binaryCircle(int i, int j, bool[,] filter)
+        {
+            int r = filter.GetLength(0);
+
+            int xCoord = i - r;
+            int yCoord = j - r;
+
+            float dist = (float)Math.Sqrt((xCoord * xCoord) + (yCoord * yCoord));
+
+            return dist <= r;
+        }
     }
 }
