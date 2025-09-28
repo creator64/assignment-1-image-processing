@@ -54,7 +54,6 @@ namespace INFOIBV
         {
             var enviroment = System.Environment.CurrentDirectory;
             string basePath = enviroment;
-            basePath = "C:\\Users\\Dangu\\Documents\\Universiteit Utrecht\\Year 3\\Beeldverwerking\\Assignment 1\\assignment-1-image-processing";
 
             Debug.WriteLine(Path.Combine(basePath, path));
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
@@ -91,7 +90,6 @@ namespace INFOIBV
         {
             var enviroment = System.Environment.CurrentDirectory;
             string basePath = enviroment;
-            basePath = "C:\\Users\\Dangu\\Documents\\Universiteit Utrecht\\Year 3\\Beeldverwerking\\Assignment 1\\assignment-1-image-processing";
 
 
             Debug.WriteLine(Path.Combine(basePath, path));
