@@ -340,5 +340,17 @@ namespace INFOIBV.Core
 
             return HelperFunctions.applyNonLinearFilter(inputImage, padder, f);
         }
+
+        public static byte[,] findLargestRegion(byte[,] inputImage)
+        {
+            byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+            List<List<Vector2>> regions = ImageRegions.findRegions(inputImage);
+            List<Vector2> largestRegion = regions.Aggregate((r1, r2) => r1.Count > r2.Count ? r1 : r2);
+            
+            foreach (Vector2 point in largestRegion)
+                outputImage[(int)point.X, (int)point.Y] = 255;
+
+            return outputImage;
+        }
     }
 }

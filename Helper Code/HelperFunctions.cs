@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Numerics;
 using System.Windows.Forms;
 
 namespace INFOIBV.Helper_Code
@@ -248,6 +249,12 @@ namespace INFOIBV.Helper_Code
                 cumulativeHistogram[i] = cumulativeHistogram[i - 1] + histogram[i];
 
             return cumulativeHistogram;
+        }
+        
+        public static Vector2[] FourNeighbours(Vector2 point)
+        {
+            float x = point.X, y = point.Y;
+            return new[] { new Vector2(x, y - 1), new Vector2(x + 1, y), new Vector2(x, y + 1), new Vector2(x - 1, y) };
         }
     }
 }
