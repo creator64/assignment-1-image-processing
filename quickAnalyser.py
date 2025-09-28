@@ -71,6 +71,7 @@ def plot_task2():
     plt.ylim([min(E) - 0.50 * (max(E) - min(E)), max(E) + 0.50 * (max(E) - min(E))])
     plt.ylabel("Average Grayscale Intensity Values")
     plt.xlabel("The images C1 until C5 and their respective Filter Dimensions")
+    if not (os.path.exists(task2_plot_dir)): os.mkdir(task2_plot_dir)
     plt.savefig(os.path.join(task2_plot_dir, "average_grayscale_values.png"))
     
     # Create plot of # of distinct grayscale intensity values
@@ -79,7 +80,6 @@ def plot_task2():
     plt.ylim([min(D) - 0.50 * (max(D) - min(D)), max(D) + 0.50 * (max(D) - min(D))])
     plt.ylabel("Amount of Distinct Grayscale Intensity Values")
     plt.xlabel("The images C1 until C5 and their respective Filter Dimensions")
-    if not (os.path.exists(task2_plot_dir)): os.mkdir(task2_plot_dir)
     plt.savefig(os.path.join(task2_plot_dir, "amount_of_distinct_grayscale_values.png"))
 
 
