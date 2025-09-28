@@ -29,7 +29,8 @@ namespace INFOIBV
             BinaryClosing,
             GrayscaleErosion,
             GrayscaleDilation,
-            Task1
+            Task1,
+            histogramEqualization
         }
 
         /*
@@ -194,6 +195,9 @@ namespace INFOIBV
                     decimal sigma = sigmaInput.Value, gaussianMatrixSize = gaussianSize.Value;
                     return Pipelines.GaussianFilterAndEdgeDetection(sigma, gaussianMatrixSize, horizontalKernel,
                         verticalKernel, workingImage);
+                
+                case ProcessingFunctions.histogramEqualization:
+                    return Core.ProcessingFunctions.histogramEqualization(workingImage);
 
                 default:
                     return null;

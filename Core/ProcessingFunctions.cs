@@ -296,5 +296,28 @@ namespace INFOIBV.Core
 
             return output;
         }
+        
+        /*
+         * histogramEqualization: create the histogram-equalized version of the image
+         * input:   inputImage          single-channel (byte) image
+         * output:                      single-channel (byte) image
+         */
+        public static byte[,] histogramEqualization(byte[,] inputImage)
+        {
+            ImageData imageData = new ImageData(inputImage);
+            int[] cumulativeHistogram = HelperFunctions.calculateCumulativeHistogram(imageData.histogram);
+            int amountOfPixels = inputImage.GetLength(0) * inputImage.GetLength(1);
+            int K = cumulativeHistogram.Length;
+            
+            int[] mappedPixels = new int[K];
+            for (int i = 0; i < K; i++)
+                mappedPixels[i] = (int)Math.Floor((K - 1d) * cumulativeHistogram[i] / amountOfPixels);
+
+            byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+            for (int x = 0; x < inputImage.GetLength(0); x++) for (int y = 0; y < inputImage.GetLength(1); y++)
+                outputImage[x, y] = (byte)mappedPixels[inputImage[x, y]];
+
+            return outputImage;
+        }
     }
 }

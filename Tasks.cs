@@ -53,10 +53,9 @@ namespace INFOIBV
 
         public void Task2(string path)
         {
-            var enviroment = System.Environment.CurrentDirectory;
+            var enviroment = Environment.CurrentDirectory;
             string basePath = enviroment;
-
-            Debug.WriteLine(Path.Combine(basePath, path));
+            
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
             Color[,] Image = HelperFunctions.convertBitmapToColor(InputImage);
             byte[,] workingImage = HelperFunctions.convertToGrayscale(Image);
