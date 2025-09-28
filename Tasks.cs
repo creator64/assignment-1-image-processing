@@ -20,6 +20,7 @@ namespace INFOIBV
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
             Color[,] Image = HelperFunctions.convertBitmapToColor(InputImage);
             byte[,] workingImage = HelperFunctions.convertToGrayscale(Image);
+            workingImage = ProcessingFunctions.adjustContrast(workingImage); //Image A
 
             int[] sizes = { 3, 7, 11, 15, 19 };
             float[,] horizontalKernel = {
@@ -59,6 +60,7 @@ namespace INFOIBV
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
             Color[,] Image = HelperFunctions.convertBitmapToColor(InputImage);
             byte[,] workingImage = HelperFunctions.convertToGrayscale(Image);
+            workingImage = ProcessingFunctions.adjustContrast(workingImage);
 
             int[] sizes = { 3, 7, 11, 15, 19 };
 
