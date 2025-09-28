@@ -45,6 +45,8 @@ namespace INFOIBV
 
                 Image outputImage = HelperFunctions.convertToImage(processedImage);
                 outputImage.Save(Path.Combine(outputPath, "B" + (i + 1) + ".bmp"), ImageFormat.Bmp);
+                outputImage.Save(Path.Combine(outputPath, "B" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report
+
             }
         }
 
@@ -52,6 +54,7 @@ namespace INFOIBV
         {
             var enviroment = System.Environment.CurrentDirectory;
             string basePath = enviroment;
+            basePath = "C:\\Users\\Dangu\\Documents\\Universiteit Utrecht\\Year 3\\Beeldverwerking\\Assignment 1\\assignment-1-image-processing";
 
             Debug.WriteLine(Path.Combine(basePath, path));
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
@@ -80,6 +83,7 @@ namespace INFOIBV
                 Image outputImage = HelperFunctions.convertToImage(processedImage);
 
                 outputImage.Save(Path.Combine(imgPath, "C" + (i + 1) + ".bmp"), ImageFormat.Bmp);
+                outputImage.Save(Path.Combine(imgPath, "C" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report
 
             }
         }
@@ -87,6 +91,8 @@ namespace INFOIBV
         {
             var enviroment = System.Environment.CurrentDirectory;
             string basePath = enviroment;
+            basePath = "C:\\Users\\Dangu\\Documents\\Universiteit Utrecht\\Year 3\\Beeldverwerking\\Assignment 1\\assignment-1-image-processing";
+
 
             Debug.WriteLine(Path.Combine(basePath, path));
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
@@ -120,6 +126,7 @@ namespace INFOIBV
                 Image outputImage = HelperFunctions.convertToImage(processedImage);
 
                 outputImage.Save(Path.Combine(imgPath, "G" + (i + 1) + ".bmp"), ImageFormat.Bmp);
+                outputImage.Save(Path.Combine(imgPath, "G" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report
 
             }
         }

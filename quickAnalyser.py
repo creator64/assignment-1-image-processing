@@ -25,6 +25,7 @@ task3_plot_dir  = os.path.join(out_dir, "task3", "plots")
 plotData= False
 noRun= False
 task = None
+sigma = "3"
 
 doneLoading = True;
 
@@ -127,7 +128,8 @@ if __name__ == "__main__":
             t = threading.Thread(target=loading_animation, args=(f"{task} is being executed",))
             doneLoading = False
             t.start()
-            subprocess.call([exe_dir, task])
+            if task == "task1": subprocess.call([exe_dir, task, sigma])
+            else: subprocess.call([exe_dir, task])
             doneLoading = True
             t.join();
             print(f"\033[32mDone running code for {task}!\033[0m")
