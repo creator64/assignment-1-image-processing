@@ -30,7 +30,8 @@ namespace INFOIBV
             GrayscaleErosion,
             GrayscaleDilation,
             Task1,
-            histogramEqualization
+            HistogramEqualization,
+            MedianFilter
         }
 
         /*
@@ -196,8 +197,11 @@ namespace INFOIBV
                     return Pipelines.GaussianFilterAndEdgeDetection(sigma, gaussianMatrixSize, horizontalKernel,
                         verticalKernel, workingImage);
                 
-                case ProcessingFunctions.histogramEqualization:
+                case ProcessingFunctions.HistogramEqualization:
                     return Core.ProcessingFunctions.histogramEqualization(workingImage);
+                
+                case ProcessingFunctions.MedianFilter:
+                    return Core.ProcessingFunctions.medianFilter(workingImage, 5);
 
                 default:
                     return null;

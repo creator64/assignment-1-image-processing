@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using INFOIBV.Helper_Code;
 
 namespace INFOIBV.Helper_Code
 {
@@ -182,6 +177,22 @@ namespace INFOIBV.Helper_Code
             }
 
             paddedImage[i, j] = (byte)selector(Values);
+        }
+
+        public static byte[,] applyNonLinearFilter(byte[,] inputImage, Padder padder, Func<int, int, byte[,], float> f)
+        { 
+            byte[,] paddedImage = padder.padImage(inputImage);
+            float[,] backupImage = copyImage(inputImage);
+
+            int paddingWidth = padder.paddingWidth, paddingHeight = padder.paddingHeight;
+
+            for (int i = paddingWidth; i < backupImage.GetLength(0) + paddingWidth; i++)
+            for (int j = paddingHeight; j < backupImage.GetLength(1) + paddingHeight; j++)
+            {
+                backupImage[i - paddingWidth, j - paddingHeight] = f(i, j, paddedImage);
+            }
+
+            return convertToBytes(backupImage);
         }
         
         public static byte[,] convertToGrayscale(Color[,] inputImage, ProgressBar progressBar = null)

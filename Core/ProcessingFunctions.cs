@@ -319,5 +319,27 @@ namespace INFOIBV.Core
 
             return outputImage;
         }
+
+        public static byte[,] medianFilter(byte[,] inputImage, int filterSize)
+        {
+            float[,] filter = FilterGenerators.createSquareFilter(filterSize, (int _, int __, float[,] ___) => 0);
+            Padder padder = new ConstantValuePadder(filter, 0);
+            int paddingWidth = padder.paddingWidth, paddingHeight = padder.paddingHeight;
+
+            Func<int, int, byte[,], float> f = (i, j, paddedImage) =>
+            {
+                int[] intensities = new int[filterSize * filterSize];
+                int a = 0;
+                for (int k = -paddingWidth; k <= paddingWidth; k++)
+                for (int l = -paddingHeight; l <= paddingHeight; l++)
+                    intensities[a++] = paddedImage[i + k, j + l];
+
+                Array.Sort(intensities);
+
+                return intensities[intensities.Length / 2];
+            };
+
+            return HelperFunctions.applyNonLinearFilter(inputImage, padder, f);
+        }
     }
 }
