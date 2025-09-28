@@ -17,7 +17,7 @@ namespace INFOIBV
         {
             Tasks tasks = new Tasks();
 
-            if (args.Length == 0) tasks.Task3("images/image_for_task3.jpg");
+            if (args.Length == 0) startApplication();
             else
             {
                 switch (args[0])
