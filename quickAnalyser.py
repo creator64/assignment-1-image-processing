@@ -60,7 +60,7 @@ def plot_task2():
         data = json.loads(jsonstring)
 
         histogram = data["imgData"]["histogram"]
-        D.append(countDistinctGrayscaleValues(histogram))
+        D.append(data["imgData"]["amountDistinctValues"])
         E.append(data["imgData"]["averageIntensity"])
         sizes.append(f"{file[-7]}{file[-6]}: {data["filterWidth"]}x{data["filterHeight"]}")
 
@@ -104,15 +104,6 @@ def plot_task3():
     plt.xlabel("The images G1 until G4 and their respective Filter Dimensions")
     if not (os.path.exists(task3_plot_dir)): os.mkdir(task3_plot_dir)
     plt.savefig(os.path.join(task3_plot_dir, "foreground_pixels_over_filter_size.png"))
-
-# Helper functions for plotting
-
-def countDistinctGrayscaleValues(histogram : list[int]) -> int:
-    n_grayscaleValues = 0;
-    for grayscaleValue in histogram:
-        if grayscaleValue > 0: n_grayscaleValues += 1
-    
-    return n_grayscaleValues
 
 # Loading animationf or terminal, just a quality of life feature
 def loading_animation(loadingMsg : str):
