@@ -304,8 +304,7 @@ namespace INFOIBV.Core
          */
         public static byte[,] histogramEqualization(byte[,] inputImage)
         {
-            ImageData imageData = new ImageData(inputImage);
-            int[] cumulativeHistogram = HelperFunctions.calculateCumulativeHistogram(imageData.histogram);
+            int[] cumulativeHistogram = HelperFunctions.calculateCumulativeHistogram(inputImage);
             int amountOfPixels = inputImage.GetLength(0) * inputImage.GetLength(1);
             int K = cumulativeHistogram.Length;
             

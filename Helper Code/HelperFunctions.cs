@@ -238,8 +238,9 @@ namespace INFOIBV.Helper_Code
             return OutputImage;
         }
 
-        public static int[] calculateCumulativeHistogram(int[] histogram)
+        public static int[] calculateCumulativeHistogram(byte[,] image)
         {
+            int[] histogram = new ImageData(image).histogram;
             int[] cumulativeHistogram = new int[histogram.Length];
             cumulativeHistogram[0] = histogram[0];
             
