@@ -87,6 +87,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Helper Code\BinaryMorphologyHelpers.cs" />
+    <Compile Include="Helper Code\ConverterMethods.cs" />
     <Compile Include="Helper Code\FilterGenerators.cs" />
     <Compile Include="Helper Code\HelperFunctions.cs" />
     <Compile Include="Helper Code\Padders.cs" />
@@ -121,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets" Condition="Exists('packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" />

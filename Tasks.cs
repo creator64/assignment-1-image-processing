@@ -18,8 +18,8 @@ namespace INFOIBV
             string basePath = enviroment;
 
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
-            Color[,] Image = HelperFunctions.convertBitmapToColor(InputImage);
-            byte[,] workingImage = HelperFunctions.convertToGrayscale(Image);
+            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
+            byte[,] workingImage = ConverterMethods.convertToGrayscale(Image);
             workingImage = ProcessingFunctions.adjustContrast(workingImage); //Image A
 
             int[] sizes = { 3, 7, 11, 15, 19 };
@@ -44,7 +44,7 @@ namespace INFOIBV
                 if (!Directory.Exists(outputPath))
                     Directory.CreateDirectory(outputPath);
 
-                Image outputImage = HelperFunctions.convertToImage(processedImage);
+                Image outputImage = ConverterMethods.convertToImage(processedImage);
                 outputImage.Save(Path.Combine(outputPath, "B" + (i + 1) + ".bmp"), ImageFormat.Bmp);
                 outputImage.Save(Path.Combine(outputPath, "B" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report
 
@@ -58,8 +58,8 @@ namespace INFOIBV
 
             Debug.WriteLine(Path.Combine(basePath, path));
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
-            Color[,] Image = HelperFunctions.convertBitmapToColor(InputImage);
-            byte[,] workingImage = HelperFunctions.convertToGrayscale(Image);
+            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
+            byte[,] workingImage = ConverterMethods.convertToGrayscale(Image);
             workingImage = ProcessingFunctions.adjustContrast(workingImage);
 
             int[] sizes = { 3, 7, 11, 15, 19 };
@@ -81,7 +81,7 @@ namespace INFOIBV
                 string jsonString = JsonSerializer.Serialize(data);
                 File.WriteAllText(Path.Combine(dataPath, "image_data_C" + (i + 1) + ".json"), jsonString);
 
-                Image outputImage = HelperFunctions.convertToImage(processedImage);
+                Image outputImage = ConverterMethods.convertToImage(processedImage);
 
                 outputImage.Save(Path.Combine(imgPath, "C" + (i + 1) + ".bmp"), ImageFormat.Bmp);
                 outputImage.Save(Path.Combine(imgPath, "C" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report
@@ -96,8 +96,8 @@ namespace INFOIBV
 
             Debug.WriteLine(Path.Combine(basePath, path));
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
-            Color[,] Image = HelperFunctions.convertBitmapToColor(InputImage);
-            byte[,] workingImage = HelperFunctions.convertToGrayscale(Image);
+            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
+            byte[,] workingImage = ConverterMethods.convertToGrayscale(Image);
 
             byte[,] imageF = ProcessingFunctions.thresholdImage(workingImage, 127);
 
@@ -109,7 +109,7 @@ namespace INFOIBV
             if (!Directory.Exists(dataPath))
                 Directory.CreateDirectory(dataPath);
 
-            Image img_imageF = HelperFunctions.convertToImage(imageF);
+            Image img_imageF = ConverterMethods.convertToImage(imageF);
             img_imageF.Save(Path.Combine(imgPath, "Image_F.bmp"), ImageFormat.Bmp);
 
             int[] sizes = { 3, 13, 23, 33 };
@@ -123,7 +123,7 @@ namespace INFOIBV
                 string jsonString = JsonSerializer.Serialize(data);
                 File.WriteAllText(Path.Combine(dataPath, "image_data_G" + (i + 1) + ".json"), jsonString);
 
-                Image outputImage = HelperFunctions.convertToImage(processedImage);
+                Image outputImage = ConverterMethods.convertToImage(processedImage);
 
                 outputImage.Save(Path.Combine(imgPath, "G" + (i + 1) + ".bmp"), ImageFormat.Bmp);
                 outputImage.Save(Path.Combine(imgPath, "G" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report

@@ -87,7 +87,7 @@ namespace INFOIBV
             if (InputImage == null) return;                                 // get out if no input image
             if (OutputImage != null) OutputImage.Dispose();                 // reset output image
             OutputImage = new Bitmap(InputImage.Size.Width, InputImage.Size.Height); // create new output image
-            Color[,] Image = HelperFunctions.convertBitmapToColor(InputImage);
+            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
 
             // execute image processing steps
             byte[,] workingImage = convertToGrayscale(Image);               // convert image to grayscale
@@ -103,7 +103,7 @@ namespace INFOIBV
             { 
                 workingImage = applyProcessingFunction(workingImage);           // processing functions
 
-                OutputImage = HelperFunctions.convertToImage(workingImage);
+                OutputImage = ConverterMethods.convertToImage(workingImage);
                 pictureBox2.Image = (Image)OutputImage;                         // display output image
             }
         }
@@ -225,7 +225,7 @@ namespace INFOIBV
             progressBar.Value = 1;
             progressBar.Step = 1;
 
-            byte[,] tempImage = HelperFunctions.convertToGrayscale(inputImage, progressBar);
+            byte[,] tempImage = ConverterMethods.convertToGrayscale(inputImage, progressBar);
             
             progressBar.Visible = false;                                    // hide progress bar
 
