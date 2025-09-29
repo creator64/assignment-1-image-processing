@@ -101,7 +101,7 @@ namespace INFOIBV.Core
             Padder padder = new ConstantValuePadder(filter, 0);
             float[,] tempImage = HelperFunctions.applyUnevenFilter(inputImage, filter, padder);
 
-            return HelperFunctions.convertToBytes(tempImage);
+            return ConverterMethods.convertToBytes(tempImage);
         }
 
 
@@ -274,7 +274,7 @@ namespace INFOIBV.Core
 
             float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Min<float>, (x, y) => x - y);
 
-            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
+            byte[,] output = ConverterMethods.convertToBytes(floatyresult);
 
             return output;
         }
@@ -292,7 +292,7 @@ namespace INFOIBV.Core
 
             float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Max<float>, (x, y) => x + y);
 
-            byte[,] output = HelperFunctions.convertToBytes(floatyresult);
+            byte[,] output = ConverterMethods.convertToBytes(floatyresult);
 
             return output;
         }

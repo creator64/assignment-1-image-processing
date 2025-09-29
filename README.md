@@ -1,0 +1,40 @@
+## Run the Program
+
+The program consists out of two subprograms.  
+The pre made GUI and a subprogram to automatically execute the tasks
+
+to run the GUI with the following commands, assuming dotnet 
+is correctly installed
+```
+dotnet build
+bin/debug/INFOIBV.exe
+```
+
+to run the subprogram you can run
+```
+dotnet build
+bin/debug/INFOIBV.exe [taskname] [sigma]
+```
+with `taskname` being simply _task1_, _task2_ or _task3_
+and sigma only applying to task1
+
+This will create the output images for the tasks in the 
+output folder `/out`
+
+to analyse the images and create plots with the requested data,
+you can run the additional made python script as follows
+
+```
+python quickAnalyser.py [task_name] [--plotdata] [--norun]
+```
+this script will run the subprogram and thereby creating the output images  
+if `--plotdata` is included, it will also create the plots in the output folder  
+if `--norun` is included, it will not again create the output images
+
+## Code Modifications
+There has been done some refactoring in order to make it possible to directly call the 
+processing functions via the command line. The processing functions have been moved to a separate
+folder called `Core` in a static class called `ProcessingFunctions`. This class contains only
+static functional methods for processing grayscale images. Also some operations like converting images to grayscale and
+converting bitmaps to arrays have been extracted from a couple of functions in the form designer and moved 
+them to the class `ConverterMethods`. This again to make them reusable for the subprogram.
