@@ -30,15 +30,17 @@ namespace INFOIBV
             GrayscaleErosion,
             GrayscaleDilation,
             Task1,
+            Task2,
+            Task3,
             HistogramEqualization,
             MedianFilter,
             LargestRegion
         }
-
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
          * it is useful to set them based on controls such as sliders, which you can add to the form
          */
+
         private byte filterSize = 5;
         private float filterSigma = 1f;
         private byte threshold = 127;
@@ -61,7 +63,6 @@ namespace INFOIBV
             }
             comboBox.SelectedIndex = 0;
         }
-
         /*
          * loadButton_Click: process when user clicks "Load" button
          */
@@ -102,7 +103,7 @@ namespace INFOIBV
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryDilation
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.LargestRegion)
                 && data.amountDistinctValues != 2)
-                MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform binary morphological operations over it. Threshold it first to turn it into a binary iamge.");
+                MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform binary morphological operations over it. Threshold it first to turn it into a binary image.");
             else
             { 
                 workingImage = applyProcessingFunction(workingImage);           // processing functions
@@ -198,6 +199,16 @@ namespace INFOIBV
                     decimal sigma = sigmaInput.Value, gaussianMatrixSize = gaussianSize.Value;
                     return Pipelines.GaussianFilterAndEdgeDetection(sigma, gaussianMatrixSize, horizontalKernel,
                         verticalKernel, workingImage);
+
+                case ProcessingFunctions.Task2:
+                    byte[,] adjustedImg = Core.ProcessingFunctions.adjustContrast(workingImage);
+                    int[,] task2StructElem = FilterGenerators.createSquareFilter<int>((int)task2KernelSize.Value, FilterValueGenerators.createUniformSquareFilter);
+                    return Core.ProcessingFunctions.grayscaleDilateImage(adjustedImg, task2StructElem);
+
+                case ProcessingFunctions.Task3:
+                    byte[,] imageF = Core.ProcessingFunctions.thresholdImage(workingImage, 127);
+                    bool[,] task3StructElem = FilterGenerators.createSquareFilter<bool>((int)task3KernelSize.Value, FilterValueGenerators.createUniformBinaryStructElem);
+                    return Core.ProcessingFunctions.binaryCloseImage(imageF, task3StructElem);
                 
                 case ProcessingFunctions.HistogramEqualization:
                     return Core.ProcessingFunctions.histogramEqualization(workingImage);

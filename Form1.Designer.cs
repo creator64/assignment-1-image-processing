@@ -46,6 +46,12 @@ namespace INFOIBV
             this.gaussianLabel = new Label();
             this.sigmaInput = new System.Windows.Forms.NumericUpDown();
             this.sigmaLabel = new Label();
+            this.task2KernelSize = new System.Windows.Forms.NumericUpDown();
+            this.task2KernelLabel = new Label();
+
+            this.task3KernelSize = new System.Windows.Forms.NumericUpDown();
+            this.task3KernelLabel = new Label();
+
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
@@ -138,8 +144,14 @@ namespace INFOIBV
             {
                 // sorry for the hardcode im lazy
                 bool task1Selected = this.comboBox.Text == "Task 1";
+                bool task2Selected = this.comboBox.Text == "Task 2";
+                bool task3Selected = this.comboBox.Text == "Task 3";
+
                 sigmaInput.Visible = sigmaLabel.Visible = gaussianLabel.Visible = gaussianSize.Visible = task1Selected;
+                task2KernelSize.Visible = task2KernelLabel.Visible = task2Selected;
+                task3KernelSize.Visible = task3KernelLabel.Visible = task3Selected;
             };
+
             //
             // Gaussian Size number input
             // 
@@ -157,6 +169,43 @@ namespace INFOIBV
             this.gaussianSize.Value = 3;
             this.gaussianSize.Maximum = 19;
             this.gaussianSize.Minimum = 1;
+
+            //
+            // Task 2 Kernel Size
+            //
+            this.task2KernelLabel.Text = "Size of Task 2's filter matrix";
+            this.task2KernelLabel.Location = new System.Drawing.Point(12, 41);
+            this.task2KernelLabel.Size = new Size(125, 20);
+            this.task2KernelSize.Location = new System.Drawing.Point(15, 60);
+            this.task2KernelSize.Name = "Task2SizeInput";
+            this.task2KernelSize.Size = new System.Drawing.Size(98, 50);
+            this.task2KernelSize.ValueChanged += new System.EventHandler((object sender, System.EventArgs e) =>
+            {
+                if (gaussianSize.Value % 2 == 0) gaussianSize.Value += 1;
+            });
+            this.task2KernelSize.Increment = 2;
+            this.task2KernelSize.Value = 3;
+            this.task2KernelSize.Maximum = 19;
+            this.task2KernelSize.Minimum = 1;
+
+
+            //
+            // Task 3 Kernel Size
+            //
+            this.task3KernelLabel.Text = "Size of Task 3's filter matrix";
+            this.task3KernelLabel.Location = new System.Drawing.Point(12, 41);
+            this.task3KernelLabel.Size = new Size(125, 20);
+            this.task3KernelSize.Location = new System.Drawing.Point(15, 60);
+            this.task3KernelSize.Name = "Task3SizeInput";
+            this.task3KernelSize.Size = new System.Drawing.Size(98, 50);
+            this.task3KernelSize.ValueChanged += new System.EventHandler((object sender, System.EventArgs e) =>
+            {
+                if (gaussianSize.Value % 2 == 0) gaussianSize.Value += 1;
+            });
+            this.task3KernelSize.Increment = 10;
+            this.task3KernelSize.Value = 3;
+            this.task3KernelSize.Maximum = 33;
+            this.task3KernelSize.Minimum = 1;
             //
             // Gaussian Size number input
             // 
@@ -187,6 +236,8 @@ namespace INFOIBV
             this.Controls.Add(this.LoadImageButton);
             this.Controls.AddRange(new Control[] {this.gaussianSize, gaussianLabel});
             this.Controls.AddRange(new Control[] {this.sigmaInput, sigmaLabel});
+            this.Controls.AddRange(new Control[] { this.task2KernelSize, task2KernelLabel });
+            this.Controls.AddRange(new Control[] { this.task3KernelSize, task3KernelLabel });
             this.Location = new System.Drawing.Point(10, 10);
             this.Name = "INFOIBV";
             this.ShowIcon = false;
@@ -214,6 +265,11 @@ namespace INFOIBV
         private System.Windows.Forms.NumericUpDown sigmaInput;
         private System.Windows.Forms.Label gaussianLabel;
         private System.Windows.Forms.Label sigmaLabel;
+        private System.Windows.Forms.NumericUpDown task2KernelSize;
+        private System.Windows.Forms.NumericUpDown task3KernelSize;
+        private System.Windows.Forms.Label task2KernelLabel;
+        private System.Windows.Forms.Label task3KernelLabel;
+
     }
 }
 
