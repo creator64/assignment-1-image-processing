@@ -70,13 +70,14 @@ namespace INFOIBV.Core
         {
             if (size % 2 == 0) throw new Exception("size of gaussian filter cannot be even");
             int halfSize = size / 2;
+            int mu = (int)Math.Ceiling((float)size / 2.0f);
             
             // create temporary grayscale image
             float[,] filter = new float[size, size];
 
             for (int x = -halfSize; x <= halfSize; x++) for (int y = -halfSize; y <= halfSize; y++)
                 filter[x + halfSize, y + halfSize] = (float)Math.Exp(
-                    -Math.Pow(x, 2) - Math.Pow(y, 2) / (2 * Math.Pow(sigma, 2))
+                    -Math.Pow(x - mu, 2) - Math.Pow(y - mu, 2) / (2 * Math.Pow(sigma, 2))
                 );
 
             float sum = 0;
