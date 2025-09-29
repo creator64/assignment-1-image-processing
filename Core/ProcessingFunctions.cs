@@ -97,8 +97,8 @@ namespace INFOIBV.Core
          * output:                      single-channel (byte) image
          */
         public static byte[,] convolveImage(byte[,] inputImage, float[,] filter)
-        {          
-            Padder padder = new ConstantValuePadder(filter, 0);
+        {
+            Padder padder = new CopyPerimeterPadder(filter);
             float[,] tempImage = HelperFunctions.applyUnevenFilter(inputImage, filter, padder);
 
             return ConverterMethods.convertToBytes(tempImage);
