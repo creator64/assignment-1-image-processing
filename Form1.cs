@@ -29,7 +29,10 @@ namespace INFOIBV
             BinaryClosing,
             GrayscaleErosion,
             GrayscaleDilation,
-            Task1
+            Task1,
+            HistogramEqualization,
+            MedianFilter,
+            LargestRegion
         }
 
         /*
@@ -96,7 +99,8 @@ namespace INFOIBV
             if (((ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryClosing
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryOpening
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryErosion
-                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryDilation)
+                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryDilation
+                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.LargestRegion)
                 && data.amountDistinctValues != 2)
                 MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform binary morphological operations over it. Threshold it first to turn it into a binary iamge.");
             else
@@ -194,6 +198,15 @@ namespace INFOIBV
                     decimal sigma = sigmaInput.Value, gaussianMatrixSize = gaussianSize.Value;
                     return Pipelines.GaussianFilterAndEdgeDetection(sigma, gaussianMatrixSize, horizontalKernel,
                         verticalKernel, workingImage);
+                
+                case ProcessingFunctions.HistogramEqualization:
+                    return Core.ProcessingFunctions.histogramEqualization(workingImage);
+                
+                case ProcessingFunctions.MedianFilter:
+                    return Core.ProcessingFunctions.medianFilter(workingImage, 5);
+                
+                case ProcessingFunctions.LargestRegion:
+                    return Core.ProcessingFunctions.findLargestRegion(workingImage);
 
                 default:
                     return null;

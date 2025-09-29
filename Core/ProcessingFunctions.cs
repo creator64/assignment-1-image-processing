@@ -42,7 +42,7 @@ namespace INFOIBV.Core
         {
             int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
             
-            int alow = 255, ahigh = 0;
+            int alow = int.MaxValue, ahigh = int.MinValue;
             for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
             { 
                 if (inputImage[x, y] > ahigh) ahigh = inputImage[x, y];
@@ -129,8 +129,8 @@ namespace INFOIBV.Core
             float[,] Dx = HelperFunctions.applyUnevenFilter(inputImage, horizontalKernel, horizontalPadder);
             float[,] Dy = HelperFunctions.applyUnevenFilter(inputImage, verticalKernel, verticalPadder);
 
-            float min = 0.0f;
-            float max = 0.0f;
+            float min = float.MaxValue;
+            float max = float.MinValue;
 
             // calculate edge magnitude
             for (int i = 0; i < tempImage.GetLength(0); i++) for (int j = 0; j < tempImage.GetLength(1); j++)
@@ -295,6 +295,62 @@ namespace INFOIBV.Core
             byte[,] output = ConverterMethods.convertToBytes(floatyresult);
 
             return output;
+        }
+        
+        /*
+         * histogramEqualization: create the histogram-equalized version of the image
+         * input:   inputImage          single-channel (byte) image
+         * output:                      single-channel (byte) image
+         */
+        public static byte[,] histogramEqualization(byte[,] inputImage)
+        {
+            int[] cumulativeHistogram = HelperFunctions.calculateCumulativeHistogram(inputImage);
+            int amountOfPixels = inputImage.GetLength(0) * inputImage.GetLength(1);
+            int K = cumulativeHistogram.Length;
+            
+            int[] mappedPixels = new int[K];
+            for (int i = 0; i < K; i++)
+                mappedPixels[i] = (int)Math.Floor((K - 1d) * cumulativeHistogram[i] / amountOfPixels);
+
+            byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+            for (int x = 0; x < inputImage.GetLength(0); x++) for (int y = 0; y < inputImage.GetLength(1); y++)
+                outputImage[x, y] = (byte)mappedPixels[inputImage[x, y]];
+
+            return outputImage;
+        }
+
+        public static byte[,] medianFilter(byte[,] inputImage, int filterSize)
+        {
+            float[,] filter = FilterGenerators.createSquareFilter(filterSize, (int _, int __, float[,] ___) => 0);
+            Padder padder = new ConstantValuePadder(filter, 0);
+            int paddingWidth = padder.paddingWidth, paddingHeight = padder.paddingHeight;
+
+            Func<int, int, byte[,], float> f = (i, j, paddedImage) =>
+            {
+                int[] intensities = new int[filterSize * filterSize];
+                int a = 0;
+                for (int k = -paddingWidth; k <= paddingWidth; k++)
+                for (int l = -paddingHeight; l <= paddingHeight; l++)
+                    intensities[a++] = paddedImage[i + k, j + l];
+
+                Array.Sort(intensities);
+
+                return intensities[intensities.Length / 2];
+            };
+
+            return HelperFunctions.applyNonLinearFilter(inputImage, padder, f);
+        }
+
+        public static byte[,] findLargestRegion(byte[,] inputImage)
+        {
+            byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+            List<List<Vector2>> regions = ImageRegions.findRegions(inputImage);
+            List<Vector2> largestRegion = regions.Aggregate((r1, r2) => r1.Count > r2.Count ? r1 : r2);
+            
+            foreach (Vector2 point in largestRegion)
+                outputImage[(int)point.X, (int)point.Y] = 255;
+
+            return outputImage;
         }
     }
 }

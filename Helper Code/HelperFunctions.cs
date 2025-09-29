@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Numerics;
 using System.Windows.Forms;
-using INFOIBV.Helper_Code;
 
 namespace INFOIBV.Helper_Code
 {
@@ -168,6 +164,83 @@ namespace INFOIBV.Helper_Code
             }
 
             paddedImage[i, j] = (byte)selector(Values);
+        }
+
+        public static byte[,] applyNonLinearFilter(byte[,] inputImage, Padder padder, Func<int, int, byte[,], float> f)
+        { 
+            byte[,] paddedImage = padder.padImage(inputImage);
+            float[,] backupImage = copyImage(inputImage);
+
+            int paddingWidth = padder.paddingWidth, paddingHeight = padder.paddingHeight;
+
+            for (int i = paddingWidth; i < backupImage.GetLength(0) + paddingWidth; i++)
+            for (int j = paddingHeight; j < backupImage.GetLength(1) + paddingHeight; j++)
+            {
+                backupImage[i - paddingWidth, j - paddingHeight] = f(i, j, paddedImage);
+            }
+
+            return convertToBytes(backupImage);
+        }
+        
+        public static byte[,] convertToGrayscale(Color[,] inputImage, ProgressBar progressBar = null)
+        {
+            // create temporary grayscale image of the same size as input, with a single channel
+            byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+
+            // process all pixels in the image
+            for (int x = 0; x < inputImage.GetLength(0); x++)                 // loop over columns
+            for (int y = 0; y < inputImage.GetLength(1); y++)            // loop over rows
+            {
+                Color pixelColor = inputImage[x, y];                    // get pixel color
+                byte average = (byte)((pixelColor.R + pixelColor.B + pixelColor.G) / 3); // calculate average over the three channels
+                tempImage[x, y] = average;                              // set the new pixel color at coordinate (x,y)
+                if (progressBar != null) progressBar.PerformStep();                              // increment progress bar
+            }
+
+            return tempImage;
+        }
+
+        public static Color[,] convertBitmapToColor(Bitmap InputImage)
+        {
+            Color[,] Image = new Color[InputImage.Size.Width, InputImage.Size.Height]; // create array to speed-up operations (Bitmap functions are very slow)
+
+            // copy input Bitmap to array            
+            for (int x = 0; x < InputImage.Size.Width; x++)                 // loop over columns
+            for (int y = 0; y < InputImage.Size.Height; y++)            // loop over rows
+                Image[x, y] = InputImage.GetPixel(x, y);                // set pixel color in array at (x,y)
+
+            return Image;
+        }
+
+        public static Bitmap convertToImage(byte[,] workingImage)
+        {
+            Bitmap OutputImage = new Bitmap(workingImage.GetLength(0), workingImage.GetLength(1)); // create new output image
+            for (int x = 0; x < workingImage.GetLength(0); x++)             // loop over columns
+            for (int y = 0; y < workingImage.GetLength(1); y++)         // loop over rows
+            {
+                Color newColor = Color.FromArgb(workingImage[x, y], workingImage[x, y], workingImage[x, y]);
+                OutputImage.SetPixel(x, y, newColor);                  // set the pixel color at coordinate (x,y)
+            }
+
+            return OutputImage;
+        }
+
+        public static int[] calculateCumulativeHistogram(byte[,] image)
+        {
+            int[] histogram = new ImageData(image).histogram;
+            int[] cumulativeHistogram = new int[histogram.Length];
+            cumulativeHistogram[0] = histogram[0];
+            
+            for (int i = 1; i < histogram.Length; i++)
+                cumulativeHistogram[i] = cumulativeHistogram[i - 1] + histogram[i];
+
+            return cumulativeHistogram;
+        }
+        
+        public static Vector2[] FourNeighbours(Vector2 point)
+        {
+            float x = point.X, y = point.Y;
+            return new[] { new Vector2(x, y - 1), new Vector2(x + 1, y), new Vector2(x, y + 1), new Vector2(x - 1, y) };
         }
     }
 }
