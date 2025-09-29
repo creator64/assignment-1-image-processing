@@ -42,7 +42,7 @@ namespace INFOIBV.Core
         {
             int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
             
-            int alow = 255, ahigh = 0;
+            int alow = int.MaxValue, ahigh = int.MinValue;
             for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
             { 
                 if (inputImage[x, y] > ahigh) ahigh = inputImage[x, y];
@@ -129,8 +129,8 @@ namespace INFOIBV.Core
             float[,] Dx = HelperFunctions.applyUnevenFilter(inputImage, horizontalKernel, horizontalPadder);
             float[,] Dy = HelperFunctions.applyUnevenFilter(inputImage, verticalKernel, verticalPadder);
 
-            float min = 0.0f;
-            float max = 0.0f;
+            float min = float.MaxValue;
+            float max = float.MinValue;
 
             // calculate edge magnitude
             for (int i = 0; i < tempImage.GetLength(0); i++) for (int j = 0; j < tempImage.GetLength(1); j++)
