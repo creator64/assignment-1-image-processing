@@ -13,7 +13,7 @@ namespace INFOIBV.Helper_Code
         /// - a filter that has an equal size in both the x and y direction
         /// - a filter that has a clear center, hence the size must be uneven.
         /// </summary>
-        /// <typeparam name="T">The type (bool, byte, float, etc.) of the elements contained in the filter matrix/typeparam>
+        /// <typeparam name="T">The type (bool, byte, float, etc.) of the elements contained in the filter matrix</typeparam>
         /// <param name="size">The size of of the filter in both the x and y direction</param>
         /// <param name="valueGenerator"></param>
         /// <returns></returns>
