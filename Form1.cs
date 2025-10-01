@@ -34,7 +34,8 @@ namespace INFOIBV
             Task3,
             HistogramEqualization,
             MedianFilter,
-            LargestRegion
+            LargestRegion,
+            HighlightRegions,
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -101,7 +102,8 @@ namespace INFOIBV
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryOpening
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryErosion
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryDilation
-                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.LargestRegion)
+                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.LargestRegion
+                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.HighlightRegions)
                 && data.amountDistinctValues != 2)
                 MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform binary morphological operations over it. Threshold it first to turn it into a binary image.");
             else
@@ -219,6 +221,11 @@ namespace INFOIBV
                 case ProcessingFunctions.LargestRegion:
                     return Core.ProcessingFunctions.findLargestRegion(workingImage, new SequentialLabeling());
 
+                case ProcessingFunctions.HighlightRegions:
+                    (byte[,], int) data = Core.ProcessingFunctions.highlightRegions(workingImage, new SequentialLabeling());
+                    LoadImageButton.Text = data.Item2.ToString(); // TODO: Change
+                    return data.Item1;
+                
                 default:
                     return null;
             }

@@ -363,5 +363,24 @@ namespace INFOIBV.Core
             
             return outputImage;
         }
+
+        public static (byte[,], int) highlightRegions(byte[,] inputImage, ImageRegionFinder regionFinder)
+        {
+            byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+            int[,] regions = regionFinder.findRegions(inputImage);
+
+            HashSet<int> regionIds = new HashSet<int>();
+            
+            for (int x = 0; x < regions.GetLength(0); x++)
+            for (int y = 0; y < regions.GetLength(1); y++)
+            {
+                if (regions[x, y] == 0) continue;
+                if (regions[x, y] % 8 == 0) outputImage[x, y] = 64;
+                else outputImage[x, y] = (byte)((regions[x, y] % 8) * 32);
+                regionIds.Add(regions[x, y]);
+            }
+
+            return (outputImage, regionIds.Count);
+        }
     }
 }
