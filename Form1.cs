@@ -217,7 +217,7 @@ namespace INFOIBV
                     return Core.ProcessingFunctions.medianFilter(workingImage, 5);
                 
                 case ProcessingFunctions.LargestRegion:
-                    return Core.ProcessingFunctions.findLargestRegion(workingImage, new FloodFill());
+                    return Core.ProcessingFunctions.findLargestRegion(workingImage, new SequentialLabeling());
 
                 default:
                     return null;

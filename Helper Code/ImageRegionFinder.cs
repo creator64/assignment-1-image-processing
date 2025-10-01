@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace INFOIBV.Helper_Code
@@ -66,7 +68,70 @@ namespace INFOIBV.Helper_Code
     {
         public override int[,] findRegions(byte[,] inputImage)
         {
-            throw new System.NotImplementedException();
+            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
+            int[,] regions = new int[width, height];
+
+            for (int i = 0; i < regions.GetLength(0); i++) for (int j = 0; j < regions.GetLength(1); j++)
+                regions[i, j] = inputImage[i, j];
+
+            int currentRegionId = 2;
+            Dictionary<int, HashSet<int>> collidingRegions = new Dictionary<int, HashSet<int>>();
+
+            for (int j = 0; j < regions.GetLength(1); j++)
+            for (int i = 0; i < regions.GetLength(0); i++)
+            {
+                if (regions[i, j] == 0) continue;
+                int[] neighbouringRegionIds = HelperFunctions.EightNeighbours(new Vector2(i, j))
+                    .Take(4)
+                    .Where(v => v.X >= 0 && v.X < width && v.Y >= 0 && v.Y < height)
+                    .Select(v => regions[(int)v.X, (int)v.Y])
+                    .Distinct()
+                    .Where(r => r != 0 && r != 255)
+                    .ToArray();
+
+                if (neighbouringRegionIds.Length == 0)
+                {
+                    regions[i, j] = currentRegionId;
+                    collidingRegions.Add(currentRegionId++, new HashSet<int>());
+                }
+                else
+                {
+                    regions[i, j] = neighbouringRegionIds[0];
+                    foreach (int neighbouringRegionId in neighbouringRegionIds.Skip(1))
+                        collidingRegions[neighbouringRegionIds[0]].Add(neighbouringRegionId);
+                }
+            }
+
+            void convert(int regionId, int targetRegionId)
+            {
+                for (int i = 0; i < regions.GetLength(0); i++)
+                for (int j = 0; j < regions.GetLength(1); j++)
+                    if (regions[i, j] == regionId)
+                        regions[i, j] = targetRegionId;
+                
+            };
+
+            void mergeRegions(int regionId, List<int> prev)
+            {
+                if (!collidingRegions.ContainsKey(regionId)) return;
+                foreach (int colldingRegionId in collidingRegions[regionId])
+                {
+                    if (prev.Contains(colldingRegionId)) continue;
+                    mergeRegions(colldingRegionId, new List<int>(prev) { colldingRegionId });
+                    convert(colldingRegionId, regionId);
+                    collidingRegions.Remove(colldingRegionId);
+                }
+            };
+
+            while (collidingRegions.Count > 0)
+            {
+                int regionId = collidingRegions.Keys.First();
+                mergeRegions(regionId, new List<int>(){regionId});
+                collidingRegions.Remove(regionId);
+            }
+
+
+            return regions;
         }
     }
 }

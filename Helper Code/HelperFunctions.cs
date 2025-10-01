@@ -197,5 +197,16 @@ namespace INFOIBV.Helper_Code
             float x = point.X, y = point.Y;
             return new[] { new Vector2(x, y - 1), new Vector2(x + 1, y), new Vector2(x, y + 1), new Vector2(x - 1, y) };
         }
+        
+        public static Vector2[] EightNeighbours(Vector2 point)
+        {
+            float x = point.X, y = point.Y;
+            return new[]
+            {
+                new Vector2(x - 1, y - 1), new Vector2(x, y - 1), new Vector2(x + 1, y - 1),
+                new Vector2(x - 1, y), new Vector2(x + 1, y),
+                new Vector2(x - 1, y + 1), new Vector2(x, y + 1), new Vector2(x + 1, y + 1),
+            };
+        }
     }
 }
