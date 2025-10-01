@@ -344,12 +344,23 @@ namespace INFOIBV.Core
         public static byte[,] findLargestRegion(byte[,] inputImage, ImageRegionFinder regionFinder)
         {
             byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            List<List<Vector2>> regions = regionFinder.findRegions(inputImage);
-            List<Vector2> largestRegion = regions.Aggregate((r1, r2) => r1.Count > r2.Count ? r1 : r2);
-            
-            foreach (Vector2 point in largestRegion)
-                outputImage[(int)point.X, (int)point.Y] = 255;
+            int[,] regions = regionFinder.findRegions(inputImage);
 
+            Dictionary<int, int> regionCount = new Dictionary<int, int>();
+            for (int x = 0; x < regions.GetLength(0); x++)
+            for (int y = 0; y < regions.GetLength(1); y++)
+            {
+                if (regions[x, y] == 0) continue;
+                if (!regionCount.ContainsKey(regions[x, y])) regionCount.Add(regions[x, y], 1);
+                regionCount[regions[x, y]]++;
+            }
+
+            int largestRegion = regionCount.Aggregate((r1, r2) => r1.Value > r2.Value ? r1 : r2).Key;
+            
+            for (int x = 0; x < regions.GetLength(0); x++)
+            for (int y = 0; y < regions.GetLength(1); y++) 
+                if (regions[x, y] == largestRegion) outputImage[x, y] = 255;
+            
             return outputImage;
         }
     }
