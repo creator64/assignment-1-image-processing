@@ -90,7 +90,7 @@
     <Compile Include="Helper Code\ConverterMethods.cs" />
     <Compile Include="Helper Code\FilterGenerators.cs" />
     <Compile Include="Helper Code\HelperFunctions.cs" />
-    <Compile Include="Helper Code\ImageRegions.cs" />
+    <Compile Include="Helper Code\ImageRegionFinder.cs" />
     <Compile Include="Helper Code\Padders.cs" />
     <Compile Include="Helper Code\ImageData.cs" />
     <Compile Include="Tasks.cs" />

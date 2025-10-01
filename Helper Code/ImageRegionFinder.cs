@@ -3,9 +3,14 @@ using System.Numerics;
 
 namespace INFOIBV.Helper_Code
 {
-    public static class ImageRegions
+    public abstract class ImageRegionFinder
     {
-        public static List<List<Vector2>> findRegions(byte[,] inputImage)
+        public abstract List<List<Vector2>> findRegions(byte[,] inputImage);
+    }
+
+    public class FloodFill : ImageRegionFinder
+    {
+        public override List<List<Vector2>> findRegions(byte[,] inputImage)
         {
             int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
             bool[,] covered = new bool[width, height];
@@ -43,6 +48,14 @@ namespace INFOIBV.Helper_Code
             }
                 
             return regions;
+        }
+    }
+
+    public class SequentialLabeling : ImageRegionFinder
+    {
+        public override List<List<Vector2>> findRegions(byte[,] inputImage)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
