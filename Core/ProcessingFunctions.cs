@@ -352,7 +352,7 @@ namespace INFOIBV.Core
             {
                 if (regions[x, y] == 0) continue;
                 if (!regionCount.ContainsKey(regions[x, y])) regionCount.Add(regions[x, y], 1);
-                regionCount[regions[x, y]]++;
+                else regionCount[regions[x, y]]++;
             }
 
             int largestRegion = regionCount.Aggregate((r1, r2) => r1.Value > r2.Value ? r1 : r2).Key;
