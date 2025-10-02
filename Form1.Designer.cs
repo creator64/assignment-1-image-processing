@@ -48,9 +48,10 @@ namespace INFOIBV
             this.sigmaLabel = new Label();
             this.task2KernelSize = new System.Windows.Forms.NumericUpDown();
             this.task2KernelLabel = new Label();
-
             this.task3KernelSize = new System.Windows.Forms.NumericUpDown();
             this.task3KernelLabel = new Label();
+            this.extraInformation = new Label();
+            this.regionFinderComboBox = new System.Windows.Forms.ComboBox();
 
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -146,10 +147,12 @@ namespace INFOIBV
                 bool task1Selected = this.comboBox.Text == "Task 1";
                 bool task2Selected = this.comboBox.Text == "Task 2";
                 bool task3Selected = this.comboBox.Text == "Task 3";
+                bool regionDetectionSelected = this.comboBox.Text == "Highlight Regions" || this.comboBox.Text == "Largest Region";
 
                 sigmaInput.Visible = sigmaLabel.Visible = gaussianLabel.Visible = gaussianSize.Visible = task1Selected;
                 task2KernelSize.Visible = task2KernelLabel.Visible = task2Selected;
                 task3KernelSize.Visible = task3KernelLabel.Visible = task3Selected;
+                regionFinderComboBox.Visible = regionDetectionSelected;
             };
 
             //
@@ -219,6 +222,18 @@ namespace INFOIBV
             this.sigmaInput.DecimalPlaces = 2;
             this.sigmaInput.Value = 2.25m;
             this.sigmaInput.Minimum = 0;
+            //
+            // Extra information
+            //
+            this.extraInformation.Location = new System.Drawing.Point(531, 70);
+            this.extraInformation.Size = new Size(300, 20);
+            //
+            // regionFinderComboBox
+            //
+            this.regionFinderComboBox.Location = new System.Drawing.Point(15, 60);
+            this.regionFinderComboBox.Items.AddRange(new []{"Flood Fill", "Sequential Labeling"});
+            this.regionFinderComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;;
+            this.regionFinderComboBox.SelectedIndex = 0;
 
             //
             // INFOIBV
@@ -238,6 +253,8 @@ namespace INFOIBV
             this.Controls.AddRange(new Control[] {this.sigmaInput, sigmaLabel});
             this.Controls.AddRange(new Control[] { this.task2KernelSize, task2KernelLabel });
             this.Controls.AddRange(new Control[] { this.task3KernelSize, task3KernelLabel });
+            this.Controls.Add(this.extraInformation);
+            this.Controls.Add(this.regionFinderComboBox);
             this.Location = new System.Drawing.Point(10, 10);
             this.Name = "INFOIBV";
             this.ShowIcon = false;
@@ -269,6 +286,8 @@ namespace INFOIBV
         private System.Windows.Forms.NumericUpDown task3KernelSize;
         private System.Windows.Forms.Label task2KernelLabel;
         private System.Windows.Forms.Label task3KernelLabel;
+        private System.Windows.Forms.Label extraInformation;
+        private System.Windows.Forms.ComboBox regionFinderComboBox;
 
     }
 }

@@ -115,6 +115,17 @@ namespace INFOIBV
             }
         }
 
+        private ImageRegionFinder selectedRegionFinder()
+        {
+            switch (regionFinderComboBox.SelectedItem)
+            {
+                case "Flood Fill": return new FloodFill();
+                case "Sequential Labeling": return new SequentialLabeling();
+            }
+
+            return new FloodFill();
+        }
+
         /*
          * applyProcessingFunction: defines behavior of function calls when "Apply" is pressed
          */
@@ -131,6 +142,7 @@ namespace INFOIBV
                 { -2, 0, 2},
                 { -1, 0, 1}
             };
+            extraInformation.Text = "";
             switch ((ProcessingFunctions)comboBox.SelectedIndex)
             {
                 case ProcessingFunctions.Invert:
@@ -219,11 +231,11 @@ namespace INFOIBV
                     return Core.ProcessingFunctions.medianFilter(workingImage, 5);
                 
                 case ProcessingFunctions.LargestRegion:
-                    return Core.ProcessingFunctions.findLargestRegion(workingImage, new SequentialLabeling());
+                    return Core.ProcessingFunctions.findLargestRegion(workingImage, selectedRegionFinder());
 
                 case ProcessingFunctions.HighlightRegions:
-                    (byte[,], int) data = Core.ProcessingFunctions.highlightRegions(workingImage, new SequentialLabeling());
-                    LoadImageButton.Text = data.Item2.ToString(); // TODO: Change
+                    (byte[,], int) data = Core.ProcessingFunctions.highlightRegions(workingImage, selectedRegionFinder());
+                    extraInformation.Text = "amount of regions: " + data.Item2;
                     return data.Item1;
                 
                 default:
