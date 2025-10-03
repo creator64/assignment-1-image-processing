@@ -50,7 +50,7 @@ namespace INFOIBV.Helper_Code
                     if (regions[px, py] != 0) continue;
                     regions[px, py] = regionId;
 
-                    foreach (Vector2 neighbour in HelperFunctions.FourNeighbours(point))
+                    foreach (Vector2 neighbour in HelperFunctions.EightNeighbours(point))
                     {
                         int neighbourX = (int)neighbour.X, neighbourY = (int)neighbour.Y;
                         if (neighbourX >= width || neighbourX < 0 || neighbourY >= height || neighbourY < 0) continue;
