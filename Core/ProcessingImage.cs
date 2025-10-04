@@ -1,35 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using INFOIBV.Helper_Code;
 using System.Numerics;
 using System.Windows.Forms;
 
-
 namespace INFOIBV.Core
 {
-    public static class ProcessingFunctions
+    public class ProcessingImage
     {
-        // ====================================================================
-        // ============= YOUR FUNCTIONS FOR ASSIGNMENT 1 GO HERE ==============
-        // ====================================================================
+        public readonly int width;
+        public readonly int height;
+        private byte[,] inputImage;
+        
+        public ProcessingImage(byte[,] inputImage)
+        {
+            width = inputImage.GetLength(0);
+            height = inputImage.GetLength(1);
+            this.inputImage = inputImage;
+        }
 
+        public byte[,] toArray()
+        {
+            return inputImage;
+        }
+        
         /*
          * invertImage: invert a single channel (grayscale) image
          * input:   inputImage          single-channel (byte) image
          * output:                      single-channel (byte) image
          */
-        public static byte[,] invertImage(byte[,] inputImage)
+        public ProcessingImage invertImage()
         {
-            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
-            
             // create temporary grayscale image
             byte[,] tempImage = new byte[width, height];
             
             for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
                 tempImage[x, y] = (byte)(255 - inputImage[x, y]);
 
-            return tempImage;
+            return new ProcessingImage(tempImage);
         }
 
 
@@ -38,10 +48,8 @@ namespace INFOIBV.Core
          * input:   inputImage          single-channel (byte) image
          * output:                      single-channel (byte) image
          */
-        public static byte[,] adjustContrast(byte[,] inputImage)
+        public ProcessingImage adjustContrast()
         {
-            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
-            
             int alow = int.MaxValue, ahigh = int.MinValue;
             for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
             { 
@@ -56,7 +64,7 @@ namespace INFOIBV.Core
                 for (int y = 0; y < height; y++)
                     tempImage[x, y] = (byte)((inputImage[x, y] - alow) * 255 / (ahigh - alow));
 
-            return tempImage;
+            return new ProcessingImage(tempImage);
         }
 
 
@@ -96,12 +104,12 @@ namespace INFOIBV.Core
          *          filter              linear kernel
          * output:                      single-channel (byte) image
          */
-        public static byte[,] convolveImage(byte[,] inputImage, float[,] filter)
+        public ProcessingImage convolveImage(float[,] filter)
         {
             Padder padder = new CopyPerimeterPadder(filter);
             float[,] tempImage = HelperFunctions.applyUnevenFilter(inputImage, filter, padder);
 
-            return ConverterMethods.convertToBytes(tempImage);
+            return new ProcessingImage(ConverterMethods.convertToBytes(tempImage));
         }
 
 
@@ -112,7 +120,7 @@ namespace INFOIBV.Core
          *          verticalKernel      vertical edge kernel
          * output:                      single-channel (byte) image
          */
-        public static byte[,] edgeMagnitude(byte[,] inputImage, float[,] horizontalKernel, float[,] verticalKernel)
+        public ProcessingImage edgeMagnitude(float[,] horizontalKernel, float[,] verticalKernel)
         {
             // create temporary grayscale image
             byte[,] resultImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
@@ -150,7 +158,7 @@ namespace INFOIBV.Core
             for (int i = 0; i < tempImage.GetLength(0); i++) for (int j = 0; j < tempImage.GetLength(1); j++)
                 resultImage[i, j] = (byte)(255.0f * ((tempImage[i, j] - min) / trueRange));
 
-            return resultImage;
+            return new ProcessingImage(resultImage);
         }
         
 
@@ -159,17 +167,15 @@ namespace INFOIBV.Core
          * input:   inputImage          single-channel (byte) image
          * output:                      single-channel (byte) image with on/off values
          */
-        public static byte[,] thresholdImage(byte[,] inputImage, byte threshold)
+        public ProcessingImage thresholdImage(byte threshold)
         {
-            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
-            
             // create temporary grayscale image
             byte[,] tempImage = new byte[width, height];
             
             for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
                 tempImage[x, y] = (byte)(inputImage[x, y] > threshold ? 255 : 0);
 
-            return tempImage;
+            return new ProcessingImage(tempImage);
         }
 
         // Binary morphology
@@ -180,14 +186,14 @@ namespace INFOIBV.Core
          *          structElem          binary structuring element (true = foreground)
          * output:                      single-channel (byte) binary image after erosion
          */
-        public static byte[,] binaryErodeImage(byte[,] inputImage, bool[,] structElem)
+        public ProcessingImage binaryErodeImage(bool[,] structElem)
         {
             ImageData data = new ImageData(inputImage);
 
             if (data.amountDistinctValues > 2)
             {
                 MessageBox.Show("You can only perform binary morphology over binary images. Threshold this image first");
-                return inputImage;
+                return new ProcessingImage(inputImage);
             }
             else
             {
@@ -212,7 +218,10 @@ namespace INFOIBV.Core
                     if (pixelMayRemain) resultSet.Add(pixel);
                 }
 
-                return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
+                return new ProcessingImage(
+                    BinaryMorphologyHelpers.pointSetToImage(
+                        resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)))
+                    );
             }
         }
 
@@ -222,7 +231,7 @@ namespace INFOIBV.Core
          *          structElem          binary structuring element (true = foreground)
          * output:                      single-channel (byte) binary image after dilation
          */
-        public static byte[,] binaryDilateImage(byte[,] inputImage, bool[,] structElem)
+        public ProcessingImage binaryDilateImage(bool[,] structElem)
         {
             
             HashSet<Vector2> imageSet = BinaryMorphologyHelpers.pointSetFromImage(inputImage);
@@ -233,7 +242,9 @@ namespace INFOIBV.Core
                 foreach(Vector2 element in structSet)
                     resultSet.Add(pixel + element);
 
-            return BinaryMorphologyHelpers.pointSetToImage(resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)));
+            return new ProcessingImage(
+                BinaryMorphologyHelpers.pointSetToImage(
+                    resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1))));
         }
 
         /*
@@ -243,9 +254,9 @@ namespace INFOIBV.Core
          *          structElem          binary structuring element (true = foreground)
          * output:                      single-channel (byte) binary image after opening
          */
-        public static byte[,] binaryOpenImage(byte[,] inputImage, bool[,] structElem)
+        public ProcessingImage binaryOpenImage(bool[,] structElem)
         {
-            return binaryDilateImage(binaryErodeImage(inputImage, structElem), structElem);
+            return binaryErodeImage(structElem).binaryDilateImage(structElem);
         }
 
         /*
@@ -254,9 +265,9 @@ namespace INFOIBV.Core
          *          structElem          binary structuring element (true = foreground)
          * output:                      single-channel (byte) binary image after closing
          */
-        public static byte[,] binaryCloseImage(byte[,] inputImage, bool[,] structElem)
+        public ProcessingImage binaryCloseImage(bool[,] structElem)
         {
-            return binaryErodeImage(binaryDilateImage(inputImage, structElem), structElem);
+            return binaryDilateImage(structElem).binaryErodeImage(structElem);
         }
 
         // Grayscale morphology
@@ -267,7 +278,7 @@ namespace INFOIBV.Core
          *          structElem          integer structuring element 
          * output:                      single-channel (byte) grayscale image after erosion
          */
-        public static byte[,] grayscaleErodeImage(byte[,] inputImage, int[,] structElem)
+        public ProcessingImage grayscaleErodeImage(int[,] structElem)
         {
             float[,] floatStructElem = HelperFunctions.floatifyIntArray(structElem);
             Padder padder = new ConstantValuePadder(floatStructElem, 0);
@@ -276,7 +287,7 @@ namespace INFOIBV.Core
 
             byte[,] output = ConverterMethods.convertToBytes(floatyresult);
 
-            return output;
+            return new ProcessingImage(output);
         }
 
         /*
@@ -285,7 +296,7 @@ namespace INFOIBV.Core
          *          structElem          integer structuring element
          * output:                      single-channel (byte) grayscale image after dilation
          */
-        public static byte[,] grayscaleDilateImage(byte[,] inputImage, int[,] structElem)
+        public ProcessingImage grayscaleDilateImage(int[,] structElem)
         {
             float[,] floatStructElem = HelperFunctions.floatifyIntArray(structElem);
             Padder padder = new ConstantValuePadder(floatStructElem, 0);
@@ -294,7 +305,7 @@ namespace INFOIBV.Core
 
             byte[,] output = ConverterMethods.convertToBytes(floatyresult);
 
-            return output;
+            return new ProcessingImage(output);
         }
         
         /*
@@ -302,7 +313,7 @@ namespace INFOIBV.Core
          * input:   inputImage          single-channel (byte) image
          * output:                      single-channel (byte) image
          */
-        public static byte[,] histogramEqualization(byte[,] inputImage)
+        public ProcessingImage histogramEqualization()
         {
             int[] cumulativeHistogram = HelperFunctions.calculateCumulativeHistogram(inputImage);
             int amountOfPixels = inputImage.GetLength(0) * inputImage.GetLength(1);
@@ -316,10 +327,10 @@ namespace INFOIBV.Core
             for (int x = 0; x < inputImage.GetLength(0); x++) for (int y = 0; y < inputImage.GetLength(1); y++)
                 outputImage[x, y] = (byte)mappedPixels[inputImage[x, y]];
 
-            return outputImage;
+            return new ProcessingImage(outputImage);
         }
 
-        public static byte[,] medianFilter(byte[,] inputImage, int filterSize)
+        public ProcessingImage medianFilter(int filterSize)
         {
             float[,] filter = FilterGenerators.createSquareFilter(filterSize, (int _, int __, float[,] ___) => 0);
             Padder padder = new ConstantValuePadder(filter, 0);
@@ -338,10 +349,12 @@ namespace INFOIBV.Core
                 return intensities[intensities.Length / 2];
             };
 
-            return HelperFunctions.applyNonLinearFilter(inputImage, padder, f);
+            return new ProcessingImage(
+                    HelperFunctions.applyNonLinearFilter(inputImage, padder, f)
+                );
         }
 
-        public static byte[,] findLargestRegion(byte[,] inputImage, ImageRegionFinder regionFinder)
+        public ProcessingImage findLargestRegion(ImageRegionFinder regionFinder)
         {
             byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
             int[,] regions = regionFinder.findRegions(inputImage);
@@ -361,10 +374,10 @@ namespace INFOIBV.Core
             for (int y = 0; y < regions.GetLength(1); y++) 
                 if (regions[x, y] == largestRegion) outputImage[x, y] = 255;
             
-            return outputImage;
+            return new ProcessingImage(outputImage);
         }
 
-        public static (byte[,], int) highlightRegions(byte[,] inputImage, ImageRegionFinder regionFinder)
+        public RegionalProcessingImage highlightRegions(ImageRegionFinder regionFinder)
         {
             byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
             int[,] regions = regionFinder.findRegions(inputImage);
@@ -380,12 +393,11 @@ namespace INFOIBV.Core
                 regionIds.Add(regions[x, y]);
             }
 
-            return (outputImage, regionIds.Count);
+            return new RegionalProcessingImage(outputImage, regionIds.Count);
         }
 
-        public static byte[,] houghTransform(byte[,] inputImage)
+        public ProcessingImage houghTransform()
         {
-            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
             double Rmax = Math.Sqrt(Math.Pow(width, 2) + Math.Pow(height, 2));
 
             int thetaDetail = 400, Rdetail = 400;
@@ -408,7 +420,32 @@ namespace INFOIBV.Core
                 }
             }
 
-            return ConverterMethods.convertToBytes(outputImage);
+            return new ProcessingImage(
+                    ConverterMethods.convertToBytes(outputImage)
+                );
+        }
+        
+        public Bitmap convertToImage()
+        {
+            Bitmap OutputImage = new Bitmap(inputImage.GetLength(0), inputImage.GetLength(1)); // create new output image
+            for (int x = 0; x < inputImage.GetLength(0); x++)             // loop over columns
+            for (int y = 0; y < inputImage.GetLength(1); y++)         // loop over rows
+            {
+                Color newColor = Color.FromArgb(inputImage[x, y], inputImage[x, y], inputImage[x, y]);
+                OutputImage.SetPixel(x, y, newColor);                  // set the pixel color at coordinate (x,y)
+            }
+
+            return OutputImage;
         }
     }
+
+    public class RegionalProcessingImage : ProcessingImage
+    {
+        public readonly int amountOfRegions;
+
+        public RegionalProcessingImage(byte[,] inputImage, int amountOfRegions) : base(inputImage)
+        {
+            this.amountOfRegions = amountOfRegions;
+        }
+    } 
 }

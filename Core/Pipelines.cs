@@ -2,16 +2,17 @@
 {
     public static class Pipelines
     {
-        public static byte[,] GaussianFilterAndEdgeDetection(
+        public static ProcessingImage GaussianFilterAndEdgeDetection(
                 decimal sigma, decimal gaussianMatrixSize, 
                 float[,] horizontalKernel, float[,] verticalKernel,
-                byte[,] workingImage
+                ProcessingImage processingImage
             )
         {
-            float[,] gaussianFilter = ProcessingFunctions.createGaussianFilter((byte)gaussianMatrixSize, (float)sigma);
-            byte[,] convolvedImage = ProcessingFunctions.convolveImage(workingImage, gaussianFilter);
-            byte[,] edgedImage = ProcessingFunctions.edgeMagnitude(convolvedImage, horizontalKernel, verticalKernel);
-            return ProcessingFunctions.thresholdImage(edgedImage, 30);
+            float[,] gaussianFilter = ProcessingImage.createGaussianFilter((byte)gaussianMatrixSize, (float)sigma);
+            return processingImage
+                .convolveImage(gaussianFilter)
+                .edgeMagnitude(horizontalKernel, verticalKernel)
+                .thresholdImage(30);
         }
     }
 }

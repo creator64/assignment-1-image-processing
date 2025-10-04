@@ -109,9 +109,9 @@ namespace INFOIBV
                 MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform binary morphological operations over it. Threshold it first to turn it into a binary image.");
             else
             { 
-                workingImage = applyProcessingFunction(workingImage);           // processing functions
+                ProcessingImage image = applyProcessingFunction(workingImage);           // processing functions
 
-                OutputImage = ConverterMethods.convertToImage(workingImage);
+                OutputImage = image.convertToImage();
                 pictureBox2.Image = (Image)OutputImage;                         // display output image
             }
         }
@@ -130,7 +130,7 @@ namespace INFOIBV
         /*
          * applyProcessingFunction: defines behavior of function calls when "Apply" is pressed
          */
-        private byte[,] applyProcessingFunction(byte[,] workingImage)
+        private ProcessingImage applyProcessingFunction(byte[,] workingImage)
         {
             float[,] horizontalKernel = {
                 { -1, -2, -1},
@@ -144,19 +144,20 @@ namespace INFOIBV
                 { -1, 0, 1}
             };
             extraInformation.Text = "";
+            ProcessingImage processingImage = new ProcessingImage(workingImage);
             switch ((ProcessingFunctions)comboBox.SelectedIndex)
             {
                 case ProcessingFunctions.Invert:
-                    return Core.ProcessingFunctions.invertImage(workingImage);
+                    return processingImage.invertImage();
                 case ProcessingFunctions.AdjustContrast:
-                    return Core.ProcessingFunctions.adjustContrast(workingImage);
+                    return processingImage.adjustContrast();
                 case ProcessingFunctions.ConvolveImage:
-                    float[,] filter = Core.ProcessingFunctions.createGaussianFilter(filterSize, filterSigma);
-                    return Core.ProcessingFunctions.convolveImage(workingImage, filter);
+                    float[,] filter = ProcessingImage.createGaussianFilter(filterSize, filterSigma);
+                    return processingImage.convolveImage(filter);
                 case ProcessingFunctions.DetectEdges:
-                    return Core.ProcessingFunctions.edgeMagnitude(workingImage, horizontalKernel, verticalKernel);
+                    return processingImage.edgeMagnitude(horizontalKernel, verticalKernel);
                 case ProcessingFunctions.Threshold:
-                    return Core.ProcessingFunctions.thresholdImage(workingImage, threshold);
+                    return processingImage.thresholdImage(threshold);
 
                 case ProcessingFunctions.BinaryErosion:
                     bool[,] structElem = {
@@ -164,7 +165,7 @@ namespace INFOIBV
                         { true, false, true},
                         { false, true, false}
                     }; // Define this structuring element yourself
-                    return Core.ProcessingFunctions.binaryErodeImage(workingImage, structElem);
+                    return processingImage.binaryErodeImage(structElem);
 
                 case ProcessingFunctions.BinaryDilation:
                     bool[,] structElem2 = {
@@ -172,7 +173,7 @@ namespace INFOIBV
                         { true, false, true},
                         { false, true, false}
                     };
-                    return Core.ProcessingFunctions.binaryDilateImage(workingImage, structElem2);
+                    return processingImage.binaryDilateImage(structElem2);
 
                 case ProcessingFunctions.BinaryOpening:
                     bool[,] structElem3 = {
@@ -182,7 +183,7 @@ namespace INFOIBV
                         { false, true, true, true, false },
                         { false, false, true, false, false }
                     };
-                    return Core.ProcessingFunctions.binaryOpenImage(workingImage, structElem3);
+                    return processingImage.binaryOpenImage(structElem3);
 
                 case ProcessingFunctions.BinaryClosing:
                     bool[,] structElem4 = {
@@ -192,7 +193,7 @@ namespace INFOIBV
                         { false, true, true, true, false },
                         { false, false, true, false, false }
                     };
-                    return Core.ProcessingFunctions.binaryCloseImage(workingImage, structElem4);
+                    return processingImage.binaryCloseImage(structElem4);
 
                 case ProcessingFunctions.GrayscaleErosion:
                     int[,] grayStructElem = {
@@ -200,7 +201,7 @@ namespace INFOIBV
                         { 1, 2, 1},
                         { 1, 2, 1}
                     };
-                    return Core.ProcessingFunctions.grayscaleErodeImage(workingImage, grayStructElem);
+                    return processingImage.grayscaleErodeImage(grayStructElem);
 
                 case ProcessingFunctions.GrayscaleDilation:
                     int[,] grayStructElem2 = {
@@ -208,39 +209,37 @@ namespace INFOIBV
                         { 1, 2, 1},
                         { 1, 2, 1}
                     };
-                    return Core.ProcessingFunctions.grayscaleDilateImage(workingImage, grayStructElem2);
+                    return processingImage.grayscaleDilateImage(grayStructElem2);
                 
                 case ProcessingFunctions.Task1:
                     decimal sigma = sigmaInput.Value, gaussianMatrixSize = gaussianSize.Value;
                     return Pipelines.GaussianFilterAndEdgeDetection(sigma, gaussianMatrixSize, horizontalKernel,
-                        verticalKernel, workingImage);
+                        verticalKernel, processingImage);
 
                 case ProcessingFunctions.Task2:
-                    byte[,] adjustedImg = Core.ProcessingFunctions.adjustContrast(workingImage);
                     int[,] task2StructElem = FilterGenerators.createSquareFilter<int>((int)task2KernelSize.Value, FilterValueGenerators.createUniformSquareFilter);
-                    return Core.ProcessingFunctions.grayscaleDilateImage(adjustedImg, task2StructElem);
+                    return processingImage.adjustContrast().grayscaleDilateImage(task2StructElem);
 
                 case ProcessingFunctions.Task3:
-                    byte[,] imageF = Core.ProcessingFunctions.thresholdImage(workingImage, 127);
                     bool[,] task3StructElem = FilterGenerators.createSquareFilter<bool>((int)task3KernelSize.Value, FilterValueGenerators.createUniformBinaryStructElem);
-                    return Core.ProcessingFunctions.binaryCloseImage(imageF, task3StructElem);
+                    return processingImage.thresholdImage(127).binaryCloseImage(task3StructElem);
                 
                 case ProcessingFunctions.HistogramEqualization:
-                    return Core.ProcessingFunctions.histogramEqualization(workingImage);
+                    return processingImage.histogramEqualization();
                 
                 case ProcessingFunctions.MedianFilter:
-                    return Core.ProcessingFunctions.medianFilter(workingImage, 5);
+                    return processingImage.medianFilter(5);
                 
                 case ProcessingFunctions.LargestRegion:
-                    return Core.ProcessingFunctions.findLargestRegion(workingImage, selectedRegionFinder());
+                    return processingImage.findLargestRegion(selectedRegionFinder());
 
                 case ProcessingFunctions.HighlightRegions:
-                    (byte[,], int) data = Core.ProcessingFunctions.highlightRegions(workingImage, selectedRegionFinder());
-                    extraInformation.Text = "amount of regions: " + data.Item2;
-                    return data.Item1;
+                    RegionalProcessingImage regionalProcessingImage = processingImage.highlightRegions(selectedRegionFinder());
+                    extraInformation.Text = "amount of regions: " + regionalProcessingImage.amountOfRegions;
+                    return regionalProcessingImage;
                 
                 case ProcessingFunctions.HoughTransformation :
-                    return Core.ProcessingFunctions.houghTransform(workingImage);
+                    return processingImage.houghTransform();
                 
                 default:
                     return null;
