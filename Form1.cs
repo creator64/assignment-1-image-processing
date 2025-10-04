@@ -36,6 +36,7 @@ namespace INFOIBV
             MedianFilter,
             LargestRegion,
             HighlightRegions,
+            HoughTransformation
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -237,6 +238,9 @@ namespace INFOIBV
                     (byte[,], int) data = Core.ProcessingFunctions.highlightRegions(workingImage, selectedRegionFinder());
                     extraInformation.Text = "amount of regions: " + data.Item2;
                     return data.Item1;
+                
+                case ProcessingFunctions.HoughTransformation :
+                    return Core.ProcessingFunctions.houghTransform(workingImage);
                 
                 default:
                     return null;

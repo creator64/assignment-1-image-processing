@@ -382,5 +382,33 @@ namespace INFOIBV.Core
 
             return (outputImage, regionIds.Count);
         }
+
+        public static byte[,] houghTransform(byte[,] inputImage)
+        {
+            int width = inputImage.GetLength(0), height = inputImage.GetLength(1);
+            double Rmax = Math.Sqrt(Math.Pow(width, 2) + Math.Pow(height, 2));
+
+            int thetaDetail = 400, Rdetail = 400;
+            float[,] outputImage = new float[thetaDetail + 1, Rdetail + 1];
+
+            Func<int, int, Func<double, double>> generateWave = (x, y) => theta => x * Math.Cos(theta) + y * Math.Sin(theta);
+
+            for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
+            {
+                if (inputImage[i, j] == 0) continue;
+                Func<double, double> wave = generateWave(i - width / 2, j - height / 2);
+
+                for (int d = 0; d <= thetaDetail; d++)
+                {
+                    double theta = d * Math.PI / thetaDetail;
+                    double Rreal = wave(theta);
+                    int Rindex = (int)Math.Floor((Rreal * Rdetail) / Rmax);
+                    outputImage[d, Math.Max(0, Rindex + Rdetail / 2)] += inputImage[i, j] / 255f;
+                }
+            }
+
+            return ConverterMethods.convertToBytes(outputImage);
+        }
     }
 }
