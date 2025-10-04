@@ -79,7 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Pipelines.cs" />
-    <Compile Include="Core\ProcessingFunctions.cs" />
+    <Compile Include="Core\ProcessingImage.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
