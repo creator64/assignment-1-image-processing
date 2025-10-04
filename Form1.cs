@@ -36,7 +36,8 @@ namespace INFOIBV
             MedianFilter,
             LargestRegion,
             HighlightRegions,
-            HoughTransformation
+            HoughTransformation,
+            HoughPeakFinding
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -143,6 +144,7 @@ namespace INFOIBV
                 { -2, 0, 2},
                 { -1, 0, 1}
             };
+
             extraInformation.Text = "";
             ProcessingImage processingImage = new ProcessingImage(workingImage);
             switch ((ProcessingFunctions)comboBox.SelectedIndex)
@@ -164,7 +166,7 @@ namespace INFOIBV
                         { false, true, false},
                         { true, false, true},
                         { false, true, false}
-                    }; // Define this structuring element yourself
+                    };
                     return processingImage.binaryErodeImage(structElem);
 
                 case ProcessingFunctions.BinaryDilation:
@@ -240,6 +242,9 @@ namespace INFOIBV
                 
                 case ProcessingFunctions.HoughTransformation :
                     return processingImage.houghTransform();
+                
+                case ProcessingFunctions.HoughPeakFinding:
+                    return Pipelines.peakFinding(processingImage, 90);
                 
                 default:
                     return null;

@@ -178,6 +178,17 @@ namespace INFOIBV.Core
             return new ProcessingImage(tempImage);
         }
 
+        public ProcessingImage halfThresholdImage(byte threshold)
+        {
+            // create temporary grayscale image
+            byte[,] tempImage = new byte[width, height];
+            
+            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+                tempImage[x, y] = (byte)(inputImage[x, y] > threshold ? inputImage[x, y] : 0);
+
+            return new ProcessingImage(tempImage);
+        }
+
         // Binary morphology
 
         /*
