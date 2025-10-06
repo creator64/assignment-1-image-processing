@@ -472,8 +472,20 @@ namespace INFOIBV.Core
         
         public Dictionary<int, Vector2> regionCenters()
         {
-            // TODO: maybe this is not the best way of finding the centers of the image
-            return regions.Select(region => new KeyValuePair<int, Vector2>(region.Key, region.Value[region.Value.Count / 2])).ToDictionary(p => p.Key, p => p.Value);
+            // TODO: maybe this is not the best way of finding the centers of the regions
+            return regions
+                .Select(region => 
+                    new KeyValuePair<int, Vector2>(region.Key, region.Value[region.Value.Count / 2]))
+                .ToDictionary(p => p.Key, p => p.Value);
+        }
+
+        public List<Vector2> getThetaRPairs()
+        {
+            return regionCenters()
+                .Select(p =>
+                    HelperFunctions.coordinateToThetaRPair(p.Value, 
+                        width, height))
+                .ToList();
         }
     } 
 }

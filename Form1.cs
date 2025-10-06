@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Numerics;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using INFOIBV.Core;
@@ -244,7 +247,12 @@ namespace INFOIBV
                     return processingImage.houghTransform();
                 
                 case ProcessingFunctions.HoughPeakFinding:
-                    return Pipelines.peakFinding(processingImage, 80);
+                    processingImage = Pipelines.peakFinding(processingImage, 80);
+                    List<Vector2> ThetaRPais = processingImage.toRegionalImage(selectedRegionFinder()).getThetaRPairs();
+
+                    extraInformation.Text = "peaks <theta, r> (r is normalized): \n" + string.Join(",", ThetaRPais);
+                    
+                    return processingImage;
                 
                 default:
                     return null;
