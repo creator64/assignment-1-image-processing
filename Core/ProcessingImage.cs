@@ -370,48 +370,6 @@ namespace INFOIBV.Core
             return new RegionalProcessingImage(inputImage, regionFinder);
         }
 
-        // public ProcessingImage findLargestRegion(ImageRegionFinder regionFinder)
-        // {
-        //     byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-        //     int[,] regions = regionFinder.findRegions(inputImage);
-        //
-        //     Dictionary<int, int> regionCount = new Dictionary<int, int>();
-        //     for (int x = 0; x < regions.GetLength(0); x++)
-        //     for (int y = 0; y < regions.GetLength(1); y++)
-        //     {
-        //         if (regions[x, y] == 0) continue;
-        //         if (!regionCount.ContainsKey(regions[x, y])) regionCount.Add(regions[x, y], 1);
-        //         else regionCount[regions[x, y]]++;
-        //     }
-        //
-        //     int largestRegion = regionCount.Aggregate((r1, r2) => r1.Value > r2.Value ? r1 : r2).Key;
-        //     
-        //     for (int x = 0; x < regions.GetLength(0); x++)
-        //     for (int y = 0; y < regions.GetLength(1); y++) 
-        //         if (regions[x, y] == largestRegion) outputImage[x, y] = 255;
-        //     
-        //     return new ProcessingImage(outputImage);
-        // }
-
-        // public RegionalProcessingImage highlightRegions(ImageRegionFinder regionFinder)
-        // {
-        //     byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-        //     int[,] regions = regionFinder.findRegions(inputImage);
-        //
-        //     HashSet<int> regionIds = new HashSet<int>();
-        //     
-        //     for (int x = 0; x < regions.GetLength(0); x++)
-        //     for (int y = 0; y < regions.GetLength(1); y++)
-        //     {
-        //         if (regions[x, y] == 0) continue;
-        //         if (regions[x, y] % 8 == 0) outputImage[x, y] = 64;
-        //         else outputImage[x, y] = (byte)((regions[x, y] % 8) * 32);
-        //         regionIds.Add(regions[x, y]);
-        //     }
-        //
-        //     return new RegionalProcessingImage(outputImage, regionIds.Count);
-        // }
-
         public ProcessingImage houghTransform()
         {
             double Rmax = Math.Sqrt(Math.Pow(width, 2) + Math.Pow(height, 2));
@@ -441,12 +399,6 @@ namespace INFOIBV.Core
                 );
         }
 
-        public List<Vector2> regionCenters(ImageRegionFinder regionFinder)
-        {
-            int[,] regions = regionFinder.findRegions(inputImage);
-            return null;
-        }
-        
         public Bitmap convertToImage()
         {
             Bitmap OutputImage = new Bitmap(inputImage.GetLength(0), inputImage.GetLength(1)); // create new output image
@@ -516,6 +468,11 @@ namespace INFOIBV.Core
             }
 
             return new ProcessingImage(outputImage);
+        }
+        
+        public List<Vector2> regionCenters()
+        {
+            return null;
         }
     } 
 }
