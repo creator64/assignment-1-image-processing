@@ -493,16 +493,8 @@ namespace INFOIBV.Core
         {
             byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
 
-            Dictionary<int, int> regionCount = new Dictionary<int, int>();
-            for (int x = 0; x < regionGrid.GetLength(0); x++)
-            for (int y = 0; y < regionGrid.GetLength(1); y++)
-            {
-                if (regionGrid[x, y] == 0) continue;
-                if (!regionCount.ContainsKey(regionGrid[x, y])) regionCount.Add(regionGrid[x, y], 1);
-                else regionCount[regionGrid[x, y]]++;
-            }
-
-            int largestRegion = regionCount.Aggregate((r1, r2) => r1.Value > r2.Value ? r1 : r2).Key;
+            int largestRegion = regions.Select(region => new KeyValuePair<int, int>(region.Key, region.Value.Count))
+                .Aggregate((r1, r2) => r1.Value > r2.Value ? r1 : r2).Key;
             
             for (int x = 0; x < regionGrid.GetLength(0); x++)
             for (int y = 0; y < regionGrid.GetLength(1); y++) 
