@@ -60,5 +60,10 @@ namespace INFOIBV.Helper_Code
 
             return (float)Math.Round((decimal)totalVal / I.LongLength);
         }
+
+        public bool isBinary()
+        {
+            return amountDistinctValues != 2 || histogram.Skip(1).Take(255).Any(iv => iv != 0);
+        }
     }
 }

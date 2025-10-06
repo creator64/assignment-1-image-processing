@@ -233,18 +233,18 @@ namespace INFOIBV
                     return processingImage.medianFilter(5);
                 
                 case ProcessingFunctions.LargestRegion:
-                    return processingImage.findLargestRegion(selectedRegionFinder());
+                    return processingImage.toRegionalImage(selectedRegionFinder()).displayLargestRegion();
 
                 case ProcessingFunctions.HighlightRegions:
-                    RegionalProcessingImage regionalProcessingImage = processingImage.highlightRegions(selectedRegionFinder());
+                    RegionalProcessingImage regionalProcessingImage = processingImage.toRegionalImage(selectedRegionFinder());
                     extraInformation.Text = "amount of regions: " + regionalProcessingImage.amountOfRegions;
-                    return regionalProcessingImage;
+                    return regionalProcessingImage.highlightRegions();
                 
                 case ProcessingFunctions.HoughTransformation :
                     return processingImage.houghTransform();
                 
                 case ProcessingFunctions.HoughPeakFinding:
-                    return Pipelines.peakFinding(processingImage, 90);
+                    return Pipelines.peakFinding(processingImage, 80);
                 
                 default:
                     return null;

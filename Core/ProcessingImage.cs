@@ -12,7 +12,7 @@ namespace INFOIBV.Core
     {
         public readonly int width;
         public readonly int height;
-        private byte[,] inputImage;
+        protected byte[,] inputImage;
         
         public ProcessingImage(byte[,] inputImage)
         {
@@ -365,47 +365,52 @@ namespace INFOIBV.Core
                 );
         }
 
-        public ProcessingImage findLargestRegion(ImageRegionFinder regionFinder)
+        public RegionalProcessingImage toRegionalImage(ImageRegionFinder regionFinder)
         {
-            byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            int[,] regions = regionFinder.findRegions(inputImage);
-
-            Dictionary<int, int> regionCount = new Dictionary<int, int>();
-            for (int x = 0; x < regions.GetLength(0); x++)
-            for (int y = 0; y < regions.GetLength(1); y++)
-            {
-                if (regions[x, y] == 0) continue;
-                if (!regionCount.ContainsKey(regions[x, y])) regionCount.Add(regions[x, y], 1);
-                else regionCount[regions[x, y]]++;
-            }
-
-            int largestRegion = regionCount.Aggregate((r1, r2) => r1.Value > r2.Value ? r1 : r2).Key;
-            
-            for (int x = 0; x < regions.GetLength(0); x++)
-            for (int y = 0; y < regions.GetLength(1); y++) 
-                if (regions[x, y] == largestRegion) outputImage[x, y] = 255;
-            
-            return new ProcessingImage(outputImage);
+            return new RegionalProcessingImage(inputImage, regionFinder);
         }
 
-        public RegionalProcessingImage highlightRegions(ImageRegionFinder regionFinder)
-        {
-            byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            int[,] regions = regionFinder.findRegions(inputImage);
+        // public ProcessingImage findLargestRegion(ImageRegionFinder regionFinder)
+        // {
+        //     byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+        //     int[,] regions = regionFinder.findRegions(inputImage);
+        //
+        //     Dictionary<int, int> regionCount = new Dictionary<int, int>();
+        //     for (int x = 0; x < regions.GetLength(0); x++)
+        //     for (int y = 0; y < regions.GetLength(1); y++)
+        //     {
+        //         if (regions[x, y] == 0) continue;
+        //         if (!regionCount.ContainsKey(regions[x, y])) regionCount.Add(regions[x, y], 1);
+        //         else regionCount[regions[x, y]]++;
+        //     }
+        //
+        //     int largestRegion = regionCount.Aggregate((r1, r2) => r1.Value > r2.Value ? r1 : r2).Key;
+        //     
+        //     for (int x = 0; x < regions.GetLength(0); x++)
+        //     for (int y = 0; y < regions.GetLength(1); y++) 
+        //         if (regions[x, y] == largestRegion) outputImage[x, y] = 255;
+        //     
+        //     return new ProcessingImage(outputImage);
+        // }
 
-            HashSet<int> regionIds = new HashSet<int>();
-            
-            for (int x = 0; x < regions.GetLength(0); x++)
-            for (int y = 0; y < regions.GetLength(1); y++)
-            {
-                if (regions[x, y] == 0) continue;
-                if (regions[x, y] % 8 == 0) outputImage[x, y] = 64;
-                else outputImage[x, y] = (byte)((regions[x, y] % 8) * 32);
-                regionIds.Add(regions[x, y]);
-            }
-
-            return new RegionalProcessingImage(outputImage, regionIds.Count);
-        }
+        // public RegionalProcessingImage highlightRegions(ImageRegionFinder regionFinder)
+        // {
+        //     byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+        //     int[,] regions = regionFinder.findRegions(inputImage);
+        //
+        //     HashSet<int> regionIds = new HashSet<int>();
+        //     
+        //     for (int x = 0; x < regions.GetLength(0); x++)
+        //     for (int y = 0; y < regions.GetLength(1); y++)
+        //     {
+        //         if (regions[x, y] == 0) continue;
+        //         if (regions[x, y] % 8 == 0) outputImage[x, y] = 64;
+        //         else outputImage[x, y] = (byte)((regions[x, y] % 8) * 32);
+        //         regionIds.Add(regions[x, y]);
+        //     }
+        //
+        //     return new RegionalProcessingImage(outputImage, regionIds.Count);
+        // }
 
         public ProcessingImage houghTransform()
         {
@@ -435,6 +440,12 @@ namespace INFOIBV.Core
                     ConverterMethods.convertToBytes(outputImage)
                 );
         }
+
+        public List<Vector2> regionCenters(ImageRegionFinder regionFinder)
+        {
+            int[,] regions = regionFinder.findRegions(inputImage);
+            return null;
+        }
         
         public Bitmap convertToImage()
         {
@@ -452,11 +463,67 @@ namespace INFOIBV.Core
 
     public class RegionalProcessingImage : ProcessingImage
     {
-        public readonly int amountOfRegions;
+        public int amountOfRegions => regions.Count;
+        private readonly int[,] regionGrid;
+        private readonly Dictionary<int, List<Vector2>> regions;
 
-        public RegionalProcessingImage(byte[,] inputImage, int amountOfRegions) : base(inputImage)
+        public RegionalProcessingImage(byte[,] inputImage, ImageRegionFinder regionFinder) : base(inputImage)
         {
-            this.amountOfRegions = amountOfRegions;
+            ImageData imgData = new ImageData(inputImage);
+            if (!imgData.isBinary())
+                throw new Exception("Regional Processing Images must be binary");
+            
+            regionGrid = regionFinder.findRegions(inputImage);
+            regions = new Dictionary<int, List<Vector2>>();
+            getRegionsFromGrid();
+        }
+
+        private void getRegionsFromGrid()
+        {
+            for (int x = 0; x < regionGrid.GetLength(0); x++)
+            for (int y = 0; y < regionGrid.GetLength(1); y++)
+            {
+                if (regionGrid[x, y] == 0) continue;
+                if (!regions.ContainsKey(regionGrid[x, y])) regions.Add(regionGrid[x, y], new List<Vector2>() {new Vector2(x, y)});
+                else regions[regionGrid[x, y]].Add(new Vector2(x, y));
+            }
+        }
+        
+        public ProcessingImage displayLargestRegion()
+        {
+            byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+
+            Dictionary<int, int> regionCount = new Dictionary<int, int>();
+            for (int x = 0; x < regionGrid.GetLength(0); x++)
+            for (int y = 0; y < regionGrid.GetLength(1); y++)
+            {
+                if (regionGrid[x, y] == 0) continue;
+                if (!regionCount.ContainsKey(regionGrid[x, y])) regionCount.Add(regionGrid[x, y], 1);
+                else regionCount[regionGrid[x, y]]++;
+            }
+
+            int largestRegion = regionCount.Aggregate((r1, r2) => r1.Value > r2.Value ? r1 : r2).Key;
+            
+            for (int x = 0; x < regionGrid.GetLength(0); x++)
+            for (int y = 0; y < regionGrid.GetLength(1); y++) 
+                if (regionGrid[x, y] == largestRegion) outputImage[x, y] = 255;
+            
+            return new ProcessingImage(outputImage);
+        }
+        
+        public ProcessingImage highlightRegions()
+        {
+            byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
+
+            for (int x = 0; x < regionGrid.GetLength(0); x++)
+            for (int y = 0; y < regionGrid.GetLength(1); y++)
+            {
+                if (regionGrid[x, y] == 0) continue;
+                if (regionGrid[x, y] % 8 == 0) outputImage[x, y] = 64;
+                else outputImage[x, y] = (byte)((regionGrid[x, y] % 8) * 32);
+            }
+
+            return new ProcessingImage(outputImage);
         }
     } 
 }
