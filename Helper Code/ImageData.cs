@@ -63,7 +63,7 @@ namespace INFOIBV.Helper_Code
 
         public bool isBinary()
         {
-            return amountDistinctValues != 2 || histogram.Skip(1).Take(255).Any(iv => iv != 0);
+            return amountDistinctValues == 2 && histogram.Skip(1).Take(254).All(iv => iv == 0);
         }
     }
 }

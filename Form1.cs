@@ -106,7 +106,7 @@ namespace INFOIBV
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryDilation
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.LargestRegion
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.HighlightRegions)
-                && data.amountDistinctValues != 2)
+                && !data.isBinary())
                 MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform binary morphological operations over it. Threshold it first to turn it into a binary image.");
             else
             { 

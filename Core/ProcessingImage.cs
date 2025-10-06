@@ -470,9 +470,10 @@ namespace INFOIBV.Core
             return new ProcessingImage(outputImage);
         }
         
-        public List<Vector2> regionCenters()
+        public Dictionary<int, Vector2> regionCenters()
         {
-            return null;
+            // TODO: maybe this is not the best way of finding the centers of the image
+            return regions.Select(region => new KeyValuePair<int, Vector2>(region.Key, region.Value[region.Value.Count / 2])).ToDictionary(p => p.Key, p => p.Value);
         }
     } 
 }
