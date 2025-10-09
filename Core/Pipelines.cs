@@ -50,7 +50,7 @@ namespace INFOIBV.Core
         /// <returns>An RGB image with the detected line segments overlaid on top the input image (the edge map) in a red colour</returns>
         public static Bitmap houghLineSegments(byte[,] edgeMap, List<Vector2> peaks, byte minIntensity, ushort minSegLength, ushort maxGap)
         {
-            List<Vector2> highestPeaks = peaks.Take(25).ToList();
+            // List<Vector2> highestPeaks = peaks.Take(25).ToList();
 
             // Create initial RGB image
             Bitmap OutputImage = new Bitmap(edgeMap.GetLength(0), edgeMap.GetLength(1)); // create new output image
@@ -66,7 +66,7 @@ namespace INFOIBV.Core
 
             
             // Find Line 
-            foreach (Vector2 ThetaR in highestPeaks)
+            foreach (Vector2 ThetaR in peaks)
             {
                 float theta = ThetaR.X, r = ThetaR.Y;
 
