@@ -399,7 +399,7 @@ namespace INFOIBV.Core
                 );
         }
 
-        public Bitmap convertToImage()
+        public virtual Bitmap convertToImage()
         {
             Bitmap OutputImage = new Bitmap(inputImage.GetLength(0), inputImage.GetLength(1)); // create new output image
             for (int x = 0; x < inputImage.GetLength(0); x++)             // loop over columns
@@ -487,5 +487,19 @@ namespace INFOIBV.Core
                         width, height))
                 .ToList();
         }
-    } 
+    }
+    
+    public class RGBProcessingImage : ProcessingImage
+    {
+        public Bitmap rgbImage { get; private set; }
+        public RGBProcessingImage(byte[,] inputGrayScale, Bitmap inputRGB) : base(inputGrayScale)
+        {
+            this.rgbImage = inputRGB;
+        }
+
+        public override Bitmap convertToImage()
+        {
+            return rgbImage;
+        }
+    }
 }

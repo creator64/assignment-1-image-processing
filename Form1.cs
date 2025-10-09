@@ -40,7 +40,8 @@ namespace INFOIBV
             LargestRegion,
             HighlightRegions,
             HoughTransformation,
-            HoughPeakFinding
+            HoughPeakFinding,
+            HoughLineSegments
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -252,6 +253,13 @@ namespace INFOIBV
                     extraInformation.Text = "peaks <theta, r> (r is normalized): \n" + string.Join(",", ThetaRPais);
                     
                     return processingImage;
+
+                case ProcessingFunctions.HoughLineSegments:
+                    ProcessingImage accumulator = processingImage.houghTransform();
+                    List<Vector2> peaks = Pipelines.peakFinding(accumulator, 80);
+                    Bitmap rgb = Pipelines.houghLineSegments(processingImage.toArray(), peaks, 125, 20, 5);
+
+                    return new RGBProcessingImage(processingImage.toArray(), rgb);
                 
                 default:
                     return null;
