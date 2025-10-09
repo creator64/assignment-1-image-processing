@@ -247,8 +247,7 @@ namespace INFOIBV
                     return processingImage.houghTransform();
                 
                 case ProcessingFunctions.HoughPeakFinding:
-                    processingImage = Pipelines.peakFinding(processingImage, 80);
-                    List<Vector2> ThetaRPais = processingImage.toRegionalImage(selectedRegionFinder()).getThetaRPairs();
+                    List<Vector2> ThetaRPais = Pipelines.peakFinding(processingImage, 80);
 
                     extraInformation.Text = "peaks <theta, r> (r is normalized): \n" + string.Join(",", ThetaRPais);
                     
