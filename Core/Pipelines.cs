@@ -78,7 +78,7 @@ namespace INFOIBV.Core
 
                     int roundY = (int)Math.Round(y);
 
-                    if (roundY >= 0 && roundY < edgeMap.GetLength(1) && edgeMap[x, roundY] > 0)
+                    if (roundY >= minIntensity && roundY < edgeMap.GetLength(1) && edgeMap[x, roundY] > 0)
                         OutputImage.SetPixel(x, roundY, Color.Red);
                 }
 

@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using INFOIBV.Core;
 using INFOIBV.Helper_Code;
+using System.Diagnostics;
 
 namespace INFOIBV
 {
@@ -248,15 +249,25 @@ namespace INFOIBV
                     return processingImage.houghTransform();
                 
                 case ProcessingFunctions.HoughPeakFinding:
-                    List<Vector2> ThetaRPais = Pipelines.peakFinding(processingImage, 80);
+
+                    bool[,] structElem5 = {
+                        { false, true, false},
+                        { true, false, true},
+                        { false, true, false}
+                    };
+                    byte t_peak = 80;
+                    ProcessingImage output = processingImage.halfThresholdImage(t_peak).binaryCloseImage(structElem5);
+                    List<Vector2> ThetaRPais = Pipelines.peakFinding(output, t_peak, selectedRegionFinder()); //output.toRegionalImage(selectedRegionFinder()).getThetaRPairs();
 
                     extraInformation.Text = "peaks <theta, r> (r is normalized): \n" + string.Join(",", ThetaRPais);
                     
-                    return processingImage;
+                    return output;
 
                 case ProcessingFunctions.HoughLineSegments:
                     ProcessingImage accumulator = processingImage.houghTransform();
                     List<Vector2> peaks = Pipelines.peakFinding(accumulator, 80);
+                    foreach (Vector2 peak in peaks)
+                        Debug.WriteLine($"peak: ({peak.X}, {peak.Y})");
                     Bitmap rgb = Pipelines.houghLineSegments(processingImage.toArray(), peaks, 125, 20, 5);
 
                     return new RGBProcessingImage(processingImage.toArray(), rgb);
