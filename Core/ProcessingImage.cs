@@ -372,9 +372,10 @@ namespace INFOIBV.Core
 
         public ProcessingImage houghTransform()
         {
-            double Rmax = Math.Sqrt(Math.Pow(width, 2) + Math.Pow(height, 2));
+            double Rmax = 0.5f * Math.Sqrt((width * width) + (height * height));
 
-            int thetaDetail = 400, Rdetail = 400;
+            int thetaDetail = width, Rdetail = height;
+            
             float[,] outputImage = new float[thetaDetail + 1, Rdetail + 1];
 
             Func<int, int, Func<double, double>> generateWave = (x, y) => theta => x * Math.Cos(theta) + y * Math.Sin(theta);
@@ -383,14 +384,15 @@ namespace INFOIBV.Core
             for (int j = 0; j < height; j++)
             {
                 if (inputImage[i, j] == 0) continue;
-                Func<double, double> wave = generateWave(i - width / 2, j - height / 2);
+                Func<double, double> wave = generateWave(i - width / 2, height / 2 - j);
 
                 for (int d = 0; d <= thetaDetail; d++)
                 {
                     double theta = d * Math.PI / thetaDetail;
                     double Rreal = wave(theta);
-                    int Rindex = (int)Math.Floor((Rreal * Rdetail) / Rmax);
-                    outputImage[d, Math.Max(0, Rindex + Rdetail / 2)] += inputImage[i, j] / 255f;
+                    double Rstep = (double)Rmax / Rdetail * 2;
+                    int RRounded = (int)Math.Floor(Rreal / Rstep);
+                    outputImage[d, Math.Max(0, RRounded + Rdetail / 2)] += inputImage[i, j] / 255f;
                 }
             }
 
