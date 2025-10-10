@@ -109,6 +109,16 @@ namespace INFOIBV.Core
             foreach (LineSegment seg in shortSegments)
                 seg.drawToImage(OutputImage, Color.Red, width, height, 2);
 
+            bool drawShortSegPoints = false;
+            bool drawLongSegPoints = false;  
+
+            if (drawLongSegPoints)
+                foreach (LineSegment seg in longSegments)
+                    seg.drawPointsToImage(OutputImage, Color.MidnightBlue, 2);
+            if (drawShortSegPoints)
+                foreach (LineSegment seg in shortSegments)
+                    seg.drawPointsToImage(OutputImage, Color.GreenYellow, 1);
+
             return OutputImage;
         }
 

@@ -123,7 +123,11 @@ namespace INFOIBV.Helper_Code
                 //Debug.WriteLine($"MaxGap: {maxGap}");
                 //Debug.WriteLine($"X gap: {Math.Abs(currentSegment.startPoint.X - point.X)}");
                 //Debug.WriteLine($"Y gap: {Math.Abs(currentSegment.endPoint.Y - point.Y)}");
-                if(currentSegment.Length == 0 || (Math.Abs(currentSegment.startPoint.X - point.X) < maxGap && Math.Abs(currentSegment.endPoint.Y - point.Y) < maxGap))
+
+                int xGap = Math.Abs(currentSegment.startPoint.X - point.X);
+                int yGap = Math.Abs(currentSegment.startPoint.Y - point.Y);
+                float dist = (float)Math.Sqrt(xGap * xGap + yGap * yGap);    
+                if (currentSegment.Length == 0 || dist <= maxGap)
                 {
                     bool result = currentSegment.addPoint(point.X, point.Y, width, height);
                     //Debug.WriteLine($"added point: {result}");  
@@ -148,21 +152,8 @@ namespace INFOIBV.Helper_Code
 
         public void drawToImage(Bitmap image, Color color, int width, int height, int thickness = 1)
         {
-            /*
-            foreach ((int X, int Y) point in points)
-            {
-                for (int i = -(thickness - 1); i <= (thickness - 1); i++)
-                {
-                    for (int j = -(thickness - 1); j <= (thickness - 1); j++)
-                    {
-                        int newX = point.X + i;
-                        int newY = point.Y + j;
-                        if (newX >= 0 && newX < image.Width && newY >= 0 && newY < image.Height)
-                            image.SetPixel(newX, newY, color);
-                    }
-                }
-            }
-            */
+            if(thickness < 1)
+                throw new ArgumentException($"Thickness can't be lower than 1, was: {thickness}");
 
             int xSpan = endPoint.X - startPoint.X;
             
@@ -209,6 +200,23 @@ namespace INFOIBV.Helper_Code
                             if (newX >= 0 && newX < image.Width && newY >= 0 && newY < image.Height)
                                 image.SetPixel(newX, newY, color);
                         }
+                    }
+                }
+            }
+        }
+
+        public void drawPointsToImage(Bitmap image, Color color, int thickness = 1)
+        {
+            foreach ((int X, int Y) point in points)
+            {
+                for (int i = -(thickness - 1); i <= (thickness - 1); i++)
+                {
+                    for (int j = -(thickness - 1); j <= (thickness - 1); j++)
+                    {
+                        int newX = point.X + i;
+                        int newY = point.Y + j;
+                        if (newX >= 0 && newX < image.Width && newY >= 0 && newY < image.Height)
+                            image.SetPixel(newX, newY, color);
                     }
                 }
             }
