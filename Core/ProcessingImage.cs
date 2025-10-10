@@ -384,15 +384,15 @@ namespace INFOIBV.Core
             for (int j = 0; j < height; j++)
             {
                 if (inputImage[i, j] == 0) continue;
-                Func<double, double> wave = generateWave(i - width / 2, height / 2 - j);
+                Func<double, double> wave = generateWave(i - (width / 2), (height / 2) - j); // used to have (height / 2) - j
 
                 for (int d = 0; d <= thetaDetail; d++)
                 {
                     double theta = d * Math.PI / thetaDetail;
                     double Rreal = wave(theta);
-                    double Rstep = (double)Rmax / Rdetail * 2;
-                    int RRounded = (int)Math.Floor(Rreal / Rstep);
-                    outputImage[d, Math.Max(0, RRounded + Rdetail / 2)] += inputImage[i, j] / 255f;
+                    double Rstep = (double)(2 * Rmax) / Rdetail;
+                    int RRounded = (int)Math.Round(Rreal / Rstep);
+                    outputImage[d, RRounded + (Rdetail / 2)] += inputImage[i, j] / 255f;
                 }
             }
 
