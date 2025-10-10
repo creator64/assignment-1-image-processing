@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using INFOIBV;
 using INFOIBV.Helper_Code;
+using static System.Net.Mime.MediaTypeNames;
 namespace INFOIBV.Core
 {
     public static class Pipelines
@@ -67,13 +70,15 @@ namespace INFOIBV.Core
 
             List<((int X, int Y) startPoint, (int X, int Y) endPoint)> lineSegments = new List<((int X, int Y) startPoint, (int X, int Y) endPoint)>();
 
-            
+            List<LineSegment> longSegments = new List<LineSegment>();
+
             // Find Line 
             foreach (Vector2 ThetaR in peaks)
             {
                 float theta = ThetaR.X, r = ThetaR.Y * maxR;
 
-                List<Vector2> lineSegment = new List<Vector2>();
+                LineSegment currentSegment = new LineSegment(theta, r, maxGap, minSegLength);
+
 
                 for (int x = 0; x < edgeMap.GetLength(0); x++)
                 {
@@ -84,10 +89,25 @@ namespace INFOIBV.Core
                     int roundY = (int)Math.Round(y);
 
                     if (roundY >= 0 && roundY < edgeMap.GetLength(1) && edgeMap[x, roundY] >= minIntensity)
-                        OutputImage.SetPixel(x, roundY, Color.Red);
+                        currentSegment.addPoint(x, roundY, width, height);
                 }
 
+                longSegments.Add(currentSegment);
             }
+
+            Debug.WriteLine($"longSegments length: {longSegments.Count}");
+
+
+            List<LineSegment> shortSegments = new List<LineSegment>();
+
+            foreach (LineSegment seg in longSegments)
+                foreach (LineSegment subseg in seg.getSegments(width, height))
+                    shortSegments.Add(subseg);
+
+            Debug.WriteLine($"shortSegments length: {shortSegments.Count}");
+
+            foreach (LineSegment seg in shortSegments)
+                seg.drawToImage(OutputImage, Color.Red, width, height, 2);
 
             return OutputImage;
         }

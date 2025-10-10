@@ -268,7 +268,7 @@ namespace INFOIBV
                     List<Vector2> peaks = Pipelines.peakFinding(accumulator, 80);
                     foreach (Vector2 peak in peaks)
                         Debug.WriteLine($"peak: ({peak.X}, {peak.Y})");
-                    Bitmap rgb = Pipelines.houghLineSegments(processingImage.toArray(), peaks, 0, 20, 5);
+                    Bitmap rgb = Pipelines.houghLineSegments(edgeMap: processingImage.toArray(), peaks: peaks, minIntensity: 30, minSegLength: 5, maxGap: 50);
 
                     return new RGBProcessingImage(processingImage.toArray(), rgb);
                 
