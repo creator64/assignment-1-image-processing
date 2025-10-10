@@ -211,10 +211,11 @@ namespace INFOIBV.Helper_Code
 
         public static Vector2 coordinateToThetaRPair(Vector2 coord, int thetaDetail, int rDetail)
         {
-            double theta = 2 * Math.PI * coord.X / thetaDetail;
-            double rNormalized = (coord.Y - rDetail / 2) / (rDetail / 2);
+            double theta = coord.X * (Math.PI / thetaDetail);
+            float maxR = 0.5f * (float)Math.Sqrt((thetaDetail * thetaDetail) + (rDetail * rDetail));
+            double rNormalized = coord.Y / maxR;
 
-            return new Vector2((float)theta, (float)-rNormalized);
+            return new Vector2((float)theta, (float)rNormalized);
         }
     }
 }

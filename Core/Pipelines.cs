@@ -52,6 +52,9 @@ namespace INFOIBV.Core
         {
             // List<Vector2> highestPeaks = peaks.Take(25).ToList();
 
+            int width = edgeMap.GetLength(0), height = edgeMap.GetLength(1);
+            float maxR = 0.5f * (float)Math.Sqrt((width * width) + (height * height));
+
             // Create initial RGB image
             Bitmap OutputImage = new Bitmap(edgeMap.GetLength(0), edgeMap.GetLength(1)); // create new output image
             for (int x = 0; x < edgeMap.GetLength(0); x++)          // loop over columns
@@ -68,17 +71,19 @@ namespace INFOIBV.Core
             // Find Line 
             foreach (Vector2 ThetaR in peaks)
             {
-                float theta = ThetaR.X, r = ThetaR.Y;
+                float theta = ThetaR.X, r = ThetaR.Y * maxR;
 
                 List<Vector2> lineSegment = new List<Vector2>();
 
                 for (int x = 0; x < edgeMap.GetLength(0); x++)
                 {
-                    float y = (float)(x * Math.Cos(theta) - r) / (float)(-Math.Sin(theta));
+                    int xTransform = x - (width / 2);
+                    float yTransform = (float)(xTransform * Math.Cos(theta) - r) / (float)(-Math.Sin(theta));
+                    float y = (height / 2) - yTransform;
 
                     int roundY = (int)Math.Round(y);
 
-                    if (roundY >= minIntensity && roundY < edgeMap.GetLength(1) && edgeMap[x, roundY] > 0)
+                    if (roundY >= 0 && roundY < edgeMap.GetLength(1) && edgeMap[x, roundY] >= minIntensity)
                         OutputImage.SetPixel(x, roundY, Color.Red);
                 }
 
