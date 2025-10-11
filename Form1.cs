@@ -238,8 +238,11 @@ namespace INFOIBV
                     extraInformation.Text = "amount of regions: " + regionalProcessingImage.amountOfRegions;
                     return regionalProcessingImage;
                 
-                case ProcessingFunctions.HoughTransformation :
-                    return processingImage.houghTransform();
+                case ProcessingFunctions.HoughTransformation:
+                    HoughTransformer transformer = new HoughTransformer(processingImage.toArray(), 360, 360);
+                    ProcessingImage result = transformer.houghTransform();
+
+                    return result;
                 
                 default:
                     return null;

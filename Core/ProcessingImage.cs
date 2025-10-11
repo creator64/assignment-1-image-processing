@@ -416,7 +416,7 @@ namespace INFOIBV.Core
                     double theta = d * Math.PI / thetaDetail;
                     double Rreal = wave(theta);
                     int Rindex = (int)Math.Floor((Rreal * Rdetail) / Rmax);
-                    outputImage[d, Math.Max(0, Rindex + Rdetail / 2)] += inputImage[i, j] / 255f;
+                    outputImage[d, Math.Max(0, Rindex + Rdetail / 2)] += 1 / 1000f;
                 }
             }
 
