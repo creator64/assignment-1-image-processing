@@ -213,7 +213,7 @@ namespace INFOIBV.Helper_Code
         {
             double theta = Math.PI * coord.X / thetaDetail;
             double rNormalized = (coord.Y - (rDetail / 2)) / (rDetail / 2);
-
+            
             return new Vector2((float)theta, (float)rNormalized);
         }
     }

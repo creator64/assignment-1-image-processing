@@ -163,9 +163,9 @@ namespace INFOIBV.Helper_Code
 
                 for(int y = 0; y <= ySpan; y++)
                 {
-                    int yTransform = startPoint.Y + y - (width / 2);
+                    int yTransform = startPoint.Y + y - (height / 2);
                     float xTransform = (float)(yTransform * Math.Sin(theta) - r) / (float)(-Math.Cos(theta));
-                    float x = (height / 2) - xTransform;
+                    float x = (width / 2) - xTransform;
 
                     int roundX = (int)Math.Round(x);
 
