@@ -374,7 +374,7 @@ namespace INFOIBV.Core
         {
             double Rmax = 0.5f * Math.Sqrt((width * width) + (height * height));
 
-            int thetaDetail = width, Rdetail = height;
+            int thetaDetail = width * 2, Rdetail = height * 2;
             
             float[,] outputImage = new float[thetaDetail + 1, Rdetail + 1];
 
@@ -392,7 +392,8 @@ namespace INFOIBV.Core
                     double Rreal = wave(theta);
                     double Rstep = (double)(2 * Rmax) / Rdetail;
                     int RRounded = (int)Math.Round(Rreal / Rstep);
-                    outputImage[d, RRounded + (Rdetail / 2)] += inputImage[i, j] / 255f;
+                    int Rindex = RRounded + (Rdetail / 2);
+                    outputImage[d, Rindex] = Math.Min(255, outputImage[d, Rindex] + inputImage[i, j] / 255f);
                 }
             }
 
