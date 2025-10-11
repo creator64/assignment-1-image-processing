@@ -156,11 +156,10 @@ namespace INFOIBV.Helper_Code
                 throw new ArgumentException($"Thickness can't be lower than 1, was: {thickness}");
 
             int xSpan = endPoint.X - startPoint.X;
-            
-            if(xSpan == 0)
-            {
-                int ySpan = endPoint.Y - startPoint.Y;
+            int ySpan = endPoint.Y - startPoint.Y;
 
+            if (xSpan < ySpan)
+            {
                 for(int y = 0; y <= ySpan; y++)
                 {
                     int yTransform = startPoint.Y + y - (width / 2);
