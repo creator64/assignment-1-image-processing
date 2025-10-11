@@ -374,7 +374,7 @@ namespace INFOIBV.Core
         {
             double Rmax = 0.5f * Math.Sqrt((width * width) + (height * height));
 
-            int thetaDetail = width, Rdetail = height;
+            int thetaDetail = width * 2, Rdetail = height * 2;
             
             float[,] outputImage = new float[thetaDetail + 1, Rdetail + 1];
 
@@ -486,7 +486,7 @@ namespace INFOIBV.Core
             return regionCenters()
                 .Select(p =>
                     HelperFunctions.coordinateToThetaRPair(p.Value, 
-                        width, height))
+                        width * 2, height * 2))
                 .ToList();
         }
     }

@@ -57,6 +57,8 @@ namespace INFOIBV.Core
 
             int width = edgeMap.GetLength(0), height = edgeMap.GetLength(1);
             float maxR = 0.5f * (float)Math.Sqrt((width * width) + (height * height));
+            width *= 2;
+            height *= 2;
 
             // Create initial RGB image
             Bitmap OutputImage = new Bitmap(edgeMap.GetLength(0), edgeMap.GetLength(1)); // create new output image
