@@ -95,6 +95,28 @@ namespace INFOIBV.Core
                 longSegments.Add(currentSegment);
             }
 
+            // Find Line 
+            foreach (Vector2 ThetaR in peaks)
+            {
+                float theta = ThetaR.X, r = ThetaR.Y * maxR;
+
+                LineSegment currentSegment = new LineSegment(theta, r, maxGap, minSegLength);
+
+
+                for (int y = 0; y < edgeMap.GetLength(1); y++)
+                {
+                    int yTransform = (height / 2) - y;
+                    float xTransform = (float)(yTransform * Math.Sin(theta) - r) / (float)(-Math.Cos(theta));
+                    float x = xTransform + (width / 2);
+
+                    int roundX = (int)Math.Round(x);
+
+                    if (roundX >= 0 && roundX < edgeMap.GetLength(0) && edgeMap[roundX, y] >= minIntensity)
+                        currentSegment.addPoint(roundX, y, width, height);
+                }
+
+                longSegments.Add(currentSegment);
+            }
             Debug.WriteLine($"longSegments length: {longSegments.Count}");
 
 

@@ -255,7 +255,7 @@ namespace INFOIBV
                         { true, false, true},
                         { false, true, false}
                     };
-                    byte t_peak = 80;
+                    byte t_peak = 1;
                     ProcessingImage output = processingImage.halfThresholdImage(t_peak).binaryCloseImage(structElem5);
                     List<Vector2> ThetaRPais = Pipelines.peakFinding(output, t_peak, selectedRegionFinder()); //output.toRegionalImage(selectedRegionFinder()).getThetaRPairs();
 
@@ -264,11 +264,13 @@ namespace INFOIBV
                     return output;
 
                 case ProcessingFunctions.HoughLineSegments:
+                    Debug.WriteLine("--------------------------");
                     ProcessingImage accumulator = processingImage.houghTransform();
                     List<Vector2> peaks = Pipelines.peakFinding(accumulator, 80);
                     foreach (Vector2 peak in peaks)
                         Debug.WriteLine($"peak: ({peak.X}, {peak.Y})");
                     Bitmap rgb = Pipelines.houghLineSegments(edgeMap: processingImage.toArray(), peaks: peaks, minIntensity: 50, minSegLength: 10, maxGap: 20);
+                    Debug.WriteLine("--------------------------");
 
                     return new RGBProcessingImage(processingImage.toArray(), rgb);
                 
