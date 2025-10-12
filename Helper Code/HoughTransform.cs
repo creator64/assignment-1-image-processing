@@ -1,6 +1,7 @@
 ﻿using INFOIBV.Core;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -12,34 +13,24 @@ namespace INFOIBV.Helper_Code
     public class HoughTransform : ProcessingImage
     {
         #region Parameters
-        int minIntensity;
-        ImageRegionFinder regionFinder;
         public int thetaDetail { get; private set; }
         public int rDetail { get; private set; }
         #endregion
 
         #region Getters for Calculations
-        int imageWidth { get { return inputImage.GetLength(0); } }
-        int imageHeight { get { return inputImage.GetLength(1); } }
-        public float Rmax { get { return 0.5f * (float)Math.Sqrt((imageWidth * imageWidth) + (imageHeight * imageHeight)); } }
+        public double Rmax { get { return 0.5f * (double)Math.Sqrt((width * width) + (height * height)); } }
 
-        public float deltaTheta { get { return (float)(Math.PI) / thetaDetail; } }
+        public double deltaTheta { get { return (Math.PI) / thetaDetail; } }
 
-        public float deltaR { get { return (float)(2 * Rmax) / rDetail; } }
-
-        (int X, int Y) centerPoint { get { return (imageWidth / 2, imageHeight / 2); } }
+        public double deltaR { get { return (double)(2 * Rmax) / rDetail; } }
         #endregion
 
-        Bitmap RGBImage; //Image that will be used to overlay lines on in houghLineSegments
-
-        public HoughTransform(byte[,] inputImage, ImageRegionFinder regionFinder, int minIntensity, int thetaDetail, int rDetail) : base(inputImage)
+        public HoughTransform(byte[,] inputImage, int thetaDetail, int rDetail) : base(inputImage)
         {
-            this.minIntensity = minIntensity;
             this.thetaDetail = thetaDetail;
             this.rDetail = rDetail;
 
             // create RGBImage
-            this.RGBImage = convertToImage(inputImage);
         }
         /// <summary>
         /// 
@@ -60,10 +51,9 @@ namespace INFOIBV.Helper_Code
 
                     for (int d = 0; d <= thetaDetail; d++)
                     {
-                        double theta = d * Math.PI / thetaDetail;
+                        double theta = d * deltaTheta;
                         double Rreal = wave(theta);
-                        double Rstep = (double)(2 * Rmax) / rDetail;
-                        int RRounded = (int)Math.Round(Rreal / Rstep);
+                        int RRounded = (int)Math.Round(Rreal / deltaR);
                         int Rindex = RRounded + (rDetail / 2);
                         outputImage[d, Rindex] = Math.Min(255, outputImage[d, Rindex] + inputImage[i, j] / 255f);
                     }
@@ -74,7 +64,7 @@ namespace INFOIBV.Helper_Code
                 );
         }
 
-        public List<Vector2> peakFinding(ProcessingImage accumulatorArray, byte t_peak)
+        public (ProcessingImage processedAccumulator, List<Vector2> ThetaRPairs) peakFinding(ProcessingImage accumulatorArray, byte t_peak,ImageRegionFinder regionFinder)
         {
             bool[,] structElem = {
                 { false, true, false},
@@ -83,7 +73,7 @@ namespace INFOIBV.Helper_Code
             };
             ProcessingImage processingImage = accumulatorArray.halfThresholdImage(t_peak).binaryCloseImage(structElem);
 
-            return getThetaRPairs(processingImage.toRegionalImage(regionFinder));
+            return (processingImage, getThetaRPairs(processingImage.toRegionalImage(regionFinder)));
         }
 
         private List<Vector2> getThetaRPairs(RegionalProcessingImage processedAcc)
@@ -91,38 +81,28 @@ namespace INFOIBV.Helper_Code
             return processedAcc.regionCenters()
                 .Select(p =>
                     HelperFunctions.coordinateToThetaRPair(p.Value,
-                        width, height))
+                        thetaDetail, rDetail))
                 .ToList();
         }
 
-        public static void houghLineSegments(byte[,] edgeMap, List<Vector2> peaks, byte minIntensity, ushort minSegLength, ushort maxGap)
+        public Bitmap houghLineSegments(List<Vector2> peaks, byte minIntensity, ushort minSegLength, ushort maxGap)
         {
-            int width = edgeMap.GetLength(0), height = edgeMap.GetLength(1);
-            float maxR = 0.5f * (float)Math.Sqrt((width * width) + (height * height));
-
-            // Create initial RGB image
-            Bitmap OutputImage = new Bitmap(edgeMap.GetLength(0), edgeMap.GetLength(1)); // create new output image
-            for (int x = 0; x < edgeMap.GetLength(0); x++)          // loop over columns
-                for (int y = 0; y < edgeMap.GetLength(1); y++)         // loop over rows
-                {
-                    Color newColor = Color.FromArgb(edgeMap[x, y], edgeMap[x, y], edgeMap[x, y]);
-
-                    OutputImage.SetPixel(x, y, newColor);                  // set the pixel color at coordinate (x,y)
-                }
 
             List<((int X, int Y) startPoint, (int X, int Y) endPoint)> lineSegments = new List<((int X, int Y) startPoint, (int X, int Y) endPoint)>();
 
             List<LineSegment> longSegments = new List<LineSegment>();
+            Bitmap outputImage = this.convertToImage();
+
 
             // Find Line 
             foreach (Vector2 ThetaR in peaks)
             {
-                float theta = ThetaR.X, r = ThetaR.Y * maxR;
+                float theta = ThetaR.X, r = ThetaR.Y * (float)Rmax;
 
                 LineSegment currentSegment = new LineSegment(theta, r, maxGap, minSegLength);
 
 
-                for (int x = 0; x < edgeMap.GetLength(0); x++)
+                for (int x = 0; x < inputImage.GetLength(0); x++)
                 {
                     int xTransform = x - (width / 2);
                     float yTransform = (float)(xTransform * Math.Cos(theta) - r) / (float)(-Math.Sin(theta));
@@ -130,18 +110,18 @@ namespace INFOIBV.Helper_Code
 
                     int roundY = (int)Math.Round(y);
 
-                    if (roundY >= 0 && roundY < edgeMap.GetLength(1) && edgeMap[x, roundY] >= minIntensity)
+                    if (roundY >= 0 && roundY < inputImage.GetLength(1) && inputImage[x, roundY] >= minIntensity)
                         currentSegment.addPoint(x, roundY, width, height);
                 }
-                for (int y = 0; y < edgeMap.GetLength(1); y++)
+                for (int y = 0; y < inputImage.GetLength(1); y++)
                 {
-                    int yTransform = (height / 2) - y;
+                    int yTransform = (width / 2) - y;
                     float xTransform = (float)(yTransform * Math.Sin(theta) - r) / (float)(-Math.Cos(theta));
-                    float x = xTransform + (width / 2);
+                    float x = xTransform + (height / 2);
 
                     int roundX = (int)Math.Round(x);
 
-                    if (roundX >= 0 && roundX < edgeMap.GetLength(0) && edgeMap[roundX, y] >= minIntensity)
+                    if (roundX >= 0 && roundX < inputImage.GetLength(0) && inputImage[roundX, y] >= minIntensity)
                         currentSegment.addPoint(roundX, y, width, height);
                 }
                 if (currentSegment.LongEnough)
@@ -151,7 +131,6 @@ namespace INFOIBV.Helper_Code
                 }
             }
 
-
             List<LineSegment> shortSegments = new List<LineSegment>();
 
             foreach (LineSegment seg in longSegments)
@@ -159,19 +138,20 @@ namespace INFOIBV.Helper_Code
                     shortSegments.Add(subseg);
 
             foreach (LineSegment seg in shortSegments)
-                seg.drawToImage(OutputImage, Color.Red, width, height, 2);
+                seg.drawToImage(outputImage, Color.Red, width, height, 2);
 
+            #region Debugging Shenanigans
             bool drawShortSegPoints = false;
             bool drawLongSegPoints = false;
 
             if (drawLongSegPoints)
                 foreach (LineSegment seg in longSegments)
-                    seg.drawPointsToImage(OutputImage, Color.MidnightBlue, 2);
+                    seg.drawPointsToImage(outputImage, Color.MidnightBlue, 2);
             if (drawShortSegPoints)
                 foreach (LineSegment seg in shortSegments)
-                    seg.drawPointsToImage(OutputImage, Color.GreenYellow, 1);
-
-            return OutputImage;
+                    seg.drawPointsToImage(outputImage, Color.GreenYellow, 1);
+            #endregion
+            return outputImage;
         }
     }
 }

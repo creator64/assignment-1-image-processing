@@ -246,33 +246,39 @@ namespace INFOIBV
                     return regionalProcessingImage.highlightRegions();
                 
                 case ProcessingFunctions.HoughTransformation :
-                    return processingImage.houghTransform();
+                    HoughTransform ht = new HoughTransform(processingImage.toArray(), processingImage.width, processingImage.height);
+                    return ht.houghTransform();
                 
                 case ProcessingFunctions.HoughPeakFinding:
-
+                    
                     bool[,] structElem5 = {
                         { false, true, false},
                         { true, false, true},
                         { false, true, false}
                     };
-                    byte t_peak = 1;
-                    ProcessingImage output = processingImage.halfThresholdImage(t_peak).binaryCloseImage(structElem5);
-                    List<Vector2> ThetaRPais = Pipelines.peakFinding(output, t_peak, selectedRegionFinder()); //output.toRegionalImage(selectedRegionFinder()).getThetaRPairs();
+                    byte t_peak = 80;
 
-                    extraInformation.Text = "peaks <theta, r> (r is normalized): \n" + string.Join(",", ThetaRPais);
+                    int thetaDetail = processingImage.width, rDetail = processingImage.height; //this is because the processingImage already is the accumulator Array
+                    HoughTransform peakfindingTransform = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
+
+                    (ProcessingImage processedAcc, List<Vector2> ThetaR) output = peakfindingTransform.peakFinding(processingImage, t_peak, selectedRegionFinder());
+
+                    extraInformation.Text = "peaks <theta, r> (r is normalized): \n" + string.Join(",", output.ThetaR);
                     
-                    return output;
+                    return output.processedAcc; // output;
 
                 case ProcessingFunctions.HoughLineSegments:
-                    Debug.WriteLine("--------------------------");
-                    ProcessingImage accumulator = processingImage.houghTransform();
-                    List<Vector2> peaks = Pipelines.peakFinding(accumulator, 80);
-                    foreach (Vector2 peak in peaks)
-                        Debug.WriteLine($"peak: ({peak.X}, {peak.Y})");
-                    Bitmap rgb = Pipelines.houghLineSegments(edgeMap: processingImage.toArray(), peaks: peaks, minIntensity: 50, minSegLength: 20, maxGap: 7);
-                    Debug.WriteLine("--------------------------");
 
-                    return new RGBProcessingImage(processingImage.toArray(), rgb);
+                    byte minIntensity = 50;
+                    ushort minSegLength = 20;
+                    ushort maxGap = 20;
+                    t_peak = 80;
+
+                    HoughTransform htDrawLines = new HoughTransform(processingImage.toArray(), processingImage.width * 5, processingImage.height * 5);
+                    ProcessingImage accumulatorArray = htDrawLines.houghTransform();
+                    List<Vector2> peaks = htDrawLines.peakFinding(accumulatorArray, t_peak, selectedRegionFinder()).ThetaRPairs;
+                    Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
+                    return new RGBProcessingImage(processingImage.toArray(), outputImage);
                 
                 default:
                     return null;
