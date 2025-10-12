@@ -132,5 +132,21 @@ namespace INFOIBV.Core
             return OutputImage;
         }
 
+        public static ProcessingImage Task4(ProcessingImage processingImage, byte t_mag, byte t_peak)
+        {
+            float[,] gaussianFilter = ProcessingImage.createGaussianFilter(5, 2.25f);
+            float[,] horizontalKernel = {
+                { -1, -2, -1},
+                { 0, 0, 0},
+                { 1, 2, 1}
+            };
+
+            float[,] verticalKernel = {
+                { -1, 0, 1},
+                { -2, 0, 2},
+                { -1, 0, 1}
+            };
+            processingImage.convolveImage(gaussianFilter).edgeMagnitude(horizontalKernel, verticalKernel).thresholdImage(t_mag);
+        }
     }
 }

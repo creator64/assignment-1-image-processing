@@ -370,38 +370,6 @@ namespace INFOIBV.Core
             return new RegionalProcessingImage(inputImage, regionFinder);
         }
 
-        public ProcessingImage houghTransform()
-        {
-            double Rmax = 0.5f * Math.Sqrt((width * width) + (height * height));
-
-            int thetaDetail = width * 2, Rdetail = height * 2;
-            
-            float[,] outputImage = new float[thetaDetail + 1, Rdetail + 1];
-
-            Func<int, int, Func<double, double>> generateWave = (x, y) => theta => x * Math.Cos(theta) + y * Math.Sin(theta);
-
-            for (int i = 0; i < width; i++)
-            for (int j = 0; j < height; j++)
-            {
-                if (inputImage[i, j] == 0) continue;
-                Func<double, double> wave = generateWave(i - (width / 2), (height / 2) - j); // used to have (height / 2) - j
-
-                for (int d = 0; d <= thetaDetail; d++)
-                {
-                    double theta = d * Math.PI / thetaDetail;
-                    double Rreal = wave(theta);
-                    double Rstep = (double)(2 * Rmax) / Rdetail;
-                    int RRounded = (int)Math.Round(Rreal / Rstep);
-                    int Rindex = RRounded + (Rdetail / 2);
-                    outputImage[d, Rindex] = Math.Min(255, outputImage[d, Rindex] + inputImage[i, j] / 255f);
-                }
-            }
-
-            return new ProcessingImage(
-                    ConverterMethods.convertToBytes(outputImage)
-                );
-        }
-
         public virtual Bitmap convertToImage()
         {
             Bitmap OutputImage = new Bitmap(inputImage.GetLength(0), inputImage.GetLength(1)); // create new output image
@@ -480,15 +448,6 @@ namespace INFOIBV.Core
                 .Select(region => 
                     new KeyValuePair<int, Vector2>(region.Key, region.Value[region.Value.Count / 2]))
                 .ToDictionary(p => p.Key, p => p.Value);
-        }
-
-        public List<Vector2> getThetaRPairs()
-        {
-            return regionCenters()
-                .Select(p =>
-                    HelperFunctions.coordinateToThetaRPair(p.Value, 
-                        width, height))
-                .ToList();
         }
     }
     
