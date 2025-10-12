@@ -26,8 +26,11 @@ namespace INFOIBV.Core
                 .thresholdImage(30);
         }
 
-        public static ProcessingImage Task4(ProcessingImage processingImage, byte t_mag, byte t_peak)
+        public static ProcessingImage BinaryPipeLine(ProcessingImage processingImage, byte minIntensity, ushort minSegLength, ushort maxGap, byte t_mag, byte t_peak, ImageRegionFinder regionFinder)
         {
+
+            ProcessingImage imageA = processingImage.adjustContrast();
+
             float[,] gaussianFilter = ProcessingImage.createGaussianFilter(5, 2.25f);
             float[,] horizontalKernel = {
                 { -1, -2, -1},
@@ -40,10 +43,14 @@ namespace INFOIBV.Core
                 { -2, 0, 2},
                 { -1, 0, 1}
             };
-            processingImage.convolveImage(gaussianFilter).edgeMagnitude(horizontalKernel, verticalKernel).thresholdImage(t_mag);
 
-            return null;
-            //processingImage.houghTransform();
+            ProcessingImage binaryEdgeMap = imageA.convolveImage(gaussianFilter).edgeMagnitude(horizontalKernel, verticalKernel).thresholdImage(t_mag);
+
+            HoughTransform htDrawLines = new HoughTransform(binaryEdgeMap.toArray(), binaryEdgeMap.width * 2, binaryEdgeMap.height * 2);
+            ProcessingImage accumulatorArray = htDrawLines.houghTransform();
+            List<Vector2> peaks = htDrawLines.peakFinding(accumulatorArray, t_peak, regionFinder).ThetaRPairs;
+            Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
+            return new RGBProcessingImage(binaryEdgeMap.toArray(), outputImage);;
         }
     }
 }
