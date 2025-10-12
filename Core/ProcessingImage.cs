@@ -440,7 +440,15 @@ namespace INFOIBV.Core
 
             return new ProcessingImage(outputImage);
         }
-        
+        public List<Vector2> getThetaRPairs()
+        {
+            return regionCenters()
+                .Select(p =>
+                    HelperFunctions.coordinateToThetaRPair(p.Value,
+                        width, height))
+                .ToList();
+        }
+
         public Dictionary<int, Vector2> regionCenters()
         {
             // TODO: maybe this is not the best way of finding the centers of the regions

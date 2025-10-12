@@ -64,8 +64,10 @@ namespace INFOIBV.Helper_Code
                 );
         }
 
-        public (ProcessingImage processedAccumulator, List<Vector2> ThetaRPairs) peakFinding(ProcessingImage accumulatorArray, byte t_peak,ImageRegionFinder regionFinder)
+        public (ProcessingImage processedAccumulator, List<Vector2> ThetaRPairs) peakFinding(ProcessingImage accumulatorArray, byte t_peak,ImageRegionFinder regionFinder = null)
         {
+            if (regionFinder == null) regionFinder = new FloodFill();
+
             bool[,] structElem = {
                 { false, true, false},
                 { true, false, true},
@@ -105,8 +107,8 @@ namespace INFOIBV.Helper_Code
                 for (int x = 0; x < inputImage.GetLength(0); x++)
                 {
                     int xTransform = x - (width / 2);
-                    float yTransform = (float)(xTransform * Math.Cos(theta) - r) / (float)(-Math.Sin(theta));
-                    float y = (height / 2) - yTransform;
+                    double yTransform = (double)(xTransform * Math.Cos(theta) - r) / (float)(-Math.Sin(theta));
+                    double y = (height / 2) - yTransform;
 
                     int roundY = (int)Math.Round(y);
 
@@ -116,8 +118,8 @@ namespace INFOIBV.Helper_Code
                 for (int y = 0; y < inputImage.GetLength(1); y++)
                 {
                     int yTransform = (width / 2) - y;
-                    float xTransform = (float)(yTransform * Math.Sin(theta) - r) / (float)(-Math.Cos(theta));
-                    float x = xTransform + (height / 2);
+                    double xTransform = (double)(yTransform * Math.Sin(theta) - r) / (float)(-Math.Cos(theta));
+                    double x = xTransform + (height / 2);
 
                     int roundX = (int)Math.Round(x);
 

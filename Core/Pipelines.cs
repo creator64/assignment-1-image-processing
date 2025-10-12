@@ -25,6 +25,20 @@ namespace INFOIBV.Core
                 .edgeMagnitude(horizontalKernel, verticalKernel)
                 .thresholdImage(30);
         }
+        public static List<Vector2> peakFinding(ProcessingImage accumulatorArray, byte t_peak, ImageRegionFinder regionFinder = null)
+        {
+            if (regionFinder == null)
+                regionFinder = new FloodFill();
+
+            bool[,] structElem = {
+                { false, true, false},
+                { true, false, true},
+                { false, true, false}
+            };
+            ProcessingImage processingImage = accumulatorArray.halfThresholdImage(t_peak).binaryCloseImage(structElem);
+
+            return processingImage.toRegionalImage(regionFinder).getThetaRPairs();
+        }
 
         public static ProcessingImage BinaryPipeLine(ProcessingImage processingImage, byte minIntensity, ushort minSegLength, ushort maxGap, byte t_mag, byte t_peak, ImageRegionFinder regionFinder)
         {
