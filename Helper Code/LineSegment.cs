@@ -24,6 +24,8 @@ namespace INFOIBV.Helper_Code
         public bool LongEnough { get { return points.Count >= minSegLength; } }
         public int Length { get { return points.Count; } }
 
+        private List<(int X, int Y)> orderedPointsList;
+
         public LineSegment(float theta, float r, int maxGap, int minSegLength)
         {
             this.theta = theta;
@@ -57,13 +59,7 @@ namespace INFOIBV.Helper_Code
         public bool addPoint(int x, int y, int width, int height)
         {
             if (fallsOnSlope(x, y, width, height))
-            {
-                if (x < startPoint.X)
-                    startPoint = (x, y);
-                if (x > endPoint.X)
-                    endPoint = (x, y);
-
-                
+            {                
                 points.Add((x, y));
                 return true;
             }
@@ -103,6 +99,41 @@ namespace INFOIBV.Helper_Code
                 return false;
         }
         /// <summary>
+        /// Initialises the start and end points of the Line segment and creates a points list accordingly.
+        /// Done only when all points have been added.
+        /// </summary>
+        public void close()
+        {
+            if (points.Count == 0 ) return;
+
+            List<(int X, int Y)> pointsList = points.ToList();
+            int minX = pointsList.Min(((int X, int Y) a) => a.X);
+            int minY = pointsList.Min(((int X, int Y) a) => a.Y);
+            int maxX = pointsList.Max(((int X, int Y) a) => a.X);
+            int maxY = pointsList.Max(((int X, int Y) a) => a.Y);
+
+            int dX = maxX - minX;
+            int dY = maxY - minY;
+
+
+            if(dX >= dY)
+            {
+                pointsList.Sort(((int X, int Y) a, (int X, int Y) b) => a.X - b.X); //sort based on X-direction
+                startPoint = pointsList.First();
+                endPoint = pointsList.Last();
+            }
+            else
+            {
+                pointsList.Sort(((int X, int Y) a, (int X, int Y) b) => a.Y - b.Y); //sort based on X-direction
+                startPoint = pointsList.First();
+                endPoint = pointsList.Last();
+
+            }
+            this.orderedPointsList = pointsList;
+
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="width">the width of the image</param>
@@ -112,12 +143,10 @@ namespace INFOIBV.Helper_Code
         {
             List<LineSegment> lineSegments = new List<LineSegment>();
 
-            List<(int X, int Y)> pointsList = points.ToList<(int X, int Y)>();
-            pointsList.Sort(((int X, int _) a, (int X, int _) b) => a.X - b.X); //sort based on X-direction
-
             LineSegment currentSegment = new LineSegment(theta, r, maxGap, minSegLength);
+            (int X, int Y) prevPoint = (0, 0); //filler, gets changed later
 
-            foreach((int X, int Y) point in pointsList)
+            foreach((int X, int Y) point in orderedPointsList)
             {
 
                 //Debug.WriteLine($"MaxGap: {maxGap}");
@@ -126,46 +155,61 @@ namespace INFOIBV.Helper_Code
 
                 int xGap = Math.Abs(currentSegment.startPoint.X - point.X);
                 int yGap = Math.Abs(currentSegment.startPoint.Y - point.Y);
-                float dist = (float)Math.Sqrt(xGap * xGap + yGap * yGap);    
+                float dist = distancePoints(prevPoint, point);
+                //Debug.WriteLine($"Gap: {dist}");
+
                 if (currentSegment.Length == 0 || dist <= maxGap)
                 {
-                    bool result = currentSegment.addPoint(point.X, point.Y, width, height);
+                    currentSegment.addPoint(point.X, point.Y, width, height);
                     //Debug.WriteLine($"added point: {result}");  
                 }
                 else if(currentSegment.LongEnough) //store segment and reset currentSegment.
                 {
+                    currentSegment.close();
                     lineSegments.Add(currentSegment);
                     currentSegment = new LineSegment(theta, r, maxGap, minSegLength);
                 }
                 else //discard current segment and reset it.
                 {
                     //Debug.WriteLine($"current segment length: {currentSegment.Length}");
+                    currentSegment.close();
                     currentSegment = new LineSegment(theta, r, 50, minSegLength);
                 }
+                prevPoint = point;
             }
 
             if (currentSegment.LongEnough)
+            {
+                currentSegment.close();
                 lineSegments.Add(currentSegment);
+            }
 
             return lineSegments;
+        }
+
+        private float distancePoints((int X, int Y) a, (int X, int Y) b)
+        {
+            int xGap = Math.Abs(a.X - b.X);
+            int yGap = Math.Abs(a.Y - b.Y);
+            return (float)Math.Sqrt(xGap * xGap + yGap * yGap);
         }
 
         public void drawToImage(Bitmap image, Color color, int width, int height, int thickness = 1)
         {
             if(thickness < 1)
                 throw new ArgumentException($"Thickness can't be lower than 1, was: {thickness}");
-
+            
             int xSpan = endPoint.X - startPoint.X;
             int ySpan = endPoint.Y - startPoint.Y;
 
-            if (xSpan == 0)
+            if (xSpan <= ySpan)
             {
 
                 for(int y = 0; y <= ySpan; y++)
                 {
-                    int yTransform = startPoint.Y + y - (width / 2);
+                    int yTransform = (height / 2) - startPoint.Y - y;
                     float xTransform = (float)(yTransform * Math.Sin(theta) - r) / (float)(-Math.Cos(theta));
-                    float x = (height / 2) - xTransform;
+                    float x = xTransform + (width / 2);
 
                     int roundX = (int)Math.Round(x);
 

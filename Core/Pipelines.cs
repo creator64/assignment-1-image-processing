@@ -91,18 +91,6 @@ namespace INFOIBV.Core
                     if (roundY >= 0 && roundY < edgeMap.GetLength(1) && edgeMap[x, roundY] >= minIntensity)
                         currentSegment.addPoint(x, roundY, width, height);
                 }
-
-                longSegments.Add(currentSegment);
-            }
-
-            // Find Line 
-            foreach (Vector2 ThetaR in peaks)
-            {
-                float theta = ThetaR.X, r = ThetaR.Y * maxR;
-
-                LineSegment currentSegment = new LineSegment(theta, r, maxGap, minSegLength);
-
-
                 for (int y = 0; y < edgeMap.GetLength(1); y++)
                 {
                     int yTransform = (height / 2) - y;
@@ -114,10 +102,12 @@ namespace INFOIBV.Core
                     if (roundX >= 0 && roundX < edgeMap.GetLength(0) && edgeMap[roundX, y] >= minIntensity)
                         currentSegment.addPoint(roundX, y, width, height);
                 }
-
-                longSegments.Add(currentSegment);
+                if (currentSegment.LongEnough)
+                {
+                    currentSegment.close();
+                    longSegments.Add(currentSegment);
+                }
             }
-            Debug.WriteLine($"longSegments length: {longSegments.Count}");
 
 
             List<LineSegment> shortSegments = new List<LineSegment>();
@@ -125,8 +115,6 @@ namespace INFOIBV.Core
             foreach (LineSegment seg in longSegments)
                 foreach (LineSegment subseg in seg.getSegments(width, height))
                     shortSegments.Add(subseg);
-
-            Debug.WriteLine($"shortSegments length: {shortSegments.Count}");
 
             foreach (LineSegment seg in shortSegments)
                 seg.drawToImage(OutputImage, Color.Red, width, height, 2);
