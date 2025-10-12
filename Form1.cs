@@ -271,10 +271,10 @@ namespace INFOIBV
 
                     byte minIntensity = 50;
                     ushort minSegLength = 20;
-                    ushort maxGap = 20;
+                    ushort maxGap = 7;
                     t_peak = 80;
 
-                    HoughTransform htDrawLines = new HoughTransform(processingImage.toArray(), processingImage.width * 5, processingImage.height * 5);
+                    HoughTransform htDrawLines = new HoughTransform(processingImage.toArray(), processingImage.width * 2, processingImage.height * 2);
                     ProcessingImage accumulatorArray = htDrawLines.houghTransform();
                     List<Vector2> peaks = htDrawLines.peakFinding(accumulatorArray, t_peak, selectedRegionFinder()).ThetaRPairs;
                     Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
