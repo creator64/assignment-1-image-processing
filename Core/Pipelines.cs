@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using INFOIBV;
 using INFOIBV.Helper_Code;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 namespace INFOIBV.Core
 {
     public static class Pipelines
@@ -40,7 +41,7 @@ namespace INFOIBV.Core
             return processingImage.toRegionalImage(regionFinder).getThetaRPairs();
         }
 
-        public static ProcessingImage BinaryPipeLine(ProcessingImage processingImage, byte minIntensity, ushort minSegLength, ushort maxGap, byte t_mag, byte t_peak, ImageRegionFinder regionFinder)
+        public static ProcessingImage BinaryPipeline(ProcessingImage processingImage, int thetaDetail, int rDetail, byte minIntensity, ushort minSegLength, ushort maxGap, byte t_mag, byte t_peak, ImageRegionFinder regionFinder)
         {
 
             ProcessingImage imageA = processingImage.adjustContrast();
@@ -60,11 +61,38 @@ namespace INFOIBV.Core
 
             ProcessingImage binaryEdgeMap = imageA.convolveImage(gaussianFilter).edgeMagnitude(horizontalKernel, verticalKernel).thresholdImage(t_mag);
 
-            HoughTransform htDrawLines = new HoughTransform(binaryEdgeMap.toArray(), binaryEdgeMap.width * 2, binaryEdgeMap.height * 2);
+            HoughTransform htDrawLines = new HoughTransform(binaryEdgeMap.toArray(), thetaDetail, rDetail);
             ProcessingImage accumulatorArray = htDrawLines.houghTransform();
-            List<Vector2> peaks = htDrawLines.peakFinding(accumulatorArray, t_peak, regionFinder).ThetaRPairs;
+            List<Vector2> peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
             Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
-            return new RGBProcessingImage(binaryEdgeMap.toArray(), outputImage);;
+            return new RGBProcessingImage(processingImage.toArray(), outputImage);
+        }
+
+        public static ProcessingImage GrayscalePipeline(ProcessingImage processingImage, int thetaDetail, int rDetail, byte minIntensity, ushort minSegLength, ushort maxGap, byte t_peak, ImageRegionFinder regionFinder)
+        {
+
+            ProcessingImage imageA = processingImage.adjustContrast();
+
+            float[,] gaussianFilter = ProcessingImage.createGaussianFilter(5, 2.25f);
+            float[,] horizontalKernel = {
+                { -1, -2, -1},
+                { 0, 0, 0},
+                { 1, 2, 1}
+            };
+
+            float[,] verticalKernel = {
+                { -1, 0, 1},
+                { -2, 0, 2},
+                { -1, 0, 1}
+            };
+
+            ProcessingImage binaryEdgeMap = imageA.convolveImage(gaussianFilter).edgeMagnitude(horizontalKernel, verticalKernel);
+
+            HoughTransform htDrawLines = new HoughTransform(binaryEdgeMap.toArray(), thetaDetail, rDetail);
+            ProcessingImage accumulatorArray = htDrawLines.houghTransform();
+            List<Vector2> peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
+            Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
+            return new RGBProcessingImage(processingImage.toArray(), outputImage);
         }
     }
 }

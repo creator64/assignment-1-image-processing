@@ -42,7 +42,9 @@ namespace INFOIBV
             HighlightRegions,
             HoughTransformation,
             HoughPeakFinding,
-            HoughLineSegments
+            HoughLineSegments,
+            BinaryPipeline,
+            GrayscalePipeline
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -246,7 +248,7 @@ namespace INFOIBV
                     return regionalProcessingImage.highlightRegions();
                 
                 case ProcessingFunctions.HoughTransformation :
-                    HoughTransform ht = new HoughTransform(processingImage.toArray(), processingImage.width, processingImage.height);
+                    HoughTransform ht = new HoughTransform(processingImage.toArray(), processingImage.width * (int)thetaDetailInput.Value, processingImage.height * (int)rDetailInput.Value);
                     return ht.houghTransform();
                 
                 case ProcessingFunctions.HoughPeakFinding:
@@ -256,7 +258,7 @@ namespace INFOIBV
                         { true, false, true},
                         { false, true, false}
                     };
-                    byte t_peak = 80;
+                    byte t_peak = (byte)t_peakInput.Value;
 
                     int thetaDetail = processingImage.width, rDetail = processingImage.height; //this is because the processingImage already is the accumulator Array
                     HoughTransform peakfindingTransform = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
@@ -269,21 +271,43 @@ namespace INFOIBV
 
                 case ProcessingFunctions.HoughLineSegments:
 
-                    byte minIntensity = 50;
-                    ushort minSegLength = 20;
-                    ushort maxGap = 7;
-                    t_peak = 80;
-                    thetaDetail = processingImage.width * 2;
-                    rDetail = processingImage.height * 2;
+                    byte minIntensity = (byte)minIntensityInput.Value;
+                    ushort minSegLength = (ushort)minSegLengthInput.Value;
+                    ushort maxGap = (ushort)maxGapInput.Value;
+                    t_peak = (byte)t_peakInput.Value;
+                    thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
+                    rDetail = processingImage.height * (int)rDetailInput.Value;
 
                     HoughTransform htDrawLines = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
                     ProcessingImage accumulatorArray = htDrawLines.houghTransform();
                     List<Vector2> peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
                     Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
                     return new RGBProcessingImage(processingImage.toArray(), outputImage);
-                
+                case ProcessingFunctions.BinaryPipeline:
+
+                    thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
+                    rDetail = processingImage.height * (int)rDetailInput.Value;
+
+                    t_peak = (byte)t_peakInput.Value;
+                    minIntensity = (byte)minIntensityInput.Value;
+                    minSegLength = (ushort)minSegLengthInput.Value;
+                    maxGap = (ushort)maxGapInput.Value;
+                    byte t_mag = (byte)t_magInput.Value; //vals 30, (100, best), 130, 180;
+
+                    return Pipelines.BinaryPipeline(processingImage, thetaDetail, rDetail, minIntensity, minSegLength, maxGap, t_mag, t_peak, selectedRegionFinder());
+                case ProcessingFunctions.GrayscalePipeline:
+                    thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
+                    rDetail = processingImage.height * (int)rDetailInput.Value;
+
+                    t_peak = (byte)t_peakInput.Value;
+                    minIntensity = (byte)minIntensityInput.Value;
+                    minSegLength = (ushort)minSegLengthInput.Value;
+                    maxGap = (ushort)maxGapInput.Value;
+
+                    return Pipelines.GrayscalePipeline(processingImage, thetaDetail, rDetail, minIntensity, minSegLength, maxGap, t_peak, selectedRegionFinder());
+
                 default:
-                    return null;
+                    return processingImage;
             }
         }
 

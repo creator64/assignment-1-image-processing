@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -53,6 +54,27 @@ namespace INFOIBV
             this.extraInformation = new Label();
             this.regionFinderComboBox = new System.Windows.Forms.ComboBox();
 
+            #region Hough Transform initialisations
+
+            //Inputs
+            this.t_magInput = new System.Windows.Forms.NumericUpDown();
+            this.thetaDetailInput = new System.Windows.Forms.NumericUpDown();
+            this.rDetailInput = new System.Windows.Forms.NumericUpDown();
+            this.t_peakInput = new System.Windows.Forms.NumericUpDown();
+            this.minIntensityInput = new System.Windows.Forms.NumericUpDown();
+            this.minSegLengthInput = new System.Windows.Forms.NumericUpDown();
+            this.maxGapInput = new System.Windows.Forms.NumericUpDown();
+
+            //labels
+            this.t_magLabel = new System.Windows.Forms.Label();
+            this.thetaDetailLabel = new System.Windows.Forms.Label();
+            this.rDetailLabel = new System.Windows.Forms.Label();
+            this.t_peakLabel = new System.Windows.Forms.Label();
+            this.minIntensityLabel = new System.Windows.Forms.Label();
+            this.minSegLengthLabel = new System.Windows.Forms.Label();
+            this.maxGapLabel = new System.Windows.Forms.Label();
+
+            #endregion
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
@@ -143,16 +165,40 @@ namespace INFOIBV
             this.comboBox.TabIndex = 7;
             this.comboBox.SelectedIndexChanged += (sender, args) =>
             {
+                Debug.WriteLine($"combobox text: {this.comboBox.Text}");
                 // sorry for the hardcode im lazy
                 bool task1Selected = this.comboBox.Text == "Task 1";
                 bool task2Selected = this.comboBox.Text == "Task 2";
                 bool task3Selected = this.comboBox.Text == "Task 3";
+                bool binaryPipelineSelected = this.comboBox.Text == "Binary Pipeline";
+                bool grayscalePipelineSelected = this.comboBox.Text == "Grayscale Pipeline";
+                bool houghLineSegmentsSelected = this.comboBox.Text == "Hough Line Segments";
+                bool houghPeaksDetected = this.comboBox.Text == "Hough Peak Finding";
+                bool getPeaksDetected = binaryPipelineSelected || grayscalePipelineSelected || houghLineSegmentsSelected || houghPeaksDetected;
+                bool houghTransformSelected = binaryPipelineSelected || grayscalePipelineSelected || houghLineSegmentsSelected || this.comboBox.Text == "Hough Transformation" || houghPeaksDetected;
                 bool regionDetectionSelected = this.comboBox.Text == "Highlight Regions" || this.comboBox.Text == "Largest Region";
 
                 sigmaInput.Visible = sigmaLabel.Visible = gaussianLabel.Visible = gaussianSize.Visible = task1Selected;
                 task2KernelSize.Visible = task2KernelLabel.Visible = task2Selected;
                 task3KernelSize.Visible = task3KernelLabel.Visible = task3Selected;
                 regionFinderComboBox.Visible = regionDetectionSelected;
+
+                #region HoughTransform Visibility
+                t_magInput.Visible = t_magLabel.Visible = binaryPipelineSelected;
+                t_peakInput.Visible = t_peakLabel.Visible = minIntensityInput.Visible = minIntensityLabel.Visible = minSegLengthInput.Visible = minSegLengthLabel.Visible = maxGapInput.Visible = maxGapLabel.Visible = getPeaksDetected;
+                thetaDetailInput.Visible = thetaDetailLabel.Visible = rDetailInput.Visible = rDetailLabel.Visible = houghTransformSelected;
+
+                if (this.comboBox.Text == "Hough Transformation") //some good values
+                {
+                    thetaDetailInput.Value = 1;
+                    rDetailInput.Value = 1;
+                }
+                else
+                {
+                    thetaDetailInput.Value = 2;
+                    rDetailInput.Value = 2;
+                }
+                #endregion
             };
 
             //
@@ -235,6 +281,112 @@ namespace INFOIBV
             this.regionFinderComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;;
             this.regionFinderComboBox.SelectedIndex = 0;
 
+            ///
+            // thetaDetail
+            //
+            this.thetaDetailLabel.Text = "Theta Detail";
+            this.thetaDetailLabel.Location = new System.Drawing.Point(142, 41);
+            this.thetaDetailLabel.Size = new Size(100, 20);
+            this.thetaDetailInput.Location = new System.Drawing.Point(145, 60);
+            this.thetaDetailInput.Name = "thetaDetailInput";
+            this.thetaDetailInput.Size = new System.Drawing.Size(98, 50);
+            this.thetaDetailInput.Increment = 1;
+            this.thetaDetailInput.DecimalPlaces = 0;
+            this.thetaDetailInput.Value = 2;
+            this.thetaDetailInput.Maximum = 3;
+            this.thetaDetailInput.Minimum = 0;
+
+            ///
+            // rDetail
+            //
+            this.rDetailLabel.Text = "R Detail";
+            this.rDetailLabel.Location = new System.Drawing.Point(250, 41);
+            this.rDetailLabel.Size = new Size(100, 20);
+            this.rDetailInput.Location = new System.Drawing.Point(250, 60);
+            this.rDetailInput.Name = "rDetailInput";
+            this.rDetailInput.Size = new System.Drawing.Size(98, 50);
+            this.rDetailInput.Increment = 1;
+            this.rDetailInput.DecimalPlaces = 0;
+            this.rDetailInput.Value = 2;
+            this.rDetailInput.Maximum = 3;
+            this.rDetailInput.Minimum = 0;
+
+
+            ///
+            // t_peak
+            //
+            this.t_peakLabel.Text = "t_peak";
+            this.t_peakLabel.Location = new System.Drawing.Point(350, 41);
+            this.t_peakLabel.Size = new Size(100, 20);
+            this.t_peakInput.Location = new System.Drawing.Point(350, 60);
+            this.t_peakInput.Name = "rDetailInput";
+            this.t_peakInput.Size = new System.Drawing.Size(98, 50);
+            this.t_peakInput.Increment = 10;
+            this.t_peakInput.DecimalPlaces = 0;
+            this.t_peakInput.Value = 80;
+            this.t_peakInput.Maximum = 255;
+            this.t_peakInput.Minimum = 0;
+
+            ///
+            // minIntensity
+            //
+            this.minIntensityLabel.Text = "Min. Intensity";
+            this.minIntensityLabel.Location = new System.Drawing.Point(450, 41);
+            this.minIntensityLabel.Size = new Size(100, 20);
+            this.minIntensityInput.Location = new System.Drawing.Point(450, 60);
+            this.minIntensityInput.Name = "minIntensityInput";
+            this.minIntensityInput.Size = new System.Drawing.Size(98, 50);
+            this.minIntensityInput.Increment = 10;
+            this.minIntensityInput.DecimalPlaces = 0;
+            this.minIntensityInput.Value = 50;
+            this.minIntensityInput.Maximum = 255;
+            this.minIntensityInput.Minimum = 0;
+
+            ///
+            // minSegLength
+            //
+            this.minSegLengthLabel.Text = "Min. Segment Length";
+            this.minSegLengthLabel.Location = new System.Drawing.Point(550, 41);
+            this.minSegLengthLabel.Size = new Size(100, 20);
+            this.minSegLengthInput.Location = new System.Drawing.Point(550, 60);
+            this.minSegLengthInput.Name = "minSegLengthInput";
+            this.minSegLengthInput.Size = new System.Drawing.Size(98, 50);
+            this.minSegLengthInput.Increment = 5;
+            this.minSegLengthInput.DecimalPlaces = 0;
+            this.minSegLengthInput.Maximum = ushort.MaxValue;
+            this.minSegLengthInput.Value = 20;
+            this.minSegLengthInput.Minimum = 0;
+
+            ///
+            // maxGap
+            //
+            this.maxGapLabel.Text = "Max Gap";
+            this.maxGapLabel.Location = new System.Drawing.Point(650, 41);
+            this.maxGapLabel.Size = new Size(100, 20);
+            this.maxGapInput.Location = new System.Drawing.Point(650, 60);
+            this.maxGapInput.Name = "maxGapInput";
+            this.maxGapInput.Size = new System.Drawing.Size(98, 50);
+            this.maxGapInput.Increment = 5;
+            this.maxGapInput.DecimalPlaces = 0;
+            this.maxGapInput.Maximum = ushort.MaxValue;
+            this.maxGapInput.Value = 7;
+            this.maxGapInput.Minimum = 0;
+
+            ///
+            // t_mag
+            //
+            this.t_magLabel.Text = "t_mag";
+            this.t_magLabel.Location = new System.Drawing.Point(750, 41);
+            this.t_magLabel.Size = new Size(100, 20);
+            this.t_magInput.Location = new System.Drawing.Point(750, 60);
+            this.t_magInput.Name = "t_magInput";
+            this.t_magInput.Size = new System.Drawing.Size(98, 50);
+            this.t_magInput.Increment = 10;
+            this.t_magInput.DecimalPlaces = 0;
+            this.t_magInput.Value = 80;
+            this.t_magInput.Maximum = 255;
+            this.t_magInput.Minimum = 0;
+
             //
             // INFOIBV
             // 
@@ -251,6 +403,14 @@ namespace INFOIBV
             this.Controls.Add(this.LoadImageButton);
             this.Controls.AddRange(new Control[] {this.gaussianSize, gaussianLabel});
             this.Controls.AddRange(new Control[] {this.sigmaInput, sigmaLabel});
+            this.Controls.AddRange(new Control[] { this.t_magInput, t_magLabel });
+            this.Controls.AddRange(new Control[] { this.t_peakInput, t_peakLabel });
+            this.Controls.AddRange(new Control[] { this.thetaDetailInput, thetaDetailLabel });
+            this.Controls.AddRange(new Control[] { this.rDetailInput, rDetailLabel });
+            this.Controls.AddRange(new Control[] { this.minIntensityInput, minIntensityLabel });
+            this.Controls.AddRange(new Control[] { this.minSegLengthInput, minSegLengthLabel });
+            this.Controls.AddRange(new Control[] { this.maxGapInput, maxGapLabel });
+
             this.Controls.AddRange(new Control[] { this.task2KernelSize, task2KernelLabel });
             this.Controls.AddRange(new Control[] { this.task3KernelSize, task3KernelLabel });
             this.Controls.Add(this.extraInformation);
@@ -288,6 +448,28 @@ namespace INFOIBV
         private System.Windows.Forms.Label task3KernelLabel;
         private System.Windows.Forms.Label extraInformation;
         private System.Windows.Forms.ComboBox regionFinderComboBox;
+
+        #region Hough Transform Shenanigans
+
+        //Inputs
+        private System.Windows.Forms.NumericUpDown t_magInput;
+        private System.Windows.Forms.NumericUpDown thetaDetailInput;
+        private System.Windows.Forms.NumericUpDown rDetailInput;
+        private System.Windows.Forms.NumericUpDown t_peakInput;
+        private System.Windows.Forms.NumericUpDown minIntensityInput;
+        private System.Windows.Forms.NumericUpDown minSegLengthInput;
+        private System.Windows.Forms.NumericUpDown maxGapInput;
+
+        //labels
+        private System.Windows.Forms.Label t_magLabel;
+        private System.Windows.Forms.Label thetaDetailLabel;
+        private System.Windows.Forms.Label rDetailLabel;
+        private System.Windows.Forms.Label t_peakLabel;
+        private System.Windows.Forms.Label minIntensityLabel;
+        private System.Windows.Forms.Label minSegLengthLabel;
+        private System.Windows.Forms.Label maxGapLabel;
+
+        #endregion
 
     }
 }
