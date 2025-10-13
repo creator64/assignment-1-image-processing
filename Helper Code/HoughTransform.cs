@@ -113,7 +113,6 @@ namespace INFOIBV.Helper_Code
 
                 LineSegment currentSegment = new LineSegment(theta, r, maxGap, minSegLength);
 
-                Debug.WriteLine($"peak: (theta: {theta}, r: {r})");
                 for (int x = 0; x < inputImage.GetLength(0); x++)
                 {
                     int xTransform = x - (width / 2);

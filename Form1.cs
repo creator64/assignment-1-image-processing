@@ -293,7 +293,7 @@ namespace INFOIBV
                     minIntensity = (byte)minIntensityInput.Value;
                     minSegLength = (ushort)minSegLengthInput.Value;
                     maxGap = (ushort)maxGapInput.Value;
-                    byte t_mag = (byte)t_magInput.Value; //vals 30, (100, best), 130, 180;
+                    byte t_mag = (byte)t_magInput.Value; 
 
                     return Pipelines.BinaryPipeline(processingImage, thetaDetail, rDetail, minIntensity, minSegLength, maxGap, t_mag, t_peak, selectedRegionFinder());
                 case ProcessingFunctions.GrayscalePipeline:

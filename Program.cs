@@ -32,6 +32,9 @@ namespace INFOIBV
                     case "task3":
                         tasks.Task3("images/image_for_task3.jpg");
                         break;
+                    case "task4":
+                        tasks.BinaryPipeline("images/image_for_tasks_1_and_2.jpg");
+                        break;
                     default:
                         break;
                 }
