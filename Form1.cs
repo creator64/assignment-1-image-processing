@@ -319,7 +319,7 @@ namespace INFOIBV
                     HoughTransform htDrawIntersects = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
                     accumulatorArray = htDrawIntersects.houghTransform();
                     peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
-                    List<(int X, int Y)> intersects = htDrawIntersects.getHoughLineIntersections(peaks);
+                    List<(int X, int Y)> intersects = htDrawIntersects.getHoughLineIntersections(peaks, minIntensity, maxGap, minSegLength);
                     outputImage = htDrawIntersects.drawPoints(intersects, Color.Red);
                     return new RGBProcessingImage(processingImage.toArray(), outputImage);
                 default:

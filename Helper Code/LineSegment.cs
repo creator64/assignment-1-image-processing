@@ -17,7 +17,8 @@ namespace INFOIBV.Helper_Code
 
         public HashSet<(int X, int Y)> points { get; private set; } = new HashSet<(int X, int Y)>();
 
-        private float theta, r;
+        public float theta { get; private set; }
+        public float r { get; private set; }
 
         private int maxGap, minSegLength;
 
@@ -25,6 +26,9 @@ namespace INFOIBV.Helper_Code
         public int Length { get { return points.Count; } }
 
         private List<(int X, int Y)> orderedPointsList;
+
+        private int dX;
+        private int dY; 
 
         public LineSegment(float theta, float r, int maxGap, int minSegLength)
         {
@@ -112,8 +116,8 @@ namespace INFOIBV.Helper_Code
             int maxX = pointsList.Max(((int X, int Y) a) => a.X);
             int maxY = pointsList.Max(((int X, int Y) a) => a.Y);
 
-            int dX = maxX - minX;
-            int dY = maxY - minY;
+            this.dX = maxX - minX;
+            this.dY = maxY - minY;
 
 
             if(dX >= dY)
@@ -124,7 +128,7 @@ namespace INFOIBV.Helper_Code
             }
             else
             {
-                pointsList.Sort(((int X, int Y) a, (int X, int Y) b) => a.Y - b.Y); //sort based on X-direction
+                pointsList.Sort(((int X, int Y) a, (int X, int Y) b) => a.Y - b.Y); //sort based on Y-direction
                 startPoint = pointsList.First();
                 endPoint = pointsList.Last();
 
@@ -187,6 +191,26 @@ namespace INFOIBV.Helper_Code
             return lineSegments;
         }
 
+        public bool validPoint(int X, int Y)
+        {
+            Debug.WriteLine($"-----------------------------------");
+            Debug.WriteLine($"X: {X}");
+            Debug.WriteLine($"Y: {Y}");
+            Debug.WriteLine($"Startpoint X: {startPoint.X}");
+            Debug.WriteLine($"StartPoint Y: {startPoint.Y}");
+            Debug.WriteLine($"endPoint X: {endPoint.X}");
+            Debug.WriteLine($"endPoint Y: {endPoint.Y}");
+            Debug.WriteLine($"-----------------------------------");
+            if (dX >= dY){
+                Debug.WriteLine($"({X}, {Y}) falls within X range [{startPoint.X} ... {endPoint.X}]: {X >= startPoint.X && X <= endPoint.X}");
+                return X >= startPoint.X && X <= endPoint.X;
+            }
+            else
+            {
+                Debug.WriteLine($"({X}, {Y}) falls within Y range [{startPoint.Y} ... {endPoint.Y}]: {Y >= startPoint.X && Y <= endPoint.X}");
+                return Y >= startPoint.Y && Y <= endPoint.Y;
+            }
+        }
         private float distancePoints((int X, int Y) a, (int X, int Y) b)
         {
             int xGap = Math.Abs(a.X - b.X);

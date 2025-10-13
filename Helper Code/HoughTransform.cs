@@ -102,7 +102,7 @@ namespace INFOIBV.Helper_Code
             return outputImage;
         }
 
-        public List<LineSegment> getLineSegments(List<Vector2> peaks, byte minIntensity, int maxGap, int minSegLength) 
+        public List<LineSegment> getLineSegments(List<Vector2> peaks, byte minIntensity, ushort maxGap, ushort minSegLength) 
         {
             List<LineSegment> longSegments = new List<LineSegment>();
 
@@ -152,17 +152,20 @@ namespace INFOIBV.Helper_Code
             return shortSegments;
         }
 
-        public List<(int X, int Y)> getHoughLineIntersections(List<Vector2> peaks)
+        public List<(int X, int Y)> getHoughLineIntersections(List<Vector2> peaks, byte minIntensity, ushort maxGap, ushort minSegLength)
         {
             List<(int X, int Y)> intersectionPoints = new List<(int X, int Y)>();
-            foreach(Vector2 a in peaks)
-            {
-                foreach (Vector2 b in peaks)
-                {
-                    if (a.X == b.X && a.Y == b.Y ) continue;
+            List<LineSegment> lineSegments = getLineSegments(peaks, minIntensity, maxGap, minSegLength);
 
-                    float thetaA = a.X, thetaB = b.X;
-                    float rA = a.Y * (float)Rmax, rB = b.Y * (float)Rmax;
+            foreach(LineSegment a in lineSegments)
+            {
+                foreach (LineSegment b in lineSegments)
+                {
+                    
+                    if (a.theta == b.theta && a.r == b.r ) continue;
+
+                    float thetaA = a.theta, thetaB = b.theta;
+                    float rA = a.r, rB = b.r;
 
                     if (Math.Sin(thetaB - thetaA) == 0) continue;
 
@@ -174,7 +177,12 @@ namespace INFOIBV.Helper_Code
                     int x = (int)Math.Round(x0);
                     int y = (int)Math.Round(y0);
 
-                    intersectionPoints.Add((x + (width / 2), (height / 2) - y));
+
+                    bool aValid = a.validPoint(x, y);
+                    bool bValid = b.validPoint(x, y);
+
+                    if (a.validPoint(x + (width / 2), (height / 2) - y) && b.validPoint(x + (width / 2), (height / 2) - y))
+                        intersectionPoints.Add((x + (width / 2), (height / 2) - y));
                 }
             }
 
