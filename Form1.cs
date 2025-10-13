@@ -44,7 +44,8 @@ namespace INFOIBV
             HoughPeakFinding,
             HoughLineSegments,
             BinaryPipeline,
-            GrayscalePipeline
+            GrayscalePipeline,
+            DrawIntersectionPoints
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -306,6 +307,21 @@ namespace INFOIBV
 
                     return Pipelines.GrayscalePipeline(processingImage, thetaDetail, rDetail, minIntensity, minSegLength, maxGap, t_peak, selectedRegionFinder());
 
+                case ProcessingFunctions.DrawIntersectionPoints:
+                    thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
+                    rDetail = processingImage.height * (int)rDetailInput.Value;
+
+                    t_peak = (byte)t_peakInput.Value;
+                    minIntensity = (byte)minIntensityInput.Value;
+                    minSegLength = (ushort)minSegLengthInput.Value;
+                    maxGap = (ushort)maxGapInput.Value;
+
+                    HoughTransform htDrawIntersects = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
+                    accumulatorArray = htDrawIntersects.houghTransform();
+                    peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
+                    List<(int X, int Y)> intersects = htDrawIntersects.getHoughLineIntersections(peaks);
+                    outputImage = htDrawIntersects.drawPoints(intersects, Color.Red);
+                    return new RGBProcessingImage(processingImage.toArray(), outputImage);
                 default:
                     return processingImage;
             }

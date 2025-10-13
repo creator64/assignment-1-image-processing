@@ -155,5 +155,52 @@ namespace INFOIBV.Helper_Code
             #endregion
             return outputImage;
         }
+
+        public List<(int X, int Y)> getHoughLineIntersections(List<Vector2> peaks)
+        {
+            List<(int X, int Y)> intersectionPoints = new List<(int X, int Y)>();
+            foreach(Vector2 a in peaks)
+            {
+                foreach (Vector2 b in peaks)
+                {
+                    if (a.X == b.X && a.Y == b.Y ) continue;
+
+                    float thetaA = a.X, thetaB = b.X;
+                    float rA = a.Y * (float)Rmax, rB = b.Y * (float)Rmax;
+
+                    if (Math.Sin(thetaB - thetaA) == 0) continue;
+
+                    float factor = 1 / (float)Math.Sin(thetaB - thetaA);
+
+                    float x0= factor * (float)(rA * Math.Sin(thetaB) - rB * Math.Sin(thetaA));
+                    float y0 = factor * (float)(rB * Math.Cos(thetaA) - rA * Math.Cos(thetaB));
+
+                    int x = (int)Math.Round(x0);
+                    int y = (int)Math.Round(y0);
+
+                    intersectionPoints.Add((x + (width / 2), (height / 2) - y));
+                }
+            }
+
+            return intersectionPoints;
+        }
+
+        public Bitmap drawPoints(List<(int X, int Y)> points, Color color)
+        {
+            Bitmap outputImage = this.convertToImage();
+            int offset = 3;
+
+            foreach ((int X, int Y) in points)
+            {
+                Debug.WriteLine($"Drawing point: ({X}, {Y})");
+                for (int xOffset = -offset; xOffset <= offset; xOffset++)
+                    for (int yOffset = -offset; yOffset <= offset; yOffset++)
+                        if (X + xOffset >= 0 && X + xOffset < width && Y + yOffset >= 0 && Y + yOffset < height)
+                            outputImage.SetPixel(X + xOffset, Y + yOffset, color);
+            }
+
+
+            return outputImage;
+        }
     }
 }
