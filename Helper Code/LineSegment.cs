@@ -148,19 +148,13 @@ namespace INFOIBV.Helper_Code
             foreach((int X, int Y) point in orderedPointsList)
             {
 
-                //Debug.WriteLine($"MaxGap: {maxGap}");
-                //Debug.WriteLine($"X gap: {Math.Abs(currentSegment.startPoint.X - point.X)}");
-                //Debug.WriteLine($"Y gap: {Math.Abs(currentSegment.endPoint.Y - point.Y)}");
-
                 int xGap = Math.Abs(currentSegment.startPoint.X - point.X);
                 int yGap = Math.Abs(currentSegment.startPoint.Y - point.Y);
                 float dist = distancePoints(prevPoint, point);
-                //Debug.WriteLine($"Gap: {dist}");
 
                 if (currentSegment.Length == 0 || dist <= maxGap)
                 {
                     currentSegment.addPoint(point.X, point.Y, width, height);
-                    //Debug.WriteLine($"added point: {result}");  
                 }
                 else if(currentSegment.LongEnough) //store segment and reset currentSegment.
                 {
@@ -170,7 +164,6 @@ namespace INFOIBV.Helper_Code
                 }
                 else //discard current segment and reset it.
                 {
-                    //Debug.WriteLine($"current segment length: {currentSegment.Length}");
                     currentSegment.close();
                     currentSegment = new LineSegment(theta, r, 50, minSegLength);
                 }

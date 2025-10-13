@@ -165,7 +165,6 @@ namespace INFOIBV
             this.comboBox.TabIndex = 7;
             this.comboBox.SelectedIndexChanged += (sender, args) =>
             {
-                Debug.WriteLine($"combobox text: {this.comboBox.Text}");
                 // sorry for the hardcode im lazy
                 bool task1Selected = this.comboBox.Text == "Task 1";
                 bool task2Selected = this.comboBox.Text == "Task 2";

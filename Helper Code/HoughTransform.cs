@@ -122,12 +122,8 @@ namespace INFOIBV.Helper_Code
 
                     int roundY = (int)Math.Round(y);
 
-                    Debug.WriteLine($"found point: ({x}, {roundY})");
-                    Debug.WriteLine($"height: {inputImage.GetLength(1)}");
-                    Debug.WriteLine($"----------------------------------");
-                    if (roundY >= 0 && roundY < inputImage.GetLength(1) && inputImage[x, roundY] >= minIntensity){
+                    if (roundY >= 0 && roundY < inputImage.GetLength(1) && inputImage[x, roundY] >= minIntensity)
                         currentSegment.addPoint(x, roundY, width, height);
-                    }
                 }
                 for (int y = 0; y < inputImage.GetLength(1); y++)
                 {
@@ -136,12 +132,9 @@ namespace INFOIBV.Helper_Code
                     double x = xTransform + (width / 2);
 
                     int roundX = (int)Math.Round(x);
-                    Debug.WriteLine($"found point: ({roundX}, {y})");
-                    Debug.WriteLine($"width: {inputImage.GetLength(0)}");
-                    Debug.WriteLine($"----------------------------------");
-                    if (roundX >= 0 && roundX < inputImage.GetLength(0) && inputImage[roundX, y] >= minIntensity){
+
+                    if (roundX >= 0 && roundX < inputImage.GetLength(0) && inputImage[roundX, y] >= minIntensity)
                         currentSegment.addPoint(roundX, y, width, height);
-                    }
                 }
                 if (currentSegment.LongEnough)
                 {
@@ -149,15 +142,12 @@ namespace INFOIBV.Helper_Code
                     longSegments.Add(currentSegment);
                 }
             }
-            Debug.WriteLine($"Long Segments count: {longSegments.Count}");
 
             List<LineSegment> shortSegments = new List<LineSegment>();
 
             foreach (LineSegment seg in longSegments)
                 foreach (LineSegment subseg in seg.getSegments(width, height))
                     shortSegments.Add(subseg);
-
-            Debug.WriteLine($"Short Segments count: {shortSegments.Count}");
 
             return shortSegments;
         }
@@ -206,7 +196,6 @@ namespace INFOIBV.Helper_Code
 
             foreach ((int X, int Y) in points)
             {
-                Debug.WriteLine($"Drawing point: ({X}, {Y})");
                 for (int xOffset = -offset; xOffset <= offset; xOffset++)
                     for (int yOffset = -offset; yOffset <= offset; yOffset++)
                         if (X + xOffset >= 0 && X + xOffset < width && Y + yOffset >= 0 && Y + yOffset < height)
