@@ -46,7 +46,7 @@ namespace INFOIBV.Helper_Code
         private bool fallsOnSlope(int x, int y, int width, int height)
         {
 
-            int xTransform = x - (width / 2);
+            int xTransform = x + (width / 2);
             float yTransform = (float)(xTransform * Math.Cos(theta) - r) / (float)(-Math.Sin(theta));
             float yCalc = (height / 2) - yTransform;
 
@@ -60,15 +60,10 @@ namespace INFOIBV.Helper_Code
         /// <param name="x">X coordinate</param>
         /// <param name="y">Y coordinate</param>
         /// <returns>Returns a bool that indicates whether the point could be added or not</returns>
-        public bool addPoint(int x, int y, int width, int height)
+        public void addPoint(int x, int y, int width, int height)
         {
-            if (fallsOnSlope(x, y, width, height))
-            {                
-                points.Add((x, y));
-                return true;
-            }
-            else
-                return false;
+            points.Add((x, y));
+
         }
 
 
@@ -193,21 +188,11 @@ namespace INFOIBV.Helper_Code
 
         public bool validPoint(int X, int Y)
         {
-            Debug.WriteLine($"-----------------------------------");
-            Debug.WriteLine($"X: {X}");
-            Debug.WriteLine($"Y: {Y}");
-            Debug.WriteLine($"Startpoint X: {startPoint.X}");
-            Debug.WriteLine($"StartPoint Y: {startPoint.Y}");
-            Debug.WriteLine($"endPoint X: {endPoint.X}");
-            Debug.WriteLine($"endPoint Y: {endPoint.Y}");
-            Debug.WriteLine($"-----------------------------------");
             if (dX >= dY){
-                Debug.WriteLine($"({X}, {Y}) falls within X range [{startPoint.X} ... {endPoint.X}]: {X >= startPoint.X && X <= endPoint.X}");
                 return X >= startPoint.X && X <= endPoint.X;
             }
             else
             {
-                Debug.WriteLine($"({X}, {Y}) falls within Y range [{startPoint.Y} ... {endPoint.Y}]: {Y >= startPoint.X && Y <= endPoint.X}");
                 return Y >= startPoint.Y && Y <= endPoint.Y;
             }
         }

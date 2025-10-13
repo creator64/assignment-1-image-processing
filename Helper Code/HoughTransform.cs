@@ -113,7 +113,7 @@ namespace INFOIBV.Helper_Code
 
                 LineSegment currentSegment = new LineSegment(theta, r, maxGap, minSegLength);
 
-
+                Debug.WriteLine($"peak: (theta: {theta}, r: {r})");
                 for (int x = 0; x < inputImage.GetLength(0); x++)
                 {
                     int xTransform = x - (width / 2);
@@ -122,19 +122,26 @@ namespace INFOIBV.Helper_Code
 
                     int roundY = (int)Math.Round(y);
 
-                    if (roundY >= 0 && roundY < inputImage.GetLength(1) && inputImage[x, roundY] >= minIntensity)
+                    Debug.WriteLine($"found point: ({x}, {roundY})");
+                    Debug.WriteLine($"height: {inputImage.GetLength(1)}");
+                    Debug.WriteLine($"----------------------------------");
+                    if (roundY >= 0 && roundY < inputImage.GetLength(1) && inputImage[x, roundY] >= minIntensity){
                         currentSegment.addPoint(x, roundY, width, height);
+                    }
                 }
                 for (int y = 0; y < inputImage.GetLength(1); y++)
                 {
-                    int yTransform = (width / 2) - y;
+                    int yTransform = (height / 2) - y;
                     double xTransform = (double)(yTransform * Math.Sin(theta) - r) / (float)(-Math.Cos(theta));
-                    double x = xTransform + (height / 2);
+                    double x = xTransform + (width / 2);
 
                     int roundX = (int)Math.Round(x);
-
-                    if (roundX >= 0 && roundX < inputImage.GetLength(0) && inputImage[roundX, y] >= minIntensity)
+                    Debug.WriteLine($"found point: ({roundX}, {y})");
+                    Debug.WriteLine($"width: {inputImage.GetLength(0)}");
+                    Debug.WriteLine($"----------------------------------");
+                    if (roundX >= 0 && roundX < inputImage.GetLength(0) && inputImage[roundX, y] >= minIntensity){
                         currentSegment.addPoint(roundX, y, width, height);
+                    }
                 }
                 if (currentSegment.LongEnough)
                 {
@@ -142,12 +149,15 @@ namespace INFOIBV.Helper_Code
                     longSegments.Add(currentSegment);
                 }
             }
+            Debug.WriteLine($"Long Segments count: {longSegments.Count}");
 
             List<LineSegment> shortSegments = new List<LineSegment>();
 
             foreach (LineSegment seg in longSegments)
                 foreach (LineSegment subseg in seg.getSegments(width, height))
                     shortSegments.Add(subseg);
+
+            Debug.WriteLine($"Short Segments count: {shortSegments.Count}");
 
             return shortSegments;
         }
