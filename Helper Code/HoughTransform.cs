@@ -92,9 +92,19 @@ namespace INFOIBV.Helper_Code
 
             List<((int X, int Y) startPoint, (int X, int Y) endPoint)> lineSegments = new List<((int X, int Y) startPoint, (int X, int Y) endPoint)>();
 
-            List<LineSegment> longSegments = new List<LineSegment>();
             Bitmap outputImage = this.convertToImage();
 
+            List<LineSegment> segments = getLineSegments(peaks, minIntensity, maxGap, minSegLength);
+
+            foreach (LineSegment seg in segments)
+                seg.drawToImage(outputImage, Color.Red, width, height, 2);
+
+            return outputImage;
+        }
+
+        public List<LineSegment> getLineSegments(List<Vector2> peaks, byte minIntensity, int maxGap, int minSegLength) 
+        {
+            List<LineSegment> longSegments = new List<LineSegment>();
 
             // Find Line 
             foreach (Vector2 ThetaR in peaks)
@@ -139,21 +149,7 @@ namespace INFOIBV.Helper_Code
                 foreach (LineSegment subseg in seg.getSegments(width, height))
                     shortSegments.Add(subseg);
 
-            foreach (LineSegment seg in shortSegments)
-                seg.drawToImage(outputImage, Color.Red, width, height, 2);
-
-            #region Debugging Shenanigans
-            bool drawShortSegPoints = false;
-            bool drawLongSegPoints = false;
-
-            if (drawLongSegPoints)
-                foreach (LineSegment seg in longSegments)
-                    seg.drawPointsToImage(outputImage, Color.MidnightBlue, 2);
-            if (drawShortSegPoints)
-                foreach (LineSegment seg in shortSegments)
-                    seg.drawPointsToImage(outputImage, Color.GreenYellow, 1);
-            #endregion
-            return outputImage;
+            return shortSegments;
         }
 
         public List<(int X, int Y)> getHoughLineIntersections(List<Vector2> peaks)
