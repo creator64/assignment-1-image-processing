@@ -37,7 +37,7 @@ def parseSettingsFromArgs(argslist):
             noRun = True
         elif arg == "--plotdata":
             plotData = True
-        elif (arg == "task1" or arg == "task2" or arg == "task3" or arg == "task4"):
+        elif (arg == "task1" or arg == "task2" or arg == "task3" or arg == "task4" or "task5"):
             task = arg;
 
 def getImgDataFileNames(imgTag : str, imgCount : int) -> list[str]:

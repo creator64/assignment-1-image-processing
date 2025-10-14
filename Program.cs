@@ -17,7 +17,10 @@ namespace INFOIBV
         {
             Tasks tasks = new Tasks();
 
-            if (args.Length == 0) startApplication();
+            if (args.Length == 0)
+            {
+                startApplication();
+            }
             else
             {
                 switch (args[0])
@@ -34,6 +37,9 @@ namespace INFOIBV
                         break;
                     case "task4":
                         tasks.BinaryPipeline("images/image_for_tasks_1_and_2.jpg");
+                        break;
+                    case "task5":
+                        tasks.GrayscalePipeline("images/image_for_tasks_1_and_2.jpg");
                         break;
                     default:
                         break;

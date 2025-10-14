@@ -144,12 +144,12 @@ namespace INFOIBV
             ProcessingImage processingImage = new ProcessingImage(workingImage);
 
             List<BinaryPipelineConfig> configs = new List<BinaryPipelineConfig>{
-                new BinaryPipelineConfig("t_mag_too_low", 2, 2, 90, 50, 10, 7, 75),             // compensate lower t_mag with bigger t_peak
-                new BinaryPipelineConfig("t_peak_compensation", 2, 2, 160, 50, 10, 7, 75),      // compensate lower t_mag with bigger t_peak
-                new BinaryPipelineConfig("t_peak_too_low", 2, 2, 40, 50, 5, 2, 70),             // example of too low a t_peak
-                new BinaryPipelineConfig("detail_loss", 2, 2, 150, 50, 25, 32, 90),             // too big of a t_peak for too high a t_mag, many details lost.
-                new BinaryPipelineConfig("minSegLength_too_high", 2, 2, 120, 50, 30, 22, 70),   // example of too big a minimal segment length
-                new BinaryPipelineConfig("perfection", 2, 2, 80, 50, 20, 7, 90)                 // perfect
+                new BinaryPipelineConfig("1_t_mag_too_low", 2, 2, 90, 50, 10, 7, 75),             // compensate lower t_mag with bigger t_peak
+                new BinaryPipelineConfig("2_t_peak_compensation", 2, 2, 160, 50, 10, 7, 75),      // compensate lower t_mag with bigger t_peak
+                new BinaryPipelineConfig("3_t_peak_too_low", 2, 2, 40, 50, 5, 2, 70),             // example of too low a t_peak
+                new BinaryPipelineConfig("4_detail_loss", 2, 2, 150, 50, 25, 32, 90),             // too big of a t_peak for too high a t_mag, many details lost.
+                new BinaryPipelineConfig("5_minSegLength_too_high", 2, 2, 120, 50, 30, 22, 70),   // example of too big a minimal segment length
+                new BinaryPipelineConfig("6_perfection", 2, 2, 80, 50, 20, 7, 90)                 // perfect
             };
 
             string imgPath = Path.Combine(basePath, "out", "task4", "images");
@@ -171,6 +171,52 @@ namespace INFOIBV
                                                                           config.t_mag,
                                                                           config.t_peak,
                                                                           config.regionFinder);
+                string jsonString = JsonSerializer.Serialize(config);
+                File.WriteAllText(Path.Combine(dataPath, "config_" + config.name + ".json"), jsonString);
+
+                Image output = processedImage.convertToImage();
+
+                output.Save(Path.Combine(imgPath, config.name + ".png"), ImageFormat.Png);
+            }
+
+        }
+        public void GrayscalePipeline(string path)
+        {
+            var enviroment = System.Environment.CurrentDirectory;
+            string basePath = enviroment;
+            //basePath = "C:\\Users\\Dangual\\Documents\\UU\\Beeldverwerking\\assignment-1-image-processing";
+
+            Debug.WriteLine(Path.Combine(basePath, path));
+            Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
+            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
+            byte[,] workingImage = ConverterMethods.convertToGrayscale(Image);
+            ProcessingImage processingImage = new ProcessingImage(workingImage);
+
+            List<GrayscalePipelineConfig> configs = new List<GrayscalePipelineConfig>{
+                new GrayscalePipelineConfig("8_t_peak_too_high", 2, 2, 100, 50, 20, 7),             // Tried to compensate moderate with too much t_peak, most important lines are there but many details are lost
+                new GrayscalePipelineConfig("9_segLength_gap_compensation", 2, 2, 80, 50, 30, 2),   // Tried to get rid of ugly tiny diagonals by raising the minimum segment length and lowering the maximum gap, this gets rid of many of them, leaving us with clean lines, more detail than 1 but still less than 4
+                new GrayscalePipelineConfig("7_moderate", 2, 2, 80, 50, 20, 7),                     // moderate values, yet we can see many correct lines, but also any that are a bit wacky.
+                new GrayscalePipelineConfig("10_perfect", 2, 2, 85, 70, 15, 7)                      // perfect, slightly heightneed t_peak, heightened minIntensity a lot and dropped the min_seg length a bit compared to moderate for pretty accurate lines over entire image.
+            };
+
+            string imgPath = Path.Combine(basePath, "out", "task5", "images");
+            string dataPath = Path.Combine(basePath, "out", "task5", "data");
+
+            if (!Directory.Exists(imgPath))
+                Directory.CreateDirectory(imgPath);
+            if (!Directory.Exists(dataPath))
+                Directory.CreateDirectory(dataPath);
+
+            foreach (GrayscalePipelineConfig config in configs)
+            {
+                ProcessingImage processedImage = Pipelines.GrayscalePipeline( processingImage,
+                                                                              processingImage.width * config.thetaDetailFactor,
+                                                                              processingImage.height * config.rDetailFactor,
+                                                                              config.minIntensity,
+                                                                              config.minSegLength,
+                                                                              config.maxGap,
+                                                                              config.t_peak,
+                                                                              config.regionFinder);
                 string jsonString = JsonSerializer.Serialize(config);
                 File.WriteAllText(Path.Combine(dataPath, "config_" + config.name + ".json"), jsonString);
 
