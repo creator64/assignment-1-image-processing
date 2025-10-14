@@ -64,29 +64,6 @@ namespace INFOIBV.Helper_Code
                 );
         }
 
-        public (ProcessingImage processedAccumulator, List<Vector2> ThetaRPairs) peakFinding(ProcessingImage accumulatorArray, byte t_peak,ImageRegionFinder regionFinder = null)
-        {
-            if (regionFinder == null) regionFinder = new FloodFill();
-
-            bool[,] structElem = {
-                { false, true, false},
-                { true, false, true},
-                { false, true, false}
-            };
-            ProcessingImage processingImage = accumulatorArray.halfThresholdImage(t_peak).binaryCloseImage(structElem);
-
-            return (processingImage, getThetaRPairs(processingImage.toRegionalImage(regionFinder)));
-        }
-
-        private List<Vector2> getThetaRPairs(RegionalProcessingImage processedAcc)
-        {
-            return processedAcc.regionCenters()
-                .Select(p =>
-                    HelperFunctions.coordinateToThetaRPair(p.Value,
-                        thetaDetail, rDetail))
-                .ToList();
-        }
-
         public Bitmap houghLineSegments(List<Vector2> peaks, byte minIntensity, ushort minSegLength, ushort maxGap)
         {
 

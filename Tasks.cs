@@ -144,9 +144,9 @@ namespace INFOIBV
             ProcessingImage processingImage = new ProcessingImage(workingImage);
 
             List<BinaryPipelineConfig> configs = new List<BinaryPipelineConfig>{
-                new BinaryPipelineConfig("1_t_mag_too_high", 2, 2, 110, 50, 20, 7, 130),           // Way too high of a t_mag value, few details as a result
-                new BinaryPipelineConfig("2_lower_t_mag", 2, 2, 140, 50, 20, 7, 60),              // compensate lower t_mag with bigger t_peak
-                new BinaryPipelineConfig("3_okayish", 3, 3, 70, 50, 20, 7, 70),                     // Lowered t_peak for more details, heightened t_mag a bit to compensate for wackiness, we get many good outlines, but it looks a bit messy
+                new BinaryPipelineConfig("1_t_mag_too_high", 2, 2, 110, 50, 20, 7, 130),    // Way too high of a t_mag value, few details as a result
+                new BinaryPipelineConfig("2_lower_t_mag", 2, 2, 140, 50, 20, 7, 60),        // compensate lower t_mag with bigger t_peak
+                new BinaryPipelineConfig("3_okayish", 3, 3, 70, 50, 20, 7, 70),             // Lowered t_peak for more details, heightened t_mag a bit to compensate for wackiness, we get many good outlines, but it looks a bit messy
                 new BinaryPipelineConfig("4_good", 3, 3, 110, 50, 20, 7, 80),               // good; heightened t_peak back up a bit and raised the t_mag value a bit more.
             };
 
@@ -191,10 +191,10 @@ namespace INFOIBV
             ProcessingImage processingImage = new ProcessingImage(workingImage);
 
             List<GrayscalePipelineConfig> configs = new List<GrayscalePipelineConfig>{
-                new GrayscalePipelineConfig("8_t_peak_too_high", 2, 2, 100, 50, 20, 7),             // Tried to compensate moderate with too much t_peak, most important lines are there but many details are lost
-                new GrayscalePipelineConfig("9_segLength_gap_compensation", 2, 2, 80, 50, 30, 2),   // Tried to get rid of ugly tiny diagonals by raising the minimum segment length and lowering the maximum gap, this gets rid of many of them, leaving us with clean lines, more detail than 1 but still less than 4
-                new GrayscalePipelineConfig("7_moderate", 2, 2, 80, 50, 20, 7),                     // moderate values, yet we can see many correct lines, but also any that are a bit wacky.
-                new GrayscalePipelineConfig("10_perfect", 2, 2, 85, 70, 15, 7)                      // perfect, slightly heightneed t_peak, heightened minIntensity a lot and dropped the min_seg length a bit compared to moderate for pretty accurate lines over entire image.
+                new GrayscalePipelineConfig("6_t_peak_too_high", 2, 2, 100, 50, 20, 7),             // Tried to compensate moderate with too much t_peak, most important lines are there but many details are lost
+                new GrayscalePipelineConfig("7_segLength_gap_compensation", 2, 2, 80, 50, 30, 2),   // Tried to get rid of ugly tiny diagonals by raising the minimum segment length and lowering the maximum gap, this gets rid of many of them, leaving us with clean lines, more detail than 1 but still less than 4
+                new GrayscalePipelineConfig("5_moderate", 2, 2, 80, 50, 20, 7),                     // moderate values, yet we can see many correct lines, but also any that are a bit wacky.
+                new GrayscalePipelineConfig("8_perfect", 2, 2, 85, 70, 15, 7)                       // perfect, slightly heightneed t_peak, heightened minIntensity a lot and dropped the min_seg length a bit compared to moderate for pretty accurate lines over entire image.
             };
 
             string imgPath = Path.Combine(basePath, "out", "task5", "images");

@@ -263,12 +263,19 @@ namespace INFOIBV
 
                     int thetaDetail = processingImage.width, rDetail = processingImage.height; //this is because the processingImage already is the accumulator Array
                     HoughTransform peakfindingTransform = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
+                    bool[,] struc = {
+                        { false, true, false},
+                        { true, false, true},
+                        { false, true, false}
+                    };
+                    ProcessingImage accumulatorArray = peakfindingTransform.houghTransform();
+                    ProcessingImage output = accumulatorArray.halfThresholdImage(t_peak).binaryCloseImage(struc);
 
-                    (ProcessingImage processedAcc, List<Vector2> ThetaR) output = peakfindingTransform.peakFinding(processingImage, t_peak, selectedRegionFinder());
+                    List<Vector2> peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
 
-                    extraInformation.Text = "peaks <theta, r> (r is normalized): \n" + string.Join(",", output.ThetaR);
+                    extraInformation.Text = "peaks <theta, r> (r is normalized): \n" + string.Join(",", peaks);
                     
-                    return output.processedAcc; // output;
+                    return output; // output;
 
                 case ProcessingFunctions.HoughLineSegments:
 
@@ -280,8 +287,8 @@ namespace INFOIBV
                     rDetail = processingImage.height * (int)rDetailInput.Value;
 
                     HoughTransform htDrawLines = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
-                    ProcessingImage accumulatorArray = htDrawLines.houghTransform();
-                    List<Vector2> peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
+                    accumulatorArray = htDrawLines.houghTransform();
+                    peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
                     Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
                     return new RGBProcessingImage(processingImage.toArray(), outputImage);
                 case ProcessingFunctions.BinaryPipeline:
