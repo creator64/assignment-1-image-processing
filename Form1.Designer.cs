@@ -292,7 +292,7 @@ namespace INFOIBV
             this.thetaDetailInput.Increment = 1;
             this.thetaDetailInput.DecimalPlaces = 0;
             this.thetaDetailInput.Value = 2;
-            this.thetaDetailInput.Maximum = 3;
+            this.thetaDetailInput.Maximum = 15;
             this.thetaDetailInput.Minimum = 1;
 
             ///
@@ -307,7 +307,7 @@ namespace INFOIBV
             this.rDetailInput.Increment = 1;
             this.rDetailInput.DecimalPlaces = 0;
             this.rDetailInput.Value = 2;
-            this.rDetailInput.Maximum = 3;
+            this.rDetailInput.Maximum = 15;
             this.rDetailInput.Minimum = 1;
 
 
