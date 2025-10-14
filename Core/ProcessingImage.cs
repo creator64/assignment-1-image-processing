@@ -370,6 +370,11 @@ namespace INFOIBV.Core
             return new RegionalProcessingImage(inputImage, regionFinder);
         }
 
+        public HoughTransform toHoughTransform(int thetaDetail, int rDetail)
+        {
+            return new HoughTransform(inputImage, thetaDetail, rDetail);
+        }
+
         public virtual Bitmap convertToImage()
         {
             Bitmap OutputImage = new Bitmap(inputImage.GetLength(0), inputImage.GetLength(1)); // create new output image

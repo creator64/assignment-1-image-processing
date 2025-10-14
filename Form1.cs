@@ -250,7 +250,7 @@ namespace INFOIBV
                     return regionalProcessingImage.highlightRegions();
                 
                 case ProcessingFunctions.HoughTransformation :
-                    HoughTransform ht = new HoughTransform(processingImage.toArray(), processingImage.width * (int)thetaDetailInput.Value, processingImage.height * (int)rDetailInput.Value);
+                    HoughTransform ht = processingImage.toHoughTransform(processingImage.width * (int)thetaDetailInput.Value, processingImage.height * (int)rDetailInput.Value);
                     return ht.houghTransform();
                 
                 case ProcessingFunctions.HoughPeakFinding:
@@ -284,7 +284,7 @@ namespace INFOIBV
                     int thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
                     int rDetail = processingImage.height * (int)rDetailInput.Value;
 
-                    HoughTransform htDrawLines = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
+                    HoughTransform htDrawLines = processingImage.toHoughTransform(thetaDetail, rDetail);
                     ProcessingImage accumulatorArray = htDrawLines.houghTransform();
                     peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
                     Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
@@ -321,7 +321,7 @@ namespace INFOIBV
                     minSegLength = 20;
                     maxGap = 7;
 
-                    HoughTransform htDrawIntersects = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
+                    HoughTransform htDrawIntersects = processingImage.toHoughTransform(thetaDetail, rDetail);
                     accumulatorArray = htDrawIntersects.houghTransform();
                     peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
                     List<(int X, int Y)> intersects = htDrawIntersects.getHoughLineIntersections(peaks, minIntensity, maxGap, minSegLength);
