@@ -261,17 +261,14 @@ namespace INFOIBV
                     };
                     byte t_peak = (byte)t_peakInput.Value;
 
-                    int thetaDetail = processingImage.width, rDetail = processingImage.height; //this is because the processingImage already is the accumulator Array
-                    HoughTransform peakfindingTransform = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
                     bool[,] struc = {
                         { false, true, false},
                         { true, false, true},
                         { false, true, false}
                     };
-                    ProcessingImage accumulatorArray = peakfindingTransform.houghTransform();
-                    ProcessingImage output = accumulatorArray.halfThresholdImage(t_peak).binaryCloseImage(struc);
+                    ProcessingImage output = processingImage.halfThresholdImage(t_peak).binaryCloseImage(struc);
 
-                    List<Vector2> peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
+                    List<Vector2> peaks = Pipelines.peakFinding(processingImage, t_peak);
 
                     extraInformation.Text = "peaks <theta, r> (r is normalized): \n" + string.Join(",", peaks);
                     
@@ -283,11 +280,11 @@ namespace INFOIBV
                     ushort minSegLength = (ushort)minSegLengthInput.Value;
                     ushort maxGap = (ushort)maxGapInput.Value;
                     t_peak = (byte)t_peakInput.Value;
-                    thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
-                    rDetail = processingImage.height * (int)rDetailInput.Value;
+                    int thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
+                    int rDetail = processingImage.height * (int)rDetailInput.Value;
 
                     HoughTransform htDrawLines = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
-                    accumulatorArray = htDrawLines.houghTransform();
+                    ProcessingImage accumulatorArray = htDrawLines.houghTransform();
                     peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
                     Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
                     return new RGBProcessingImage(processingImage.toArray(), outputImage);

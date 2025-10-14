@@ -270,7 +270,7 @@ namespace INFOIBV
             //
             // Extra information
             //
-            this.extraInformation.Location = new System.Drawing.Point(531, 50);
+            this.extraInformation.Location = new System.Drawing.Point(800, 70);
             this.extraInformation.Size = new Size(8000, 100);
             //
             // regionFinderComboBox
