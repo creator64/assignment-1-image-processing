@@ -86,9 +86,9 @@ namespace INFOIBV.Core
                 { -1, 0, 1}
             };
 
-            ProcessingImage binaryEdgeMap = imageA.convolveImage(gaussianFilter).edgeMagnitude(horizontalKernel, verticalKernel);
+            ProcessingImage grayscaleEdgeMap = imageA.convolveImage(gaussianFilter).edgeMagnitude(horizontalKernel, verticalKernel);
 
-            HoughTransform htDrawLines = new HoughTransform(binaryEdgeMap.toArray(), thetaDetail, rDetail);
+            HoughTransform htDrawLines = new HoughTransform(grayscaleEdgeMap.toArray(), thetaDetail, rDetail);
             ProcessingImage accumulatorArray = htDrawLines.houghTransform();
             List<Vector2> peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
             Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
