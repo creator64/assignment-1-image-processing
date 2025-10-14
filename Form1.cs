@@ -113,9 +113,10 @@ namespace INFOIBV
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryErosion
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryDilation
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.LargestRegion
-                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.HighlightRegions)
+                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.HighlightRegions
+                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.DrawIntersectionPoints)
                 && !data.isBinary())
-                MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform binary morphological operations over it. Threshold it first to turn it into a binary image.");
+                MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform this operation on it. Threshold it first to turn it into a binary image.");
             else
             { 
                 ProcessingImage image = applyProcessingFunction(workingImage);           // processing functions
