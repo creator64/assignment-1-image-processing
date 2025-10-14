@@ -312,13 +312,13 @@ namespace INFOIBV
                     return Pipelines.GrayscalePipeline(processingImage, thetaDetail, rDetail, minIntensity, minSegLength, maxGap, t_peak, selectedRegionFinder());
 
                 case ProcessingFunctions.DrawIntersectionPoints:
-                    thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
-                    rDetail = processingImage.height * (int)rDetailInput.Value;
+                    thetaDetail = processingImage.width * 2;
+                    rDetail = processingImage.height * 2;
 
-                    t_peak = (byte)t_peakInput.Value;
-                    minIntensity = (byte)minIntensityInput.Value;
-                    minSegLength = (ushort)minSegLengthInput.Value;
-                    maxGap = (ushort)maxGapInput.Value;
+                    t_peak = 80;
+                    minIntensity = 50;
+                    minSegLength = 20;
+                    maxGap = 7;
 
                     HoughTransform htDrawIntersects = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
                     accumulatorArray = htDrawIntersects.houghTransform();
