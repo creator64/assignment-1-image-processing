@@ -144,12 +144,10 @@ namespace INFOIBV
             ProcessingImage processingImage = new ProcessingImage(workingImage);
 
             List<BinaryPipelineConfig> configs = new List<BinaryPipelineConfig>{
-                new BinaryPipelineConfig("1_t_mag_too_low", 2, 2, 90, 50, 10, 7, 75),             // compensate lower t_mag with bigger t_peak
-                new BinaryPipelineConfig("2_t_peak_compensation", 2, 2, 160, 50, 10, 7, 75),      // compensate lower t_mag with bigger t_peak
-                new BinaryPipelineConfig("3_t_peak_too_low", 2, 2, 40, 50, 5, 2, 70),             // example of too low a t_peak
-                new BinaryPipelineConfig("4_detail_loss", 2, 2, 150, 50, 25, 32, 90),             // too big of a t_peak for too high a t_mag, many details lost.
-                new BinaryPipelineConfig("5_minSegLength_too_high", 2, 2, 120, 50, 30, 22, 70),   // example of too big a minimal segment length
-                new BinaryPipelineConfig("6_perfection", 2, 2, 80, 50, 20, 7, 90)                 // perfect
+                new BinaryPipelineConfig("1_t_mag_too_high", 2, 2, 110, 50, 20, 7, 130),           // Way too high of a t_mag value, few details as a result
+                new BinaryPipelineConfig("2_lower_t_mag", 2, 2, 140, 50, 20, 7, 60),              // compensate lower t_mag with bigger t_peak
+                new BinaryPipelineConfig("3_okayish", 3, 3, 70, 50, 20, 7, 70),                     // Lowered t_peak for more details, heightened t_mag a bit to compensate for wackiness, we get many good outlines, but it looks a bit messy
+                new BinaryPipelineConfig("4_good", 3, 3, 110, 50, 20, 7, 80),               // good; heightened t_peak back up a bit and raised the t_mag value a bit more.
             };
 
             string imgPath = Path.Combine(basePath, "out", "task4", "images");
