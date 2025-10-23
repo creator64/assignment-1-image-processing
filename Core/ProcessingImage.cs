@@ -178,6 +178,14 @@ namespace INFOIBV.Core
             return new ProcessingImage(tempImage);
         }
 
+        public ProcessingImage otsuThresholding()
+        {
+            ImageData data = new ImageData(inputImage);
+            int[] histogram = data.histogram;
+
+            return this.thresholdImage(125);
+        }
+
         public ProcessingImage halfThresholdImage(byte threshold)
         {
             // create temporary grayscale image
