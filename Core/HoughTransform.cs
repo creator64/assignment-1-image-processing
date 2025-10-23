@@ -5,10 +5,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using INFOIBV.Helper_Code;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace INFOIBV.Helper_Code
+namespace INFOIBV.Core
 {
     public class HoughTransform : ProcessingImage
     {
