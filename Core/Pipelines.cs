@@ -94,5 +94,24 @@ namespace INFOIBV.Core
             Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
             return new RGBProcessingImage(processingImage.toArray(), outputImage);
         }
+
+        public static ProcessingImage Assignment3(ProcessingImage processingImage, byte t_mag, bool[,] structElem)
+        {
+            float[,] horizontalKernel = {
+                { -1, -2, -1},
+                { 0, 0, 0},
+                { 1, 2, 1}
+            };
+
+            float[,] verticalKernel = {
+                { -1, 0, 1},
+                { -2, 0, 2},
+                { -1, 0, 1}
+            };
+
+            ProcessingImage binaryEdgeMap = processingImage.adjustContrast().thresholdImage(t_mag).invertImage().binaryCloseImage(structElem);
+
+            return binaryEdgeMap;
+        }
     }
 }

@@ -45,7 +45,8 @@ namespace INFOIBV
             HoughLineSegments,
             BinaryPipeline,
             GrayscalePipeline,
-            DrawIntersectionPoints
+            DrawIntersectionPoints,
+            Assignment3
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -327,6 +328,16 @@ namespace INFOIBV
                     List<(int X, int Y)> intersects = htDrawIntersects.getHoughLineIntersections(peaks, minIntensity, maxGap, minSegLength);
                     outputImage = htDrawIntersects.drawPoints(intersects, Color.Red);
                     return new RGBProcessingImage(processingImage.toArray(), outputImage);
+                case ProcessingFunctions.Assignment3:
+                    t_mag = (byte)t_magInput.Value;
+                    gaussianMatrixSize = gaussianSize.Value;
+                    sigma = sigmaInput.Value;
+                    bool[,] A3StructElem = {
+                        { false, true, false},
+                        { true, true, true},
+                        { false, true, false}
+                    };
+                    return Pipelines.Assignment3(processingImage, t_mag, A3StructElem);
                 default:
                     return processingImage;
             }
