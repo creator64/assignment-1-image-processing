@@ -37,7 +37,7 @@ def parseSettingsFromArgs(argslist):
             noRun = True
         elif arg == "--plotdata":
             plotData = True
-        elif (arg == "task1" or arg == "task2" or arg == "task3"):
+        elif (arg == "task1" or arg == "task2" or arg == "task3" or arg == "task4" or "task5"):
             task = arg;
 
 def getImgDataFileNames(imgTag : str, imgCount : int) -> list[str]:
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     parseSettingsFromArgs(sys.argv)
 
     if not task: 
-        print("Please specify which task to perform: \n task1, task2 or task3")
+        print("Please specify which task to perform: \n task1, task2, task3, task4")
     else:
         if not noRun: 
             print(f"\033[33mRunning code for {task}, this can take a bit\033[0m")

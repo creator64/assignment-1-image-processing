@@ -113,9 +113,10 @@ namespace INFOIBV
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryErosion
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.BinaryDilation
                 || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.LargestRegion
-                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.HighlightRegions)
+                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.HighlightRegions
+                || (ProcessingFunctions)comboBox.SelectedIndex == ProcessingFunctions.DrawIntersectionPoints)
                 && !data.isBinary())
-                MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform binary morphological operations over it. Threshold it first to turn it into a binary image.");
+                MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform this operation on it. Threshold it first to turn it into a binary image.");
             else
             { 
                 ProcessingImage image = applyProcessingFunction(workingImage);           // processing functions
@@ -249,7 +250,7 @@ namespace INFOIBV
                     return regionalProcessingImage.highlightRegions();
                 
                 case ProcessingFunctions.HoughTransformation :
-                    HoughTransform ht = new HoughTransform(processingImage.toArray(), processingImage.width * (int)thetaDetailInput.Value, processingImage.height * (int)rDetailInput.Value);
+                    HoughTransform ht = processingImage.toHoughTransform(processingImage.width * (int)thetaDetailInput.Value, processingImage.height * (int)rDetailInput.Value);
                     return ht.houghTransform();
                 
                 case ProcessingFunctions.HoughPeakFinding:
@@ -261,14 +262,18 @@ namespace INFOIBV
                     };
                     byte t_peak = (byte)t_peakInput.Value;
 
-                    int thetaDetail = processingImage.width, rDetail = processingImage.height; //this is because the processingImage already is the accumulator Array
-                    HoughTransform peakfindingTransform = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
+                    bool[,] struc = {
+                        { false, true, false},
+                        { true, false, true},
+                        { false, true, false}
+                    };
+                    ProcessingImage output = processingImage.halfThresholdImage(t_peak).binaryCloseImage(struc);
 
-                    (ProcessingImage processedAcc, List<Vector2> ThetaR) output = peakfindingTransform.peakFinding(processingImage, t_peak, selectedRegionFinder());
+                    List<Vector2> peaks = Pipelines.peakFinding(processingImage, t_peak);
 
-                    extraInformation.Text = "peaks <theta, r> (r is normalized): \n" + string.Join(",", output.ThetaR);
+                    extraInformation.Text = "peaks <theta, r> (r is normalized): \n" + string.Join(",", peaks);
                     
-                    return output.processedAcc; // output;
+                    return output; // output;
 
                 case ProcessingFunctions.HoughLineSegments:
 
@@ -276,12 +281,12 @@ namespace INFOIBV
                     ushort minSegLength = (ushort)minSegLengthInput.Value;
                     ushort maxGap = (ushort)maxGapInput.Value;
                     t_peak = (byte)t_peakInput.Value;
-                    thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
-                    rDetail = processingImage.height * (int)rDetailInput.Value;
+                    int thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
+                    int rDetail = processingImage.height * (int)rDetailInput.Value;
 
-                    HoughTransform htDrawLines = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
+                    HoughTransform htDrawLines = processingImage.toHoughTransform(thetaDetail, rDetail);
                     ProcessingImage accumulatorArray = htDrawLines.houghTransform();
-                    List<Vector2> peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
+                    peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
                     Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
                     return new RGBProcessingImage(processingImage.toArray(), outputImage);
                 case ProcessingFunctions.BinaryPipeline:
@@ -293,7 +298,7 @@ namespace INFOIBV
                     minIntensity = (byte)minIntensityInput.Value;
                     minSegLength = (ushort)minSegLengthInput.Value;
                     maxGap = (ushort)maxGapInput.Value;
-                    byte t_mag = (byte)t_magInput.Value; //vals 30, (100, best), 130, 180;
+                    byte t_mag = (byte)t_magInput.Value; 
 
                     return Pipelines.BinaryPipeline(processingImage, thetaDetail, rDetail, minIntensity, minSegLength, maxGap, t_mag, t_peak, selectedRegionFinder());
                 case ProcessingFunctions.GrayscalePipeline:
@@ -308,15 +313,15 @@ namespace INFOIBV
                     return Pipelines.GrayscalePipeline(processingImage, thetaDetail, rDetail, minIntensity, minSegLength, maxGap, t_peak, selectedRegionFinder());
 
                 case ProcessingFunctions.DrawIntersectionPoints:
-                    thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
-                    rDetail = processingImage.height * (int)rDetailInput.Value;
+                    thetaDetail = processingImage.width * 2;
+                    rDetail = processingImage.height * 2;
 
-                    t_peak = (byte)t_peakInput.Value;
-                    minIntensity = (byte)minIntensityInput.Value;
-                    minSegLength = (ushort)minSegLengthInput.Value;
-                    maxGap = (ushort)maxGapInput.Value;
+                    t_peak = 80;
+                    minIntensity = 50;
+                    minSegLength = 20;
+                    maxGap = 7;
 
-                    HoughTransform htDrawIntersects = new HoughTransform(processingImage.toArray(), thetaDetail, rDetail);
+                    HoughTransform htDrawIntersects = processingImage.toHoughTransform(thetaDetail, rDetail);
                     accumulatorArray = htDrawIntersects.houghTransform();
                     peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
                     List<(int X, int Y)> intersects = htDrawIntersects.getHoughLineIntersections(peaks, minIntensity, maxGap, minSegLength);

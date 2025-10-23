@@ -43,65 +43,18 @@ namespace INFOIBV.Helper_Code
 
         }
 
-        private bool fallsOnSlope(int x, int y, int width, int height)
-        {
-
-            int xTransform = x - (width / 2);
-            float yTransform = (float)(xTransform * Math.Cos(theta) - r) / (float)(-Math.Sin(theta));
-            float yCalc = (height / 2) - yTransform;
-
-            int roundYCalc = (int)Math.Round(yCalc);
-
-            return roundYCalc == y;
-        }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="y">Y coordinate</param>
         /// <returns>Returns a bool that indicates whether the point could be added or not</returns>
-        public bool addPoint(int x, int y, int width, int height)
+        public void addPoint(int x, int y, int width, int height)
         {
-            if (fallsOnSlope(x, y, width, height))
-            {                
-                points.Add((x, y));
-                return true;
-            }
-            else
-                return false;
+            points.Add((x, y));
+
         }
 
-
-        private bool sameLine(LineSegment seg)
-        {
-            int xDist = this.startPoint.X - seg.startPoint.X;
-            int yDist = this.startPoint.Y - seg.startPoint.Y;
-
-            return (xDist <= maxGap && yDist <= maxGap);
-        } 
-
-        /// <summary>
-        /// Merge one line with the current line, if the gap between them is smaller than maxGap
-        /// </summary>
-        /// <param name="seg"></param>
-        /// <returns>A bool signifying whether the lines have been merged or not</returns>
-        public bool mergeLine(LineSegment seg)
-        {
-            if (sameLine(seg))
-            {
-                if (seg.startPoint.X < startPoint.X)
-                    this.startPoint = seg.startPoint;
-                else if (seg.endPoint.X > endPoint.X)
-                    this.endPoint = seg.endPoint;
-
-                foreach ((int, int) point in seg.points)
-                    this.points.Add(point);
-
-                return true;
-            }
-            else
-                return false;
-        }
         /// <summary>
         /// Initialises the start and end points of the Line segment and creates a points list accordingly.
         /// Done only when all points have been added.
@@ -153,19 +106,13 @@ namespace INFOIBV.Helper_Code
             foreach((int X, int Y) point in orderedPointsList)
             {
 
-                //Debug.WriteLine($"MaxGap: {maxGap}");
-                //Debug.WriteLine($"X gap: {Math.Abs(currentSegment.startPoint.X - point.X)}");
-                //Debug.WriteLine($"Y gap: {Math.Abs(currentSegment.endPoint.Y - point.Y)}");
-
                 int xGap = Math.Abs(currentSegment.startPoint.X - point.X);
                 int yGap = Math.Abs(currentSegment.startPoint.Y - point.Y);
                 float dist = distancePoints(prevPoint, point);
-                //Debug.WriteLine($"Gap: {dist}");
 
                 if (currentSegment.Length == 0 || dist <= maxGap)
                 {
                     currentSegment.addPoint(point.X, point.Y, width, height);
-                    //Debug.WriteLine($"added point: {result}");  
                 }
                 else if(currentSegment.LongEnough) //store segment and reset currentSegment.
                 {
@@ -175,7 +122,6 @@ namespace INFOIBV.Helper_Code
                 }
                 else //discard current segment and reset it.
                 {
-                    //Debug.WriteLine($"current segment length: {currentSegment.Length}");
                     currentSegment.close();
                     currentSegment = new LineSegment(theta, r, 50, minSegLength);
                 }
@@ -193,21 +139,11 @@ namespace INFOIBV.Helper_Code
 
         public bool validPoint(int X, int Y)
         {
-            Debug.WriteLine($"-----------------------------------");
-            Debug.WriteLine($"X: {X}");
-            Debug.WriteLine($"Y: {Y}");
-            Debug.WriteLine($"Startpoint X: {startPoint.X}");
-            Debug.WriteLine($"StartPoint Y: {startPoint.Y}");
-            Debug.WriteLine($"endPoint X: {endPoint.X}");
-            Debug.WriteLine($"endPoint Y: {endPoint.Y}");
-            Debug.WriteLine($"-----------------------------------");
             if (dX >= dY){
-                Debug.WriteLine($"({X}, {Y}) falls within X range [{startPoint.X} ... {endPoint.X}]: {X >= startPoint.X && X <= endPoint.X}");
                 return X >= startPoint.X && X <= endPoint.X;
             }
             else
             {
-                Debug.WriteLine($"({X}, {Y}) falls within Y range [{startPoint.Y} ... {endPoint.Y}]: {Y >= startPoint.X && Y <= endPoint.X}");
                 return Y >= startPoint.Y && Y <= endPoint.Y;
             }
         }
@@ -268,23 +204,6 @@ namespace INFOIBV.Helper_Code
                             if (newX >= 0 && newX < image.Width && newY >= 0 && newY < image.Height)
                                 image.SetPixel(newX, newY, color);
                         }
-                    }
-                }
-            }
-        }
-
-        public void drawPointsToImage(Bitmap image, Color color, int thickness = 1)
-        {
-            foreach ((int X, int Y) point in points)
-            {
-                for (int i = -(thickness - 1); i <= (thickness - 1); i++)
-                {
-                    for (int j = -(thickness - 1); j <= (thickness - 1); j++)
-                    {
-                        int newX = point.X + i;
-                        int newY = point.Y + j;
-                        if (newX >= 0 && newX < image.Width && newY >= 0 && newY < image.Height)
-                            image.SetPixel(newX, newY, color);
                     }
                 }
             }

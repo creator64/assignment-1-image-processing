@@ -1,3 +1,35 @@
+# Assignment 2
+Greetings Corrector(s),
+
+Like last time, the tasks can be run with both the GUI as well as via the terminal using `quickAnalyser.py`.
+The Binary Pipeline can be run via:
+```bash
+python quickAnalyser.py task4
+```
+
+The Grayscale Pipeline meanwhile, can be run via:
+```bash
+python quickAnalyser.py task5
+```
+
+The output of which can be seen in the `out/task4` and `out/task5` respectively. We figured this would be much more
+ergonomical than manually typing 
+
+For quality of life purposes, both on our and your part, we've made it so that the configurations
+of each of the respective images can be found inside of the `data/` folder. These configurations are
+in json format, making them easy to import in your own program to cross-check for instance.
+
+Most of the code important for this project can be found in the `ProcessingImage.cs`, `HoughTransform.cs`, and `Pipelines.cs` files.
+
+P.S: One of the parameters that you often see is "thetaDetail" and "rDetail" which both go from 1 to 3. We admit that these names hence this small explanation.
+ThetaDetail and rDetail refer to the factor by which the input image's width and height are respectively multiplied to arrive at the dimensions for the accumulator array.
+
+## Line Intersections
+Depending on certain what image you feed to the line intersections function. Sometimes the hough transform can detect many smaller lines in what is 
+actually one (thick) line on the input edge map. These lines sometimes overlap, and as a result will show up as intersections when Drawing the Hough Intersection Points.
+
+# Assignment 1
+
 ## Run the Program
 
 The program consists out of two subprograms.  

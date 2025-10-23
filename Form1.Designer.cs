@@ -165,7 +165,6 @@ namespace INFOIBV
             this.comboBox.TabIndex = 7;
             this.comboBox.SelectedIndexChanged += (sender, args) =>
             {
-                Debug.WriteLine($"combobox text: {this.comboBox.Text}");
                 // sorry for the hardcode im lazy
                 bool task1Selected = this.comboBox.Text == "Task 1";
                 bool task2Selected = this.comboBox.Text == "Task 2";
@@ -271,7 +270,7 @@ namespace INFOIBV
             //
             // Extra information
             //
-            this.extraInformation.Location = new System.Drawing.Point(531, 50);
+            this.extraInformation.Location = new System.Drawing.Point(800, 70);
             this.extraInformation.Size = new Size(8000, 100);
             //
             // regionFinderComboBox
@@ -293,8 +292,8 @@ namespace INFOIBV
             this.thetaDetailInput.Increment = 1;
             this.thetaDetailInput.DecimalPlaces = 0;
             this.thetaDetailInput.Value = 2;
-            this.thetaDetailInput.Maximum = 3;
-            this.thetaDetailInput.Minimum = 0;
+            this.thetaDetailInput.Maximum = 15;
+            this.thetaDetailInput.Minimum = 1;
 
             ///
             // rDetail
@@ -308,8 +307,8 @@ namespace INFOIBV
             this.rDetailInput.Increment = 1;
             this.rDetailInput.DecimalPlaces = 0;
             this.rDetailInput.Value = 2;
-            this.rDetailInput.Maximum = 3;
-            this.rDetailInput.Minimum = 0;
+            this.rDetailInput.Maximum = 15;
+            this.rDetailInput.Minimum = 1;
 
 
             ///

@@ -6,6 +6,9 @@ using INFOIBV.Core;
 using INFOIBV.Helper_Code;
 using System.Text.Json;
 using System.Diagnostics;
+using System.Security.Policy;
+using System.Collections.Generic;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace INFOIBV
 {
@@ -127,6 +130,100 @@ namespace INFOIBV
 
             }
         }
+
+        public void BinaryPipeline(string path)
+        {
+            var enviroment = System.Environment.CurrentDirectory;
+            string basePath = enviroment;
+            //basePath = "C:\\Users\\Dangual\\Documents\\UU\\Beeldverwerking\\assignment-1-image-processing";
+
+            Debug.WriteLine(Path.Combine(basePath, path));
+            Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
+            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
+            byte[,] workingImage = ConverterMethods.convertToGrayscale(Image);
+            ProcessingImage processingImage = new ProcessingImage(workingImage);
+
+            List<BinaryPipelineConfig> configs = new List<BinaryPipelineConfig>{
+                new BinaryPipelineConfig("1_t_mag_too_high", 2, 2, 110, 50, 20, 7, 130),    // Way too high of a t_mag value, few details as a result
+                new BinaryPipelineConfig("2_lower_t_mag", 2, 2, 140, 50, 20, 7, 60),        // compensate lower t_mag with bigger t_peak
+                new BinaryPipelineConfig("3_okayish", 3, 3, 70, 50, 20, 7, 70),             // Lowered t_peak for more details, heightened t_mag a bit to compensate for wackiness, we get many good outlines, but it looks a bit messy
+                new BinaryPipelineConfig("4_good", 3, 3, 110, 50, 20, 7, 80),               // good; heightened t_peak back up a bit and raised the t_mag value a bit more.
+            };
+
+            string imgPath = Path.Combine(basePath, "out", "task4", "images");
+            string dataPath = Path.Combine(basePath, "out", "task4", "data");
+
+            if (!Directory.Exists(imgPath))
+                Directory.CreateDirectory(imgPath);
+            if (!Directory.Exists(dataPath))
+                Directory.CreateDirectory(dataPath);
+
+            foreach (BinaryPipelineConfig config in configs)
+            {
+                ProcessingImage processedImage = Pipelines.BinaryPipeline(processingImage,
+                                                                          processingImage.width * config.thetaDetailFactor,
+                                                                          processingImage.height * config.rDetailFactor,
+                                                                          config.minIntensity,
+                                                                          config.minSegLength,
+                                                                          config.maxGap,
+                                                                          config.t_mag,
+                                                                          config.t_peak,
+                                                                          config.regionFinder);
+                string jsonString = JsonSerializer.Serialize(config);
+                File.WriteAllText(Path.Combine(dataPath, "config_" + config.name + ".json"), jsonString);
+
+                Image output = processedImage.convertToImage();
+
+                output.Save(Path.Combine(imgPath, config.name + ".png"), ImageFormat.Png);
+            }
+
+        }
+        public void GrayscalePipeline(string path)
+        {
+            var enviroment = System.Environment.CurrentDirectory;
+            string basePath = enviroment;
+            //basePath = "C:\\Users\\Dangual\\Documents\\UU\\Beeldverwerking\\assignment-1-image-processing";
+
+            Debug.WriteLine(Path.Combine(basePath, path));
+            Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
+            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
+            byte[,] workingImage = ConverterMethods.convertToGrayscale(Image);
+            ProcessingImage processingImage = new ProcessingImage(workingImage);
+
+            List<GrayscalePipelineConfig> configs = new List<GrayscalePipelineConfig>{
+                new GrayscalePipelineConfig("6_t_peak_too_high", 2, 2, 100, 50, 20, 7),             // Tried to compensate moderate with too much t_peak, most important lines are there but many details are lost
+                new GrayscalePipelineConfig("7_segLength_gap_compensation", 2, 2, 80, 50, 30, 2),   // Tried to get rid of ugly tiny diagonals by raising the minimum segment length and lowering the maximum gap, this gets rid of many of them, leaving us with clean lines, more detail than 1 but still less than 4
+                new GrayscalePipelineConfig("5_moderate", 2, 2, 80, 50, 20, 7),                     // moderate values, yet we can see many correct lines, but also any that are a bit wacky.
+                new GrayscalePipelineConfig("8_perfect", 2, 2, 85, 70, 15, 7)                       // perfect, slightly heightneed t_peak, heightened minIntensity a lot and dropped the min_seg length a bit compared to moderate for pretty accurate lines over entire image.
+            };
+
+            string imgPath = Path.Combine(basePath, "out", "task5", "images");
+            string dataPath = Path.Combine(basePath, "out", "task5", "data");
+
+            if (!Directory.Exists(imgPath))
+                Directory.CreateDirectory(imgPath);
+            if (!Directory.Exists(dataPath))
+                Directory.CreateDirectory(dataPath);
+
+            foreach (GrayscalePipelineConfig config in configs)
+            {
+                ProcessingImage processedImage = Pipelines.GrayscalePipeline( processingImage,
+                                                                              processingImage.width * config.thetaDetailFactor,
+                                                                              processingImage.height * config.rDetailFactor,
+                                                                              config.minIntensity,
+                                                                              config.minSegLength,
+                                                                              config.maxGap,
+                                                                              config.t_peak,
+                                                                              config.regionFinder);
+                string jsonString = JsonSerializer.Serialize(config);
+                File.WriteAllText(Path.Combine(dataPath, "config_" + config.name + ".json"), jsonString);
+
+                Image output = processedImage.convertToImage();
+
+                output.Save(Path.Combine(imgPath, config.name + ".png"), ImageFormat.Png);
+            }
+
+        }
     }
     public class TaskData<T>
     {
@@ -155,6 +252,61 @@ namespace INFOIBV
 
 
             imgData = new ImageData(image);
+        }
+    }
+
+    public class BinaryPipelineConfig
+    {
+        public string name { get; private set; }
+        public int thetaDetailFactor { get; private set; }
+        public int rDetailFactor { get; private set; }
+        public byte t_mag { get; private set; }
+        public byte t_peak { get; private set; }
+        public byte minIntensity { get; private set; }
+        public ushort minSegLength { get; private set; }
+        public ushort maxGap { get; private set; }
+
+        public ImageRegionFinder regionFinder { get; private set; }
+
+        public BinaryPipelineConfig(string name, int thetaDetailFactor, int rDetailFactor, byte t_peak, byte minIntensity, ushort minSegLength, ushort maxGap, byte t_mag, ImageRegionFinder regionFinder = null)
+        {
+            this.name = name;
+            this.thetaDetailFactor = thetaDetailFactor;
+            this.rDetailFactor = rDetailFactor;
+            this.t_mag = t_mag;
+            this.t_peak = t_peak;
+            this.minIntensity = minIntensity;
+            this.minSegLength = minSegLength;
+            this.maxGap = maxGap;
+            this.regionFinder = regionFinder;
+
+            if (regionFinder != null) this.regionFinder = regionFinder;
+            else this.regionFinder = new FloodFill();
+        }
+    }
+    public class GrayscalePipelineConfig
+    {
+        public string name { get; private set; }
+        public int thetaDetailFactor { get; private set; }
+        public int rDetailFactor { get; private set; }
+        public byte t_peak { get; private set; }
+        public byte minIntensity { get; private set; }
+        public ushort minSegLength { get; private set; }
+        public ushort maxGap { get; private set; }
+        public ImageRegionFinder regionFinder { get; private set; }
+
+        public GrayscalePipelineConfig(string name, byte thetaDetailFactor, byte rDetailFactor, byte t_peak, byte minIntensity, ushort minSegLength, ushort maxGap, ImageRegionFinder regionFinder = null)
+        {
+            this.name = name;
+            this.thetaDetailFactor = thetaDetailFactor;
+            this.rDetailFactor = rDetailFactor;
+            this.t_peak = t_peak;
+            this.minIntensity = minIntensity;
+            this.minSegLength = minSegLength;
+            this.maxGap = maxGap;
+
+            if (regionFinder != null) this.regionFinder = regionFinder;
+            else this.regionFinder = new FloodFill();
         }
     }
 }

@@ -5,10 +5,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using INFOIBV.Helper_Code;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace INFOIBV.Helper_Code
+namespace INFOIBV.Core
 {
     public class HoughTransform : ProcessingImage
     {
@@ -64,29 +65,6 @@ namespace INFOIBV.Helper_Code
                 );
         }
 
-        public (ProcessingImage processedAccumulator, List<Vector2> ThetaRPairs) peakFinding(ProcessingImage accumulatorArray, byte t_peak,ImageRegionFinder regionFinder = null)
-        {
-            if (regionFinder == null) regionFinder = new FloodFill();
-
-            bool[,] structElem = {
-                { false, true, false},
-                { true, false, true},
-                { false, true, false}
-            };
-            ProcessingImage processingImage = accumulatorArray.halfThresholdImage(t_peak).binaryCloseImage(structElem);
-
-            return (processingImage, getThetaRPairs(processingImage.toRegionalImage(regionFinder)));
-        }
-
-        private List<Vector2> getThetaRPairs(RegionalProcessingImage processedAcc)
-        {
-            return processedAcc.regionCenters()
-                .Select(p =>
-                    HelperFunctions.coordinateToThetaRPair(p.Value,
-                        thetaDetail, rDetail))
-                .ToList();
-        }
-
         public Bitmap houghLineSegments(List<Vector2> peaks, byte minIntensity, ushort minSegLength, ushort maxGap)
         {
 
@@ -113,7 +91,6 @@ namespace INFOIBV.Helper_Code
 
                 LineSegment currentSegment = new LineSegment(theta, r, maxGap, minSegLength);
 
-
                 for (int x = 0; x < inputImage.GetLength(0); x++)
                 {
                     int xTransform = x - (width / 2);
@@ -127,9 +104,9 @@ namespace INFOIBV.Helper_Code
                 }
                 for (int y = 0; y < inputImage.GetLength(1); y++)
                 {
-                    int yTransform = (width / 2) - y;
+                    int yTransform = (height / 2) - y;
                     double xTransform = (double)(yTransform * Math.Sin(theta) - r) / (float)(-Math.Cos(theta));
-                    double x = xTransform + (height / 2);
+                    double x = xTransform + (width / 2);
 
                     int roundX = (int)Math.Round(x);
 
@@ -196,7 +173,6 @@ namespace INFOIBV.Helper_Code
 
             foreach ((int X, int Y) in points)
             {
-                Debug.WriteLine($"Drawing point: ({X}, {Y})");
                 for (int xOffset = -offset; xOffset <= offset; xOffset++)
                     for (int yOffset = -offset; yOffset <= offset; yOffset++)
                         if (X + xOffset >= 0 && X + xOffset < width && Y + yOffset >= 0 && Y + yOffset < height)
