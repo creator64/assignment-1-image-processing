@@ -45,7 +45,8 @@ namespace INFOIBV
             HoughLineSegments,
             BinaryPipeline,
             GrayscalePipeline,
-            DrawIntersectionPoints
+            DrawIntersectionPoints,
+            OtsuThresholding
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -327,6 +328,8 @@ namespace INFOIBV
                     List<(int X, int Y)> intersects = htDrawIntersects.getHoughLineIntersections(peaks, minIntensity, maxGap, minSegLength);
                     outputImage = htDrawIntersects.drawPoints(intersects, Color.Red);
                     return new RGBProcessingImage(processingImage.toArray(), outputImage);
+                case ProcessingFunctions.OtsuThresholding:
+                    return processingImage.otsuThreshold();
                 default:
                     return processingImage;
             }

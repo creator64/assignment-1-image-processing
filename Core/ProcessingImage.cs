@@ -5,6 +5,7 @@ using System.Linq;
 using INFOIBV.Helper_Code;
 using System.Numerics;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace INFOIBV.Core
 {
@@ -176,6 +177,47 @@ namespace INFOIBV.Core
                 tempImage[x, y] = (byte)(inputImage[x, y] > threshold ? 255 : 0);
 
             return new ProcessingImage(tempImage);
+        }
+
+       
+
+        public ProcessingImage otsuThreshold()
+        {
+            ImageData data = new ImageData(inputImage);
+
+            decimal maxVariance = 0.0m;
+            byte qMax = 0;
+            int N = data.getNumPixels();
+            int N_low = 0;
+            int N_high;
+
+            for(int i = 0; i <= 255; i++)
+            {
+                N_low += data.histogram[i];
+                N_high = N - N_low;
+
+                if(N_low > 0 && N_high > 0) 
+                {
+
+                    float mu_low = data.calculateMean(0, (byte)i);
+                    float mu_high = data.calculateMean((byte)(i + 1), 255);
+                    Debug.WriteLine($"N_low: {N_low}");
+                    Debug.WriteLine($"N_high: {N_high}");
+                    Debug.WriteLine($"mu 0: {mu_low}");
+                    Debug.WriteLine($"mu 1: {mu_high}");
+                    Debug.WriteLine($"N: {N}");
+                    decimal variance = (1.0m / ((long)N * (long)N)) * N_low * N_high * (decimal)((mu_low - mu_high) * (mu_low - mu_high));
+                    Debug.WriteLine($"factor: {(decimal)((long)N * N)}");
+                    if (variance > maxVariance)
+                    {
+                        maxVariance = variance;
+                        qMax = (i >= 0 && i <= 255) ? (byte)i : (byte)0;
+                    }
+                }
+            }
+            Debug.WriteLine($"maxVar: {maxVariance}");
+            Debug.WriteLine($"qMax: {qMax}");
+            return this.thresholdImage(qMax);
         }
 
         public ProcessingImage halfThresholdImage(byte threshold)
