@@ -201,13 +201,8 @@ namespace INFOIBV.Core
 
                     float mu_low = data.calculateMean(0, (byte)i);
                     float mu_high = data.calculateMean((byte)(i + 1), 255);
-                    Debug.WriteLine($"N_low: {N_low}");
-                    Debug.WriteLine($"N_high: {N_high}");
-                    Debug.WriteLine($"mu 0: {mu_low}");
-                    Debug.WriteLine($"mu 1: {mu_high}");
-                    Debug.WriteLine($"N: {N}");
+
                     decimal variance = (1.0m / ((long)N * (long)N)) * N_low * N_high * (decimal)((mu_low - mu_high) * (mu_low - mu_high));
-                    Debug.WriteLine($"factor: {(decimal)((long)N * N)}");
                     if (variance > maxVariance)
                     {
                         maxVariance = variance;
