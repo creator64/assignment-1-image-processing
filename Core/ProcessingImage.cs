@@ -210,8 +210,7 @@ namespace INFOIBV.Core
                     }
                 }
             }
-            Debug.WriteLine($"maxVar: {maxVariance}");
-            Debug.WriteLine($"qMax: {qMax}");
+
             return this.thresholdImage(qMax);
         }
 
