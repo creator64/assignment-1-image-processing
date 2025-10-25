@@ -478,6 +478,9 @@ namespace INFOIBV.Core
 
             return new ProcessingImage(outputImage);
         }
+
+
+
         public List<Vector2> getThetaRPairs()
         {
             return regionCenters()
