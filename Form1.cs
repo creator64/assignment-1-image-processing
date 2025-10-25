@@ -47,7 +47,9 @@ namespace INFOIBV
             GrayscalePipeline,
             DrawIntersectionPoints,
             OtsuThreshold,
-            Assignment3
+            BilateralSmoothing,
+            Assignment3,
+            Assignment3Variant
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -331,6 +333,8 @@ namespace INFOIBV
                     return new RGBProcessingImage(processingImage.toArray(), outputImage);
                 case ProcessingFunctions.OtsuThreshold:
                     return processingImage.otsuThreshold();
+                case ProcessingFunctions.BilateralSmoothing:
+                    return processingImage.bilateralSmoothing(2, 50);
                 case ProcessingFunctions.Assignment3:
                     t_mag = (byte)t_magInput.Value;
                     gaussianMatrixSize = gaussianSize.Value;
@@ -338,6 +342,8 @@ namespace INFOIBV
                     bool[,] A3StructElem = FilterGenerators.createSquareFilter<bool>(3, FilterValueGenerators.createRoundStructuringElement);
 
                     return Pipelines.Assignment3(processingImage, t_mag, A3StructElem);
+                case ProcessingFunctions.Assignment3Variant:
+                    return processingImage.adjustContrast().bilateralSmoothing(2, 50).otsuThreshold().invertImage(); //for testing other methods later
                 default:
                     return processingImage;
             }

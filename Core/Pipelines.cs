@@ -99,13 +99,9 @@ namespace INFOIBV.Core
         {
 
             //--------------------------------------------------------
-            //  Step 1: Binarisation
+            //  Step 1 & 2: Binarisation (thresholding) & Pre-processing (despeckling via bilateralSmoothing)
             //--------------------------------------------------------
-            ProcessingImage binaryEdgeMap = processingImage.adjustContrast().otsuThreshold().invertImage();
-
-            //--------------------------------------------------------
-            //  Step 2: Pre-processing (despeckling)
-            //--------------------------------------------------------
+            ProcessingImage binaryEdgeMap = processingImage.adjustContrast().bilateralSmoothing(2, 50).otsuThreshold().invertImage();
 
             //--------------------------------------------------------
             //  Step 3: Segmentation (Detect regions of text)
