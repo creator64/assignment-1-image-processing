@@ -397,8 +397,7 @@ namespace INFOIBV.Core
 
         public RegionalProcessingImage(byte[,] inputImage, ImageRegionFinder regionFinder) : base(inputImage)
         {
-            ImageData imgData = new ImageData(inputImage);
-            if (!imgData.isBinary())
+            if (!new ImageData(inputImage).isBinary())
                 throw new Exception("Regional Processing Images must be binary");
             
             regionGrid = regionFinder.findRegions(inputImage);
