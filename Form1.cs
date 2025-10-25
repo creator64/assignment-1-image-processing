@@ -86,8 +86,8 @@ namespace INFOIBV
                 imageFileName.Text = file;                                  // show file name
                 if (InputImage != null) InputImage.Dispose();               // reset image
                 InputImage = new Bitmap(file);                              // create new Bitmap from file
-                if (InputImage.Size.Height <= 0 || InputImage.Size.Width <= 0 ||
-                    InputImage.Size.Height > 512 || InputImage.Size.Width > 512) // dimension check (may be removed or altered)
+                if (InputImage.Size.Height <= 0 || InputImage.Size.Width <= 0 /*||
+                    InputImage.Size.Height > 512 || InputImage.Size.Width > 512*/) // dimension check (may be removed or altered)
                     MessageBox.Show("Error in image dimensions (have to be > 0 and <= 512)");
                 else
                     pictureBox1.Image = (Image) InputImage;                 // display input image
@@ -337,7 +337,7 @@ namespace INFOIBV
                         { true, true, true},
                         { false, true, false}
                     };
-                    return Pipelines.Assignment3(processingImage, t_mag, A3StructElem);
+                    return processingImage.otsuThreshold(); //Pipelines.Assignment3(processingImage, t_mag, A3StructElem);
                 default:
                     return processingImage;
             }
