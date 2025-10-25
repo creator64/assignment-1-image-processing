@@ -183,7 +183,7 @@ namespace INFOIBV.Core
             ImageData data = new ImageData(inputImage);
             int[] histogram = data.histogram;
 
-            return this.thresholdImage(125);
+            return this.thresholdImage(125); //placeholder
         }
 
         public ProcessingImage halfThresholdImage(byte threshold)
