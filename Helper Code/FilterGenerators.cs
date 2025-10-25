@@ -75,5 +75,17 @@ namespace INFOIBV.Helper_Code
 
             return (int)Math.Round(hotspot * Math.Exp(-((x - hotspot) * (x - hotspot) / (2 * sigma * sigma)) - ((y - hotspot) * (y - hotspot) / (2 * sigma * sigma))));
         }
+
+        public static bool createRoundStructuringElement(int i, int j, bool[,] filter)
+        {
+            int r = filter.GetLength(0);
+
+            int x = i + 1;
+            int y = j + 1;
+            float sigma = 1.8f; //value that works well
+            int hotspot = (int)Math.Ceiling((float)r / 2);
+
+            return Math.Round(hotspot * Math.Exp(-((x - hotspot) * (x - hotspot) / (2 * sigma * sigma)) - ((y - hotspot) * (y - hotspot) / (2 * sigma * sigma)))) > 0;
+        }
     }
 }

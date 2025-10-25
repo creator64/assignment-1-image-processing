@@ -46,6 +46,7 @@ namespace INFOIBV
             BinaryPipeline,
             GrayscalePipeline,
             DrawIntersectionPoints,
+            OtsuThreshold,
             Assignment3
         }
         /*
@@ -328,16 +329,15 @@ namespace INFOIBV
                     List<(int X, int Y)> intersects = htDrawIntersects.getHoughLineIntersections(peaks, minIntensity, maxGap, minSegLength);
                     outputImage = htDrawIntersects.drawPoints(intersects, Color.Red);
                     return new RGBProcessingImage(processingImage.toArray(), outputImage);
+                case ProcessingFunctions.OtsuThreshold:
+                    return processingImage.otsuThreshold();
                 case ProcessingFunctions.Assignment3:
                     t_mag = (byte)t_magInput.Value;
                     gaussianMatrixSize = gaussianSize.Value;
                     sigma = sigmaInput.Value;
-                    bool[,] A3StructElem = {
-                        { false, true, false},
-                        { true, true, true},
-                        { false, true, false}
-                    };
-                    return processingImage.otsuThreshold(); //Pipelines.Assignment3(processingImage, t_mag, A3StructElem);
+                    bool[,] A3StructElem = FilterGenerators.createSquareFilter<bool>(3, FilterValueGenerators.createRoundStructuringElement);
+
+                    return Pipelines.Assignment3(processingImage, t_mag, A3StructElem);
                 default:
                     return processingImage;
             }

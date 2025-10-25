@@ -97,19 +97,23 @@ namespace INFOIBV.Core
 
         public static ProcessingImage Assignment3(ProcessingImage processingImage, byte t_mag, bool[,] structElem)
         {
-            float[,] horizontalKernel = {
-                { -1, -2, -1},
-                { 0, 0, 0},
-                { 1, 2, 1}
-            };
 
-            float[,] verticalKernel = {
-                { -1, 0, 1},
-                { -2, 0, 2},
-                { -1, 0, 1}
-            };
+            //--------------------------------------------------------
+            //  Step 1: Binarisation
+            //--------------------------------------------------------
+            ProcessingImage binaryEdgeMap = processingImage.adjustContrast().otsuThreshold().invertImage();
 
-            ProcessingImage binaryEdgeMap = processingImage.adjustContrast().thresholdImage(t_mag).invertImage().binaryCloseImage(structElem);
+            //--------------------------------------------------------
+            //  Step 2: Pre-processing (despeckling)
+            //--------------------------------------------------------
+
+            //--------------------------------------------------------
+            //  Step 3: Segmentation (Detect regions of text)
+            //--------------------------------------------------------
+
+            //--------------------------------------------------------
+            //  Step 4: Feature Extraction (Template Matching)
+            //--------------------------------------------------------
 
             return binaryEdgeMap;
         }

@@ -184,7 +184,7 @@ namespace INFOIBV
                 regionFinderComboBox.Visible = regionDetectionSelected;
 
                 #region HoughTransform Visibility
-                t_magInput.Visible = t_magLabel.Visible = binaryPipelineSelected || assignment3Selected;
+                t_magInput.Visible = t_magLabel.Visible = binaryPipelineSelected;
                 t_peakInput.Visible = t_peakLabel.Visible = minIntensityInput.Visible = minIntensityLabel.Visible = minSegLengthInput.Visible = minSegLengthLabel.Visible = maxGapInput.Visible = maxGapLabel.Visible = getPeaksDetected;
                 thetaDetailInput.Visible = thetaDetailLabel.Visible = rDetailInput.Visible = rDetailLabel.Visible = houghTransformSelected;
 
