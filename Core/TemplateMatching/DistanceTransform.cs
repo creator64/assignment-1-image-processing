@@ -80,7 +80,7 @@ namespace INFOIBV.Core.TemplateMatching
                         if (!toTraverse(k, l)) continue;
 
                         int x = i + k - center, y = j + l - center;
-                        if (x < 0 || x >= width || y < 0 || y >= height) continue;
+                        if (outOfBounds(x, y)) continue;
 
                         distancesForPixel.Add(distances[x, y] + distanceMatrix[k, l]);
                     }
@@ -89,9 +89,9 @@ namespace INFOIBV.Core.TemplateMatching
                 }
             };
 
-            // top-left
+            // top-left -> bottom-right
             traverseDistances("left");
-            // bottom-right
+            // bottom-right -> top-left
             traverseDistances("right");
 
             return distances;

@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Numerics;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using INFOIBV.Core;
 using INFOIBV.Helper_Code;
-using System.Diagnostics;
+using System.IO;
 using INFOIBV.Core.TemplateMatching;
 
 namespace INFOIBV
@@ -47,7 +46,8 @@ namespace INFOIBV
             BinaryPipeline,
             GrayscalePipeline,
             DrawIntersectionPoints,
-            BinaryDistanceTransform
+            BinaryDistanceTransform,
+            TestTemplateMatching
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -56,7 +56,7 @@ namespace INFOIBV
 
         private byte filterSize = 5;
         private float filterSigma = 1f;
-        private byte threshold = 127;
+        private byte threshold = 180;
         int x = 0;
 
         public INFOIBV()
@@ -336,6 +336,17 @@ namespace INFOIBV
                 case ProcessingFunctions.BinaryDistanceTransform:
                     DistanceStyle s = x % 2 == 0 ? (DistanceStyle)new EuclidianDistance() : new ManhattanDistance();
                     return new ChamferDistanceTransform(processingImage.toArray(), 3).toDistancesImage(s);
+                
+                case ProcessingFunctions.TestTemplateMatching:
+                    string baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
+                    ProcessingImage templateImage = new ProcessingImage(ConverterMethods.convertToGrayscale(
+                        ConverterMethods.convertBitmapToColor(
+                        new Bitmap(
+                        Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
+                    ))));
+                    Point bestMatch = processingImage.findBestMatchBinary(templateImage);
+                    extraInformation.Text = "best match: x=" + bestMatch.X + ", y=" + bestMatch.Y;
+                    return processingImage;
                     
                 default:
                     return processingImage;

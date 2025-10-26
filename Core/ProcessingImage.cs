@@ -5,6 +5,7 @@ using System.Linq;
 using INFOIBV.Helper_Code;
 using System.Numerics;
 using System.Windows.Forms;
+using INFOIBV.Core.TemplateMatching;
 
 namespace INFOIBV.Core
 {
@@ -363,6 +364,45 @@ namespace INFOIBV.Core
                 );
         }
 
+        public Point findBestMatchBinary(ProcessingImage templateImage, bool checkEdges = false, List<Point> pointsToCheck = null)
+        {
+            DistanceStyle ds = new ManhattanDistance();
+            float[,] distances = new ChamferDistanceTransform(inputImage, 3).toDistances(ds);
+            int K = templateImage.getImageData().amountForegroundPixels;
+            float bestScore = K * ds.maxDistance(width, height); Point currentBestMatch = new Point();
+
+            for (int r = 0; r < width; r++)
+            for (int s = 0; s < height; s++)
+            {
+                if ((width - r < templateImage.width || height - s < templateImage.height) && !checkEdges) continue;
+                if (pointsToCheck != null && !pointsToCheck.Contains(new Point(r, s))) continue;
+                
+                float score = 0;
+                for (int k = 0; k < templateImage.width; k++)
+                for (int l = 0; l < templateImage.height; l++)
+                {
+                    if (templateImage.inputImage[k, l] != 255) continue;
+                    int x = r + k, y = s + l; if (outOfBounds(x, y)) continue;
+                    score += distances[x, y];
+                }
+
+                score /= K;
+
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    currentBestMatch = new Point(r, s);
+                }
+            }
+            
+            return currentBestMatch;
+        }
+
+        protected bool outOfBounds(int x, int y)
+        {
+            return x < 0 || x >= width || y < 0 || y >= height;
+        }
+
         public RegionalProcessingImage toRegionalImage(ImageRegionFinder regionFinder)
         {
             return new RegionalProcessingImage(inputImage, regionFinder);
@@ -386,7 +426,7 @@ namespace INFOIBV.Core
             return OutputImage;
         }
 
-        public ImageData getImageData()
+        protected ImageData getImageData()
         {
             return new ImageData(inputImage);
         }
