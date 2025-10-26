@@ -9,7 +9,7 @@ namespace INFOIBV.Core.TemplateMatching
     {
         protected AbstractDistanceTransform(byte[,] inputImage) : base(inputImage)
         {
-            if (!new ImageData(inputImage).isBinary())
+            if (!getImageData().isBinary())
                 throw new Exception("Cannot do a distance transformation on a non-binary image");
         }
         public abstract float[,] toDistances(DistanceStyle distanceStyle);
@@ -110,9 +110,3 @@ namespace INFOIBV.Core.TemplateMatching
         }
     }
 }
-
-
-// {
-//     if (!new ImageData(inputImage).isBinary())
-//         throw new Exception("Cannot do a distance transformation on a non-binary image");
-// }

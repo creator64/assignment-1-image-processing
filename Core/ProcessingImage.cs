@@ -199,9 +199,7 @@ namespace INFOIBV.Core
          */
         public ProcessingImage binaryErodeImage(bool[,] structElem)
         {
-            ImageData data = new ImageData(inputImage);
-
-            if (data.amountDistinctValues > 2)
+            if (getImageData().amountDistinctValues > 2)
             {
                 MessageBox.Show("You can only perform binary morphology over binary images. Threshold this image first");
                 return new ProcessingImage(inputImage);
@@ -387,6 +385,11 @@ namespace INFOIBV.Core
 
             return OutputImage;
         }
+
+        public ImageData getImageData()
+        {
+            return new ImageData(inputImage);
+        }
     }
 
     public class RegionalProcessingImage : ProcessingImage
@@ -397,7 +400,7 @@ namespace INFOIBV.Core
 
         public RegionalProcessingImage(byte[,] inputImage, ImageRegionFinder regionFinder) : base(inputImage)
         {
-            if (!new ImageData(inputImage).isBinary())
+            if (!getImageData().isBinary())
                 throw new Exception("Regional Processing Images must be binary");
             
             regionGrid = regionFinder.findRegions(inputImage);
