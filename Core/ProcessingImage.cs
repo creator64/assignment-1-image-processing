@@ -9,7 +9,13 @@ using INFOIBV.Core.TemplateMatching;
 
 namespace INFOIBV.Core
 {
-    public class ProcessingImage
+
+    interface IImage
+    {
+        Bitmap getImage();
+    }
+    
+    public class ProcessingImage : IImage
     {
         public readonly int width;
         public readonly int height;
@@ -413,7 +419,7 @@ namespace INFOIBV.Core
             return new HoughTransform(inputImage, thetaDetail, rDetail);
         }
 
-        public virtual Bitmap convertToImage()
+        public Bitmap getImage()
         {
             Bitmap OutputImage = new Bitmap(inputImage.GetLength(0), inputImage.GetLength(1)); // create new output image
             for (int x = 0; x < inputImage.GetLength(0); x++)             // loop over columns
@@ -432,15 +438,15 @@ namespace INFOIBV.Core
         }
     }
 
-    public class RGBProcessingImage : ProcessingImage
+    public class RGBImage : IImage
     {
         public Bitmap rgbImage { get; private set; }
-        public RGBProcessingImage(byte[,] inputGrayScale, Bitmap inputRGB) : base(inputGrayScale)
+        public RGBImage(Bitmap inputRGB)
         {
             this.rgbImage = inputRGB;
         }
 
-        public override Bitmap convertToImage()
+        public Bitmap getImage()
         {
             return rgbImage;
         }

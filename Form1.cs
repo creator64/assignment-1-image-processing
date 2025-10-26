@@ -122,9 +122,9 @@ namespace INFOIBV
                 MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform this operation on it. Threshold it first to turn it into a binary image.");
             else
             { 
-                ProcessingImage image = applyProcessingFunction(workingImage);           // processing functions
+                IImage image = applyProcessingFunction(workingImage);           // processing functions
 
-                OutputImage = image.convertToImage();
+                OutputImage = image.getImage();
                 pictureBox2.Image = (Image)OutputImage;                         // display output image
             }
         }
@@ -143,7 +143,7 @@ namespace INFOIBV
         /*
          * applyProcessingFunction: defines behavior of function calls when "Apply" is pressed
          */
-        private ProcessingImage applyProcessingFunction(byte[,] workingImage)
+        private IImage applyProcessingFunction(byte[,] workingImage)
         {
             x++;
             float[,] horizontalKernel = {
@@ -292,8 +292,7 @@ namespace INFOIBV
                     HoughTransform htDrawLines = processingImage.toHoughTransform(thetaDetail, rDetail);
                     ProcessingImage accumulatorArray = htDrawLines.houghTransform();
                     peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
-                    Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
-                    return new RGBProcessingImage(processingImage.toArray(), outputImage);
+                    return htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
                 case ProcessingFunctions.BinaryPipeline:
 
                     thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
@@ -330,9 +329,8 @@ namespace INFOIBV
                     accumulatorArray = htDrawIntersects.houghTransform();
                     peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
                     List<(int X, int Y)> intersects = htDrawIntersects.getHoughLineIntersections(peaks, minIntensity, maxGap, minSegLength);
-                    outputImage = htDrawIntersects.drawPoints(intersects, Color.Red);
-                    return new RGBProcessingImage(processingImage.toArray(), outputImage);
-                
+                    return htDrawIntersects.drawPoints(intersects, Color.Red);
+
                 case ProcessingFunctions.BinaryDistanceTransform:
                     DistanceStyle s = x % 2 == 0 ? (DistanceStyle)new EuclidianDistance() : new ManhattanDistance();
                     return new ChamferDistanceTransform(processingImage.toArray(), 3).toDistancesImage(s);
