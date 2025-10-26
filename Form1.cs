@@ -46,7 +46,11 @@ namespace INFOIBV
             GrayscalePipeline,
             DrawIntersectionPoints,
             BinaryDistanceTransform,
-            TestTemplateMatching
+            TestTemplateMatching,
+            OtsuThreshold,
+            BilateralSmoothing,
+            Assignment3,
+            Assignment3Variant
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -87,8 +91,8 @@ namespace INFOIBV
                 imageFileName.Text = file;                                  // show file name
                 if (InputImage != null) InputImage.Dispose();               // reset image
                 InputImage = new Bitmap(file);                              // create new Bitmap from file
-                if (InputImage.Size.Height <= 0 || InputImage.Size.Width <= 0 ||
-                    InputImage.Size.Height > 512 || InputImage.Size.Width > 512) // dimension check (may be removed or altered)
+                if (InputImage.Size.Height <= 0 || InputImage.Size.Width <= 0 /*||
+                    InputImage.Size.Height > 512 || InputImage.Size.Width > 512*/) // dimension check (may be removed or altered)
                     MessageBox.Show("Error in image dimensions (have to be > 0 and <= 512)");
                 else
                     pictureBox1.Image = (Image) InputImage;                 // display input image
@@ -342,7 +346,24 @@ namespace INFOIBV
                         Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
                     )))); // TODO: Maybe find a way to not hardcode this
                     return processingImage.visualiseBestMatchBinary(templateImage);
-                    
+                
+                case ProcessingFunctions.OtsuThreshold:
+                    return processingImage.otsuThreshold();
+                
+                case ProcessingFunctions.BilateralSmoothing:
+                    return processingImage.bilateralSmoothing(2, 50);
+                
+                case ProcessingFunctions.Assignment3:
+                    t_mag = (byte)t_magInput.Value;
+                    gaussianMatrixSize = gaussianSize.Value;
+                    sigma = sigmaInput.Value;
+                    bool[,] A3StructElem = FilterGenerators.createSquareFilter<bool>(3, FilterValueGenerators.createRoundStructuringElement);
+
+                    return Pipelines.Assignment3(processingImage, t_mag, A3StructElem);
+                
+                case ProcessingFunctions.Assignment3Variant:
+                    return processingImage.adjustContrast().otsuThreshold().invertImage(); //for testing other methods later
+                
                 default:
                     return processingImage;
             }

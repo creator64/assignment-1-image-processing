@@ -92,5 +92,24 @@ namespace INFOIBV.Core
             List<Vector2> peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
             return htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
         }
+
+        public static ProcessingImage Assignment3(ProcessingImage processingImage, byte t_mag, bool[,] structElem)
+        {
+
+            //--------------------------------------------------------
+            //  Step 1 & 2: Binarisation (thresholding) & Pre-processing (despeckling via bilateralSmoothing)
+            //--------------------------------------------------------
+            ProcessingImage binaryEdgeMap = processingImage.adjustContrast().bilateralSmoothing(2, 50).otsuThreshold().invertImage();
+
+            //--------------------------------------------------------
+            //  Step 3: Segmentation (Detect regions of text)
+            //--------------------------------------------------------
+
+            //--------------------------------------------------------
+            //  Step 4: Feature Extraction (Template Matching)
+            //--------------------------------------------------------
+
+            return binaryEdgeMap;
+        }
     }
 }

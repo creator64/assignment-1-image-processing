@@ -5,6 +5,8 @@ using System.Linq;
 using INFOIBV.Helper_Code;
 using System.Numerics;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace INFOIBV.Core
 {
@@ -118,6 +120,48 @@ namespace INFOIBV.Core
             return new ProcessingImage(ConverterMethods.convertToBytes(tempImage));
         }
 
+        public ProcessingImage bilateralSmoothing(int domainWidth, int rangeWidth)
+        {
+            int M = width, N = height;
+            int K = (int)Math.Ceiling(3.5f * domainWidth);
+            CopyPerimeterPadder padder = new CopyPerimeterPadder(new float[2 * K + 1, 2 * K + 1]);
+            byte[,] paddedImg = padder.padImage(inputImage);
+            float[,] result = HelperFunctions.copyImage(inputImage);
+
+            for (int u = 0; u < result.GetLength(0); u++)
+            {
+                for (int v = 0; v < result.GetLength(1); v++)
+                {
+                    float S = 0;
+                    float W = 0;
+                    float a = inputImage[u, v];
+
+                    for (int m = -K; m <= K; m++)
+                    {
+                        for (int n = -K; n <= K; n++)
+                        {
+                            float b = paddedImg[(u + m) + K, (v + n) + K];
+
+                            float wd_denuminator = (m * m) + (n * n);
+                            float wd_numinator = 2 * domainWidth * domainWidth;
+                            float wd = (float)Math.Exp(-(wd_denuminator / wd_numinator));
+
+                            float wr_denuminator = (a - b) * (a - b);
+                            float wr_numinator = 2 * rangeWidth * rangeWidth;
+                            float wr = (float)Math.Exp(-(wr_denuminator / wr_numinator));
+
+                            float w = wd * wr;
+                            S += w * b;
+                            W += w;
+                        }
+                    }
+
+                    result[u, v] = (1 / W) * S;
+                }
+            }
+
+            return new ProcessingImage(ConverterMethods.convertToBytes(result));
+        }
 
         /*
          * edgeMagnitude: calculate the image derivative of an input image and a provided edge kernel
@@ -182,6 +226,38 @@ namespace INFOIBV.Core
                 tempImage[x, y] = (byte)(inputImage[x, y] > threshold ? 255 : 0);
 
             return new ProcessingImage(tempImage);
+        }
+        public ProcessingImage otsuThreshold()
+        {
+            ImageData data = new ImageData(inputImage);
+
+            decimal maxVariance = 0.0m;
+            byte qMax = 0;
+            int N = data.getNumPixels();
+            int N_low = 0;
+            int N_high;
+
+            for(int i = 0; i <= 255; i++)
+            {
+                N_low += data.histogram[i];
+                N_high = N - N_low;
+
+                if(N_low > 0 && N_high > 0) 
+                {
+
+                    float mu_low = data.calculateMean(0, (byte)i);
+                    float mu_high = data.calculateMean((byte)(i + 1), 255);
+
+                    decimal variance = (1.0m / ((long)N * (long)N)) * N_low * N_high * (decimal)((mu_low - mu_high) * (mu_low - mu_high));
+                    if (variance > maxVariance)
+                    {
+                        maxVariance = variance;
+                        qMax = (i >= 0 && i <= 255) ? (byte)i : (byte)0;
+                    }
+                }
+            }
+
+            return this.thresholdImage(qMax);
         }
 
         public ProcessingImage halfThresholdImage(byte threshold)

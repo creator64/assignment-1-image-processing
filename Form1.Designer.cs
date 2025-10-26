@@ -176,6 +176,7 @@ namespace INFOIBV
                 bool getPeaksDetected = binaryPipelineSelected || grayscalePipelineSelected || houghLineSegmentsSelected || houghPeaksDetected;
                 bool houghTransformSelected = binaryPipelineSelected || grayscalePipelineSelected || houghLineSegmentsSelected || this.comboBox.Text == "Hough Transformation" || houghPeaksDetected;
                 bool regionDetectionSelected = this.comboBox.Text == "Highlight Regions" || this.comboBox.Text == "Largest Region";
+                bool assignment3Selected = this.comboBox.Text == "Assignment 3";
 
                 sigmaInput.Visible = sigmaLabel.Visible = gaussianLabel.Visible = gaussianSize.Visible = task1Selected;
                 task2KernelSize.Visible = task2KernelLabel.Visible = task2Selected;
