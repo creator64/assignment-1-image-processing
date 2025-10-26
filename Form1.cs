@@ -341,10 +341,8 @@ namespace INFOIBV
                         ConverterMethods.convertBitmapToColor(
                         new Bitmap(
                         Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
-                    ))));
-                    Point bestMatch = processingImage.findBestMatchBinary(templateImage);
-                    extraInformation.Text = "best match: x=" + bestMatch.X + ", y=" + bestMatch.Y;
-                    return processingImage;
+                    )))); // TODO: Maybe find a way to not hardcode this
+                    return processingImage.visualiseBestMatchBinary(templateImage);
                     
                 default:
                     return processingImage;

@@ -370,13 +370,13 @@ namespace INFOIBV.Core
                 );
         }
 
-        public Point findBestMatchBinary(ProcessingImage templateImage, bool checkEdges = false, List<Point> pointsToCheck = null)
+        public Dictionary<Point, float> findMatchesBinary(ProcessingImage templateImage, int threshold = 0, bool checkEdges = false, List<Point> pointsToCheck = null)
         {
             DistanceStyle ds = new ManhattanDistance();
             float[,] distances = new ChamferDistanceTransform(inputImage, 3).toDistances(ds);
             int K = templateImage.getImageData().amountForegroundPixels;
-            float bestScore = K * ds.maxDistance(width, height); Point currentBestMatch = new Point();
-
+            Dictionary<Point, float> scores = new Dictionary<Point, float>();
+            
             for (int r = 0; r < width; r++)
             for (int s = 0; s < height; s++)
             {
@@ -394,14 +394,36 @@ namespace INFOIBV.Core
 
                 score /= K;
 
-                if (score < bestScore)
-                {
-                    bestScore = score;
-                    currentBestMatch = new Point(r, s);
-                }
+                if (score > threshold) scores.Add(new Point(r, s), score);
             }
             
-            return currentBestMatch;
+            return scores;
+        }
+
+        public Point findBestMatchBinary(ProcessingImage templateImage)
+        {
+            Dictionary<Point, float> scores = findMatchesBinary(templateImage, 0);
+            return scores.Aggregate(
+                (s1, s2) => s1.Value < s2.Value ? s1 : s2)
+            .Key;
+        }
+
+        public RGBImage visualiseBestMatchBinary(ProcessingImage templateImage)
+        {
+            Point bestMatch = findBestMatchBinary(templateImage);
+            Bitmap output = getImage();
+            
+            // outlined square
+            for (int i = bestMatch.X; i < bestMatch.X + templateImage.width; i++)
+                output.SetPixel(i, bestMatch.Y, Color.Red);
+            for (int i = bestMatch.X; i < bestMatch.X + templateImage.width; i++)
+                output.SetPixel(i, bestMatch.Y + templateImage.height, Color.Red);
+            for (int j = bestMatch.Y; j < bestMatch.Y + templateImage.height; j++)
+                output.SetPixel(bestMatch.X, j, Color.Red);
+            for (int j = bestMatch.Y; j < bestMatch.Y + templateImage.height; j++)
+                output.SetPixel(bestMatch.X + templateImage.width, j, Color.Red);
+
+            return new RGBImage(output);
         }
 
         protected bool outOfBounds(int x, int y)
