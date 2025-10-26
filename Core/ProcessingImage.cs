@@ -5,7 +5,6 @@ using System.Linq;
 using INFOIBV.Helper_Code;
 using System.Numerics;
 using System.Windows.Forms;
-using INFOIBV.Core.TemplateMatching;
 
 namespace INFOIBV.Core
 {
