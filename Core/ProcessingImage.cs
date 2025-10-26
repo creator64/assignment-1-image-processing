@@ -10,7 +10,13 @@ using System.Runtime.InteropServices;
 
 namespace INFOIBV.Core
 {
-    public class ProcessingImage
+
+    interface IImage
+    {
+        Bitmap getImage();
+    }
+    
+    public class ProcessingImage : IImage
     {
         public readonly int width;
         public readonly int height;
@@ -275,9 +281,7 @@ namespace INFOIBV.Core
          */
         public ProcessingImage binaryErodeImage(bool[,] structElem)
         {
-            ImageData data = new ImageData(inputImage);
-
-            if (data.amountDistinctValues > 2)
+            if (getImageData().amountDistinctValues > 2)
             {
                 MessageBox.Show("You can only perform binary morphology over binary images. Threshold this image first");
                 return new ProcessingImage(inputImage);
@@ -441,6 +445,67 @@ namespace INFOIBV.Core
                 );
         }
 
+        public Dictionary<Point, float> findMatchesBinary(ProcessingImage templateImage, int threshold = 0, bool checkEdges = false, List<Point> pointsToCheck = null)
+        {
+            DistanceStyle ds = new ManhattanDistance();
+            float[,] distances = new ChamferDistanceTransform(inputImage, 3).toDistances(ds);
+            int K = templateImage.getImageData().amountForegroundPixels;
+            Dictionary<Point, float> scores = new Dictionary<Point, float>();
+            
+            for (int r = 0; r < width; r++)
+            for (int s = 0; s < height; s++)
+            {
+                if ((width - r < templateImage.width || height - s < templateImage.height) && !checkEdges) continue;
+                if (pointsToCheck != null && !pointsToCheck.Contains(new Point(r, s))) continue;
+                
+                float score = 0;
+                for (int k = 0; k < templateImage.width; k++)
+                for (int l = 0; l < templateImage.height; l++)
+                {
+                    if (templateImage.inputImage[k, l] != 255) continue;
+                    int x = r + k, y = s + l; if (outOfBounds(x, y)) continue;
+                    score += distances[x, y];
+                }
+
+                score /= K;
+
+                if (score > threshold) scores.Add(new Point(r, s), score);
+            }
+            
+            return scores;
+        }
+
+        public Point findBestMatchBinary(ProcessingImage templateImage)
+        {
+            Dictionary<Point, float> scores = findMatchesBinary(templateImage, 0);
+            return scores.Aggregate(
+                (s1, s2) => s1.Value < s2.Value ? s1 : s2)
+            .Key;
+        }
+
+        public RGBImage visualiseBestMatchBinary(ProcessingImage templateImage)
+        {
+            Point bestMatch = findBestMatchBinary(templateImage);
+            Bitmap output = getImage();
+            
+            // outlined square
+            for (int i = bestMatch.X; i < bestMatch.X + templateImage.width; i++)
+                output.SetPixel(i, bestMatch.Y, Color.Red);
+            for (int i = bestMatch.X; i < bestMatch.X + templateImage.width; i++)
+                output.SetPixel(i, bestMatch.Y + templateImage.height, Color.Red);
+            for (int j = bestMatch.Y; j < bestMatch.Y + templateImage.height; j++)
+                output.SetPixel(bestMatch.X, j, Color.Red);
+            for (int j = bestMatch.Y; j < bestMatch.Y + templateImage.height; j++)
+                output.SetPixel(bestMatch.X + templateImage.width, j, Color.Red);
+
+            return new RGBImage(output);
+        }
+
+        protected bool outOfBounds(int x, int y)
+        {
+            return x < 0 || x >= width || y < 0 || y >= height;
+        }
+
         public RegionalProcessingImage toRegionalImage(ImageRegionFinder regionFinder)
         {
             return new RegionalProcessingImage(inputImage, regionFinder);
@@ -451,7 +516,7 @@ namespace INFOIBV.Core
             return new HoughTransform(inputImage, thetaDetail, rDetail);
         }
 
-        public virtual Bitmap convertToImage()
+        public Bitmap getImage()
         {
             Bitmap OutputImage = new Bitmap(inputImage.GetLength(0), inputImage.GetLength(1)); // create new output image
             for (int x = 0; x < inputImage.GetLength(0); x++)             // loop over columns
@@ -463,93 +528,22 @@ namespace INFOIBV.Core
 
             return OutputImage;
         }
-    }
 
-    public class RegionalProcessingImage : ProcessingImage
-    {
-        public int amountOfRegions => regions.Count;
-        private readonly int[,] regionGrid;
-        private readonly Dictionary<int, List<Vector2>> regions;
-
-        public RegionalProcessingImage(byte[,] inputImage, ImageRegionFinder regionFinder) : base(inputImage)
+        protected ImageData getImageData()
         {
-            ImageData imgData = new ImageData(inputImage);
-            if (!imgData.isBinary())
-                throw new Exception("Regional Processing Images must be binary");
-            
-            regionGrid = regionFinder.findRegions(inputImage); 
-            regions = new Dictionary<int, List<Vector2>>();
-            getRegionsFromGrid();
-        }
-
-        private void getRegionsFromGrid()
-        {
-            for (int x = 0; x < regionGrid.GetLength(0); x++)
-            for (int y = 0; y < regionGrid.GetLength(1); y++)
-            {
-                if (regionGrid[x, y] == 0) continue;
-                if (!regions.ContainsKey(regionGrid[x, y])) regions.Add(regionGrid[x, y], new List<Vector2>() {new Vector2(x, y)});
-                else regions[regionGrid[x, y]].Add(new Vector2(x, y));
-            }
-        }
-        
-        public ProcessingImage displayLargestRegion()
-        {
-            byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-
-            int largestRegion = regions.Select(region => new KeyValuePair<int, int>(region.Key, region.Value.Count))
-                .Aggregate((r1, r2) => r1.Value > r2.Value ? r1 : r2).Key;
-            
-            for (int x = 0; x < regionGrid.GetLength(0); x++)
-            for (int y = 0; y < regionGrid.GetLength(1); y++) 
-                if (regionGrid[x, y] == largestRegion) outputImage[x, y] = 255;
-            
-            return new ProcessingImage(outputImage);
-        }
-        
-        public ProcessingImage highlightRegions()
-        {
-            byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-
-            for (int x = 0; x < regionGrid.GetLength(0); x++)
-            for (int y = 0; y < regionGrid.GetLength(1); y++)
-            {
-                if (regionGrid[x, y] == 0) continue;
-                if (regionGrid[x, y] % 8 == 0) outputImage[x, y] = 64;
-                else outputImage[x, y] = (byte)((regionGrid[x, y] % 8) * 32);
-            }
-
-            return new ProcessingImage(outputImage);
-        }
-
-        public List<Vector2> getThetaRPairs()
-        {
-            return regionCenters()
-                .Select(p =>
-                    HelperFunctions.coordinateToThetaRPair(p.Value,
-                        width, height))
-                .ToList();
-        }
-
-        public Dictionary<int, Vector2> regionCenters()
-        {
-            // TODO: maybe this is not the best way of finding the centers of the regions
-            return regions
-                .Select(region => 
-                    new KeyValuePair<int, Vector2>(region.Key, region.Value[region.Value.Count / 2]))
-                .ToDictionary(p => p.Key, p => p.Value);
+            return new ImageData(inputImage);
         }
     }
-    
-    public class RGBProcessingImage : ProcessingImage
+
+    public class RGBImage : IImage
     {
         public Bitmap rgbImage { get; private set; }
-        public RGBProcessingImage(byte[,] inputGrayScale, Bitmap inputRGB) : base(inputGrayScale)
+        public RGBImage(Bitmap inputRGB)
         {
             this.rgbImage = inputRGB;
         }
 
-        public override Bitmap convertToImage()
+        public Bitmap getImage()
         {
             return rgbImage;
         }

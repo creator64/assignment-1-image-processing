@@ -65,19 +65,19 @@ namespace INFOIBV.Core
                 );
         }
 
-        public Bitmap houghLineSegments(List<Vector2> peaks, byte minIntensity, ushort minSegLength, ushort maxGap)
+        public RGBImage houghLineSegments(List<Vector2> peaks, byte minIntensity, ushort minSegLength, ushort maxGap)
         {
 
             List<((int X, int Y) startPoint, (int X, int Y) endPoint)> lineSegments = new List<((int X, int Y) startPoint, (int X, int Y) endPoint)>();
 
-            Bitmap outputImage = this.convertToImage();
+            Bitmap outputImage = this.getImage();
 
             List<LineSegment> segments = getLineSegments(peaks, minIntensity, maxGap, minSegLength);
 
             foreach (LineSegment seg in segments)
                 seg.drawToImage(outputImage, Color.Red, width, height, 2);
 
-            return outputImage;
+            return new RGBImage(outputImage);
         }
 
         public List<LineSegment> getLineSegments(List<Vector2> peaks, byte minIntensity, ushort maxGap, ushort minSegLength) 
@@ -166,9 +166,9 @@ namespace INFOIBV.Core
             return intersectionPoints;
         }
 
-        public Bitmap drawPoints(List<(int X, int Y)> points, Color color)
+        public RGBImage drawPoints(List<(int X, int Y)> points, Color color)
         {
-            Bitmap outputImage = this.convertToImage();
+            Bitmap outputImage = this.getImage();
             int offset = 3;
 
             foreach ((int X, int Y) in points)
@@ -180,7 +180,7 @@ namespace INFOIBV.Core
             }
 
 
-            return outputImage;
+            return new RGBImage(outputImage);
         }
     }
 }

@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Numerics;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using INFOIBV.Core;
 using INFOIBV.Helper_Code;
-using System.Diagnostics;
+using System.IO;
 
 namespace INFOIBV
 {
@@ -46,6 +45,8 @@ namespace INFOIBV
             BinaryPipeline,
             GrayscalePipeline,
             DrawIntersectionPoints,
+            BinaryDistanceTransform,
+            TestTemplateMatching,
             OtsuThreshold,
             BilateralSmoothing,
             Assignment3,
@@ -58,7 +59,8 @@ namespace INFOIBV
 
         private byte filterSize = 5;
         private float filterSigma = 1f;
-        private byte threshold = 127;
+        private byte threshold = 180;
+        int x = 0;
 
         public INFOIBV()
         {
@@ -123,9 +125,9 @@ namespace INFOIBV
                 MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform this operation on it. Threshold it first to turn it into a binary image.");
             else
             { 
-                ProcessingImage image = applyProcessingFunction(workingImage);           // processing functions
+                IImage image = applyProcessingFunction(workingImage);           // processing functions
 
-                OutputImage = image.convertToImage();
+                OutputImage = image.getImage();
                 pictureBox2.Image = (Image)OutputImage;                         // display output image
             }
         }
@@ -144,18 +146,20 @@ namespace INFOIBV
         /*
          * applyProcessingFunction: defines behavior of function calls when "Apply" is pressed
          */
-        private ProcessingImage applyProcessingFunction(byte[,] workingImage)
+        private IImage applyProcessingFunction(byte[,] workingImage)
         {
+            x++;
             float[,] horizontalKernel = {
                 { -1, -2, -1},
                 { 0, 0, 0},
                 { 1, 2, 1}
             };
 
-            float[,] verticalKernel = {
-                { -1, 0, 1},
-                { -2, 0, 2},
-                { -1, 0, 1}
+            float[,] verticalKernel =
+            {
+                { -1, 0, 1 },
+                { -2, 0, 2 },
+                { -1, 0, 1 }
             };
 
             extraInformation.Text = "";
@@ -291,8 +295,7 @@ namespace INFOIBV
                     HoughTransform htDrawLines = processingImage.toHoughTransform(thetaDetail, rDetail);
                     ProcessingImage accumulatorArray = htDrawLines.houghTransform();
                     peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
-                    Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
-                    return new RGBProcessingImage(processingImage.toArray(), outputImage);
+                    return htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
                 case ProcessingFunctions.BinaryPipeline:
 
                     thetaDetail = processingImage.width * (int)thetaDetailInput.Value;
@@ -329,12 +332,27 @@ namespace INFOIBV
                     accumulatorArray = htDrawIntersects.houghTransform();
                     peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
                     List<(int X, int Y)> intersects = htDrawIntersects.getHoughLineIntersections(peaks, minIntensity, maxGap, minSegLength);
-                    outputImage = htDrawIntersects.drawPoints(intersects, Color.Red);
-                    return new RGBProcessingImage(processingImage.toArray(), outputImage);
+                    return htDrawIntersects.drawPoints(intersects, Color.Red);
+
+                case ProcessingFunctions.BinaryDistanceTransform:
+                    DistanceStyle s = x % 2 == 0 ? (DistanceStyle)new EuclidianDistance() : new ManhattanDistance();
+                    return new ChamferDistanceTransform(processingImage.toArray(), 3).toDistancesImage(s);
+                
+                case ProcessingFunctions.TestTemplateMatching:
+                    string baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
+                    ProcessingImage templateImage = new ProcessingImage(ConverterMethods.convertToGrayscale(
+                        ConverterMethods.convertBitmapToColor(
+                        new Bitmap(
+                        Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
+                    )))); // TODO: Maybe find a way to not hardcode this
+                    return processingImage.visualiseBestMatchBinary(templateImage);
+                
                 case ProcessingFunctions.OtsuThreshold:
                     return processingImage.otsuThreshold();
+                
                 case ProcessingFunctions.BilateralSmoothing:
                     return processingImage.bilateralSmoothing(2, 50);
+                
                 case ProcessingFunctions.Assignment3:
                     t_mag = (byte)t_magInput.Value;
                     gaussianMatrixSize = gaussianSize.Value;
@@ -342,8 +360,10 @@ namespace INFOIBV
                     bool[,] A3StructElem = FilterGenerators.createSquareFilter<bool>(3, FilterValueGenerators.createRoundStructuringElement);
 
                     return Pipelines.Assignment3(processingImage, t_mag, A3StructElem);
+                
                 case ProcessingFunctions.Assignment3Variant:
                     return processingImage.adjustContrast().otsuThreshold().invertImage(); //for testing other methods later
+                
                 default:
                     return processingImage;
             }

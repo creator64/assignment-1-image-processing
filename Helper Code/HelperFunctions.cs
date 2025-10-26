@@ -41,6 +41,7 @@ namespace INFOIBV.Helper_Code
 
             for (int i = 0; i < copy.GetLength(0); i++) for (int j = 0; j < copy.GetLength(1); j++)
                     copy[i, j] = I[i, j];
+            
             return copy;
         }
 

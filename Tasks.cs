@@ -6,9 +6,7 @@ using INFOIBV.Core;
 using INFOIBV.Helper_Code;
 using System.Text.Json;
 using System.Diagnostics;
-using System.Security.Policy;
 using System.Collections.Generic;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace INFOIBV
 {
@@ -46,7 +44,7 @@ namespace INFOIBV
                 if (!Directory.Exists(outputPath))
                     Directory.CreateDirectory(outputPath);
 
-                Image outputImage = processedImage.convertToImage();
+                Image outputImage = processedImage.getImage();
                 outputImage.Save(Path.Combine(outputPath, "B" + (i + 1) + ".bmp"), ImageFormat.Bmp);
                 outputImage.Save(Path.Combine(outputPath, "B" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report
 
@@ -82,7 +80,7 @@ namespace INFOIBV
                 string jsonString = JsonSerializer.Serialize(data);
                 File.WriteAllText(Path.Combine(dataPath, "image_data_C" + (i + 1) + ".json"), jsonString);
 
-                Image outputImage = processedImage.convertToImage();
+                Image outputImage = processedImage.getImage();
 
                 outputImage.Save(Path.Combine(imgPath, "C" + (i + 1) + ".bmp"), ImageFormat.Bmp);
                 outputImage.Save(Path.Combine(imgPath, "C" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report
@@ -109,7 +107,7 @@ namespace INFOIBV
             if (!Directory.Exists(dataPath))
                 Directory.CreateDirectory(dataPath);
 
-            Image img_imageF = imageF.convertToImage();
+            Image img_imageF = imageF.getImage();
             img_imageF.Save(Path.Combine(imgPath, "Image_F.bmp"), ImageFormat.Bmp);
 
             int[] sizes = { 3, 13, 23, 33 };
@@ -123,7 +121,7 @@ namespace INFOIBV
                 string jsonString = JsonSerializer.Serialize(data);
                 File.WriteAllText(Path.Combine(dataPath, "image_data_G" + (i + 1) + ".json"), jsonString);
 
-                Image outputImage = processedImage.convertToImage();
+                Image outputImage = processedImage.getImage();
 
                 outputImage.Save(Path.Combine(imgPath, "G" + (i + 1) + ".bmp"), ImageFormat.Bmp);
                 outputImage.Save(Path.Combine(imgPath, "G" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report
@@ -160,19 +158,19 @@ namespace INFOIBV
 
             foreach (BinaryPipelineConfig config in configs)
             {
-                ProcessingImage processedImage = Pipelines.BinaryPipeline(processingImage,
-                                                                          processingImage.width * config.thetaDetailFactor,
-                                                                          processingImage.height * config.rDetailFactor,
-                                                                          config.minIntensity,
-                                                                          config.minSegLength,
-                                                                          config.maxGap,
-                                                                          config.t_mag,
-                                                                          config.t_peak,
-                                                                          config.regionFinder);
+                RGBImage processedImage = Pipelines.BinaryPipeline(processingImage,
+                  processingImage.width * config.thetaDetailFactor,
+                  processingImage.height * config.rDetailFactor,
+                  config.minIntensity,
+                  config.minSegLength,
+                  config.maxGap,
+                  config.t_mag,
+                  config.t_peak,
+                  config.regionFinder);
                 string jsonString = JsonSerializer.Serialize(config);
                 File.WriteAllText(Path.Combine(dataPath, "config_" + config.name + ".json"), jsonString);
 
-                Image output = processedImage.convertToImage();
+                Image output = processedImage.getImage();
 
                 output.Save(Path.Combine(imgPath, config.name + ".png"), ImageFormat.Png);
             }
@@ -207,18 +205,18 @@ namespace INFOIBV
 
             foreach (GrayscalePipelineConfig config in configs)
             {
-                ProcessingImage processedImage = Pipelines.GrayscalePipeline( processingImage,
-                                                                              processingImage.width * config.thetaDetailFactor,
-                                                                              processingImage.height * config.rDetailFactor,
-                                                                              config.minIntensity,
-                                                                              config.minSegLength,
-                                                                              config.maxGap,
-                                                                              config.t_peak,
-                                                                              config.regionFinder);
+                RGBImage processedImage = Pipelines.GrayscalePipeline( processingImage,
+                  processingImage.width * config.thetaDetailFactor,
+                  processingImage.height * config.rDetailFactor,
+                  config.minIntensity,
+                  config.minSegLength,
+                  config.maxGap,
+                  config.t_peak,
+                  config.regionFinder);
                 string jsonString = JsonSerializer.Serialize(config);
                 File.WriteAllText(Path.Combine(dataPath, "config_" + config.name + ".json"), jsonString);
 
-                Image output = processedImage.convertToImage();
+                Image output = processedImage.getImage();
 
                 output.Save(Path.Combine(imgPath, config.name + ".png"), ImageFormat.Png);
             }

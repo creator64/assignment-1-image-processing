@@ -41,7 +41,7 @@ namespace INFOIBV.Core
             return processingImage.toRegionalImage(regionFinder).getThetaRPairs();
         }
 
-        public static ProcessingImage BinaryPipeline(ProcessingImage processingImage, int thetaDetail, int rDetail, byte minIntensity, ushort minSegLength, ushort maxGap, byte t_mag, byte t_peak, ImageRegionFinder regionFinder)
+        public static RGBImage BinaryPipeline(ProcessingImage processingImage, int thetaDetail, int rDetail, byte minIntensity, ushort minSegLength, ushort maxGap, byte t_mag, byte t_peak, ImageRegionFinder regionFinder)
         {
 
             ProcessingImage imageA = processingImage.adjustContrast();
@@ -64,11 +64,10 @@ namespace INFOIBV.Core
             HoughTransform htDrawLines = binaryEdgeMap.toHoughTransform(thetaDetail, rDetail);
             ProcessingImage accumulatorArray = htDrawLines.houghTransform();
             List<Vector2> peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
-            Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
-            return new RGBProcessingImage(processingImage.toArray(), outputImage);
+            return htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
         }
 
-        public static ProcessingImage GrayscalePipeline(ProcessingImage processingImage, int thetaDetail, int rDetail, byte minIntensity, ushort minSegLength, ushort maxGap, byte t_peak, ImageRegionFinder regionFinder)
+        public static RGBImage GrayscalePipeline(ProcessingImage processingImage, int thetaDetail, int rDetail, byte minIntensity, ushort minSegLength, ushort maxGap, byte t_peak, ImageRegionFinder regionFinder)
         {
 
             ProcessingImage imageA = processingImage.adjustContrast();
@@ -91,8 +90,7 @@ namespace INFOIBV.Core
             HoughTransform htDrawLines = grayscaleEdgeMap.toHoughTransform(thetaDetail, rDetail);
             ProcessingImage accumulatorArray = htDrawLines.houghTransform();
             List<Vector2> peaks = Pipelines.peakFinding(accumulatorArray, t_peak);
-            Bitmap outputImage = htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
-            return new RGBProcessingImage(processingImage.toArray(), outputImage);
+            return htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
         }
 
         public static ProcessingImage Assignment3(ProcessingImage processingImage, byte t_mag, bool[,] structElem)
