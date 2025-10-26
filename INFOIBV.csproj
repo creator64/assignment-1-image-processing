@@ -81,6 +81,8 @@
     <Compile Include="Core\HoughTransform.cs" />
     <Compile Include="Core\Pipelines.cs" />
     <Compile Include="Core\ProcessingImage.cs" />
+    <Compile Include="Core\TemplateMatching\DistanceTransform.cs" />
+    <Compile Include="Core\TemplateMatching\TemplateMatching.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -89,6 +91,7 @@
     </Compile>
     <Compile Include="Helper Code\BinaryMorphologyHelpers.cs" />
     <Compile Include="Helper Code\ConverterMethods.cs" />
+    <Compile Include="Helper Code\DistanceStyle.cs" />
     <Compile Include="Helper Code\FilterGenerators.cs" />
     <Compile Include="Helper Code\HelperFunctions.cs" />
     <Compile Include="Helper Code\ImageRegionFinder.cs" />

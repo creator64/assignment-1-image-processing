@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using INFOIBV.Core;
 using INFOIBV.Helper_Code;
 using System.Diagnostics;
+using INFOIBV.Core.TemplateMatching;
 
 namespace INFOIBV
 {
@@ -45,7 +46,8 @@ namespace INFOIBV
             HoughLineSegments,
             BinaryPipeline,
             GrayscalePipeline,
-            DrawIntersectionPoints
+            DrawIntersectionPoints,
+            BinaryDistanceTransform
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -55,6 +57,7 @@ namespace INFOIBV
         private byte filterSize = 5;
         private float filterSigma = 1f;
         private byte threshold = 127;
+        int x = 0;
 
         public INFOIBV()
         {
@@ -142,16 +145,18 @@ namespace INFOIBV
          */
         private ProcessingImage applyProcessingFunction(byte[,] workingImage)
         {
+            x++;
             float[,] horizontalKernel = {
                 { -1, -2, -1},
                 { 0, 0, 0},
                 { 1, 2, 1}
             };
 
-            float[,] verticalKernel = {
-                { -1, 0, 1},
-                { -2, 0, 2},
-                { -1, 0, 1}
+            float[,] verticalKernel =
+            {
+                { -1, 0, 1 },
+                { -2, 0, 2 },
+                { -1, 0, 1 }
             };
 
             extraInformation.Text = "";
@@ -327,6 +332,11 @@ namespace INFOIBV
                     List<(int X, int Y)> intersects = htDrawIntersects.getHoughLineIntersections(peaks, minIntensity, maxGap, minSegLength);
                     outputImage = htDrawIntersects.drawPoints(intersects, Color.Red);
                     return new RGBProcessingImage(processingImage.toArray(), outputImage);
+                
+                case ProcessingFunctions.BinaryDistanceTransform:
+                    DistanceStyle s = x % 2 == 0 ? (DistanceStyle)new EuclidianDistance() : new ManhattanDistance();
+                    return new ChamferDistanceTransform(processingImage.toArray(), 3).toDistancesImage(s);
+                    
                 default:
                     return processingImage;
             }
