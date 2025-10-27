@@ -56,8 +56,9 @@ namespace INFOIBV.Helper_Code
 
         protected override List<SubImage> segmentImage()
         {
-            RegionalProcessingImage regionalImage = binaryData.toRegionalImage(new FloodFill());
-            Dictionary<int, List<Vector2>> regions = regionalImage.regions;
+            Dictionary<int, List<Vector2>> regions = binaryData.
+                toRegionalImage(new FloodFill())
+                .regions;
 
             List<SubImage> result = new List<SubImage>();
 
