@@ -362,8 +362,8 @@ namespace INFOIBV
                     return Pipelines.Assignment3(processingImage, t_mag, A3StructElem);
                 
                 case ProcessingFunctions.Assignment3Variant:
-                    return processingImage.adjustContrast().otsuThreshold().invertImage(); //for testing other methods later
-                
+                    return processingImage.adjustContrast().bilateralSmoothing(2, 100).otsuThreshold().invertImage(); //for testing other methods later
+
                 default:
                     return processingImage;
             }
