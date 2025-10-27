@@ -75,6 +75,26 @@ namespace INFOIBV.Core
             return new ProcessingImage(tempImage);
         }
 
+        public SubImage createSubImage((int X, int Y) startPos, (int X, int Y) endPos)
+        {
+            byte[,] subImageArray = new byte[endPos.X - startPos.X, endPos.Y - startPos.Y];
+
+            for (int u = startPos.X; u <= endPos.X; u++)
+            {
+                for (int v = startPos.Y; v <= endPos.Y; v++)
+                {
+                    if (    (u - startPos.X < 0 || u - startPos.X >= subImageArray.GetLength(0))
+                        ||  (v - startPos.Y < 0 || v - startPos.Y >= subImageArray.GetLength(1))
+                        ||  (u < 0 || u >= inputImage.GetLength(0))
+                        ||  (v < 0 || v >= inputImage.GetLength(1))) // out of array bounds check
+                        continue;
+
+                    subImageArray[u - startPos.X, v - startPos.Y] = inputImage[u, v];
+                }
+            }
+
+            return new SubImage(this, subImageArray, startPos, endPos);
+        }
 
         /*
          * createGaussianFilter: create a Gaussian filter of specific square size and with a specified sigma
@@ -533,6 +553,23 @@ namespace INFOIBV.Core
         {
             return new ImageData(inputImage);
         }
+    }
+
+    public class SubImage : ProcessingImage
+    {
+        public ProcessingImage parentImage { get; private set; }
+        
+        public (int X, int Y) startPos { get; private set; }
+
+        public (int X, int Y) endPos { get; private set; }
+
+        public SubImage(ProcessingImage parentImage, byte[,] subImageArray, (int X, int Y) startPos, (int X, int Y) endPos) : base(subImageArray)
+        {
+            this.parentImage = parentImage;
+            this.startPos = startPos;
+            this.endPos = endPos;
+        }
+
     }
 
     public class RGBImage : IImage

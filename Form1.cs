@@ -49,8 +49,8 @@ namespace INFOIBV
             TestTemplateMatching,
             OtsuThreshold,
             BilateralSmoothing,
-            Assignment3,
-            Assignment3Variant
+            SegmentationTest,
+            Assignment3
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -361,8 +361,16 @@ namespace INFOIBV
 
                     return Pipelines.Assignment3(processingImage, t_mag, A3StructElem);
                 
-                case ProcessingFunctions.Assignment3Variant:
-                    return processingImage.adjustContrast().bilateralSmoothing(2, 100).otsuThreshold().invertImage(); //for testing other methods later
+                case ProcessingFunctions.SegmentationTest:
+                    baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
+                    templateImage = new ProcessingImage(ConverterMethods.convertToGrayscale(
+                        ConverterMethods.convertBitmapToColor(
+                        new Bitmap(
+                        Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
+                    ))));
+
+                    Segmentator segmentator = new SimpleConnectionSegmentator(processingImage, (templateImage.width, templateImage.height));
+                    return segmentator.visualisedSegmentation;
 
                 default:
                     return processingImage;

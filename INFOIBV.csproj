@@ -98,6 +98,7 @@
     <Compile Include="Helper Code\LineSegment.cs" />
     <Compile Include="Helper Code\Padders.cs" />
     <Compile Include="Helper Code\ImageData.cs" />
+    <Compile Include="Helper Code\Segmentators.cs" />
     <Compile Include="Tasks.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

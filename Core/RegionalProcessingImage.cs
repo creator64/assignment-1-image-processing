@@ -10,7 +10,7 @@ namespace INFOIBV.Core
     {
         public int amountOfRegions => regions.Count;
         private readonly int[,] regionGrid;
-        private readonly Dictionary<int, List<Vector2>> regions;
+        public Dictionary<int, List<Vector2>> regions { get; private set; }
 
         public RegionalProcessingImage(byte[,] inputImage, ImageRegionFinder regionFinder) : base(inputImage)
         {
