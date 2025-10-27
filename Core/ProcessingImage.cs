@@ -249,7 +249,7 @@ namespace INFOIBV.Core
         }
         public ProcessingImage otsuThreshold()
         {
-            ImageData data = new ImageData(inputImage);
+            ImageData data = getImageData();
 
             decimal maxVariance = 0.0m;
             byte qMax = 0;
@@ -549,7 +549,7 @@ namespace INFOIBV.Core
             return OutputImage;
         }
 
-        protected ImageData getImageData()
+        public ImageData getImageData()
         {
             return new ImageData(inputImage);
         }

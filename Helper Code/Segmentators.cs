@@ -25,8 +25,7 @@ namespace INFOIBV.Helper_Code
         /// <param name="binaryData">Binarised form of inscription with the glyps being foreground pixels (pixels of value 255)</param>
         public Segmentator(ProcessingImage binaryData)
         {
-            ImageData data  = new ImageData(binaryData.toArray());
-            if (!data.isBinary()) throw new ArgumentException("A segmentator should receive a binary image as input");
+            if (!binaryData.getImageData().isBinary()) throw new ArgumentException("A segmentator should receive a binary image as input");
             this.binaryData = binaryData;
         }
 
