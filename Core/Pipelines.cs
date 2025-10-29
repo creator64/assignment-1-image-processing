@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using INFOIBV;
+using INFOIBV.Core.Main;
 using INFOIBV.Helper_Code;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
@@ -109,7 +110,7 @@ namespace INFOIBV.Core
             //--------------------------------------------------------
             //  Step 3: Segmentation (Detect regions of text)
             //--------------------------------------------------------
-
+            // binaryEdgeMap.toRegionalImage(new FloodFill()).
             //--------------------------------------------------------
             //  Step 4: Feature Extraction (Template Matching)
             //--------------------------------------------------------
