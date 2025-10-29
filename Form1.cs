@@ -50,7 +50,7 @@ namespace INFOIBV
             OtsuThreshold,
             BilateralSmoothing,
             SegmentationTest,
-            Assignment3
+            SimpleCuneiDetection
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -353,13 +353,13 @@ namespace INFOIBV
                 case ProcessingFunctions.BilateralSmoothing:
                     return processingImage.bilateralSmoothing(2, 50);
                 
-                case ProcessingFunctions.Assignment3:
+                case ProcessingFunctions.SimpleCuneiDetection:
                     t_mag = (byte)t_magInput.Value;
                     gaussianMatrixSize = gaussianSize.Value;
                     sigma = sigmaInput.Value;
                     bool[,] A3StructElem = FilterGenerators.createSquareFilter<bool>(3, FilterValueGenerators.createRoundStructuringElement);
 
-                    return Pipelines.Assignment3(processingImage, t_mag, A3StructElem);
+                    return Pipelines.simpleCuneiDetection(processingImage, t_mag, A3StructElem);
                 
                 case ProcessingFunctions.SegmentationTest:
                     baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;

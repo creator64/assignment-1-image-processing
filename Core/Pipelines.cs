@@ -26,6 +26,7 @@ namespace INFOIBV.Core
                 .edgeMagnitude(horizontalKernel, verticalKernel)
                 .thresholdImage(30);
         }
+        
         public static List<Vector2> peakFinding(ProcessingImage accumulatorArray, byte t_peak, ImageRegionFinder regionFinder = null)
         {
             if (regionFinder == null)
@@ -93,13 +94,17 @@ namespace INFOIBV.Core
             return htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
         }
 
-        public static ProcessingImage Assignment3(ProcessingImage processingImage, byte t_mag, bool[,] structElem)
+        public static ProcessingImage simpleCuneiDetection(ProcessingImage processingImage, byte t_mag, bool[,] structElem)
         {
 
             //--------------------------------------------------------
             //  Step 1 & 2: Binarisation (thresholding) & Pre-processing (despeckling via bilateralSmoothing)
             //--------------------------------------------------------
-            ProcessingImage binaryEdgeMap = processingImage.adjustContrast().bilateralSmoothing(2, 50).otsuThreshold().invertImage();
+            ProcessingImage binaryEdgeMap = processingImage
+                .adjustContrast()
+                .bilateralSmoothing(2, 50)
+                .otsuThreshold()
+                .invertImage();
 
             //--------------------------------------------------------
             //  Step 3: Segmentation (Detect regions of text)
