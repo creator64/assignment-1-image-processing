@@ -13,10 +13,10 @@ namespace INFOIBV.Core
         public List<Vector2> coordinates;
         public int Size => coordinates.Count;
 
-        public Region(int id, List<Vector2> regions)
+        public Region(int id, List<Vector2> coordinates)
         {
             this.id = id;
-            this.coordinates = new List<Vector2>(regions);
+            this.coordinates = coordinates;
         }
 
         public void addCoordinate(Vector2 vector2)
@@ -63,7 +63,6 @@ namespace INFOIBV.Core
             byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
 
             int largestRegion = regions
-                // .Select(region => new KeyValuePair<int, int>(region.Key, region.Value.Count))
                 .Aggregate((r1, r2) => r1.Size > r2.Size ? r1 : r2).id;
             
             for (int x = 0; x < regionGrid.GetLength(0); x++)
