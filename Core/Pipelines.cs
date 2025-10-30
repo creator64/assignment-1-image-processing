@@ -106,11 +106,11 @@ namespace INFOIBV.Core
             //  Step 3: Segmentation (Detect regions of text)
             //--------------------------------------------------------
             String baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-            TemplateMatchingImage templateImage = new TemplateMatchingImage(ConverterMethods.convertToGrayscale(
-                ConverterMethods.convertBitmapToColor(
-                    new Bitmap(
-                        Path.Combine(baseDirectory, "images", "cunei_alphabet_template.bmp")
-                    ))));
+            TemplateMatchingImage templateImage = ProcessingImage.fromBitmap(
+                new Bitmap(
+                    Path.Combine(baseDirectory, "images", "cunei_alphabet_template.bmp")
+                )
+            ).toTemplateMatchingImage();
             
             Segmentator segmentator = new SimpleConnectionSegmentator(binaryEdgeMap, (templateImage.width, templateImage.height));
             List<SubImage> segments = segmentator.segments;

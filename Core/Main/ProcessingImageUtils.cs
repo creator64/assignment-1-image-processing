@@ -80,5 +80,14 @@ namespace INFOIBV.Core.Main
         {
             return inputImage;
         }
+
+        public static ProcessingImage fromBitmap(Bitmap image)
+        {
+            return new ProcessingImage(
+                ConverterMethods.convertToGrayscale(
+                    ConverterMethods.convertBitmapToColor(image)
+                    )
+                );
+        }
     }
 }

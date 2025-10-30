@@ -19,9 +19,7 @@ namespace INFOIBV
             string basePath = enviroment;
 
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
-            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
-            byte[,] workingImage = ConverterMethods.convertToGrayscale(Image);
-            ProcessingImage processingImage = new ProcessingImage(workingImage).adjustContrast();
+            ProcessingImage processingImage = ProcessingImage.fromBitmap(InputImage).adjustContrast();
 
             int[] sizes = { 3, 7, 11, 15, 19 };
             float[,] horizontalKernel = {
@@ -58,9 +56,7 @@ namespace INFOIBV
             string basePath = enviroment;
             
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
-            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
-            byte[,] workingImage = ConverterMethods.convertToGrayscale(Image);
-            ProcessingImage processingImage = new ProcessingImage(workingImage).adjustContrast();
+            ProcessingImage processingImage = ProcessingImage.fromBitmap(InputImage).adjustContrast();
 
             int[] sizes = { 3, 7, 11, 15, 19 };
 
@@ -96,9 +92,7 @@ namespace INFOIBV
 
             Debug.WriteLine(Path.Combine(basePath, path));
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
-            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
-            byte[,] workingImage = ConverterMethods.convertToGrayscale(Image);
-            ProcessingImage imageF = new ProcessingImage(workingImage).thresholdImage(127);
+            ProcessingImage imageF = ProcessingImage.fromBitmap(InputImage).thresholdImage(127);
 
             string imgPath = Path.Combine(basePath, "out", "task3", "images");
             string dataPath = Path.Combine(basePath, "out", "task3", "data");
@@ -138,9 +132,7 @@ namespace INFOIBV
 
             Debug.WriteLine(Path.Combine(basePath, path));
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
-            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
-            byte[,] workingImage = ConverterMethods.convertToGrayscale(Image);
-            ProcessingImage processingImage = new ProcessingImage(workingImage);
+            ProcessingImage processingImage = ProcessingImage.fromBitmap(InputImage);
 
             List<BinaryPipelineConfig> configs = new List<BinaryPipelineConfig>{
                 new BinaryPipelineConfig("1_t_mag_too_high", 2, 2, 110, 50, 20, 7, 130),    // Way too high of a t_mag value, few details as a result
@@ -185,9 +177,7 @@ namespace INFOIBV
 
             Debug.WriteLine(Path.Combine(basePath, path));
             Bitmap InputImage = new Bitmap(Path.Combine(basePath, path));
-            Color[,] Image = ConverterMethods.convertBitmapToColor(InputImage);
-            byte[,] workingImage = ConverterMethods.convertToGrayscale(Image);
-            ProcessingImage processingImage = new ProcessingImage(workingImage);
+            ProcessingImage processingImage = ProcessingImage.fromBitmap(InputImage);
 
             List<GrayscalePipelineConfig> configs = new List<GrayscalePipelineConfig>{
                 new GrayscalePipelineConfig("6_t_peak_too_high", 2, 2, 100, 50, 20, 7),             // Tried to compensate moderate with too much t_peak, most important lines are there but many details are lost

@@ -342,11 +342,10 @@ namespace INFOIBV
                 
                 case ProcessingFunctions.TestTemplateMatching:
                     string baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-                    TemplateMatchingImage templateImage = new TemplateMatchingImage(ConverterMethods.convertToGrayscale(
-                        ConverterMethods.convertBitmapToColor(
+                    TemplateMatchingImage templateImage = ProcessingImage.fromBitmap(
                         new Bitmap(
                         Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
-                    )))); // TODO: Maybe find a way to not hardcode this
+                    )).toTemplateMatchingImage(); // TODO: Maybe find a way to not hardcode this
                     return processingImage.toTemplateMatchingImage().visualiseBestMatchBinary(templateImage);
                 
                 case ProcessingFunctions.OtsuThreshold:
@@ -365,11 +364,10 @@ namespace INFOIBV
                 
                 case ProcessingFunctions.SegmentationTest:
                     baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-                    templateImage = new TemplateMatchingImage(ConverterMethods.convertToGrayscale(
-                        ConverterMethods.convertBitmapToColor(
+                    templateImage = ProcessingImage.fromBitmap(
                         new Bitmap(
                         Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
-                    ))));
+                    )).toTemplateMatchingImage();
 
                     Segmentator segmentator = new SimpleConnectionSegmentator(processingImage, (templateImage.width, templateImage.height));
                     return segmentator.visualisedSegmentation;
