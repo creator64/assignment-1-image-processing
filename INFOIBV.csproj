@@ -78,12 +78,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\DistanceTransform.cs" />
     <Compile Include="Core\HoughTransform.cs" />
     <Compile Include="Core\Pipelines.cs" />
     <Compile Include="Core\Main\ProcessingImage.cs" />
     <Compile Include="Core\Main\ProcessingImageUtils.cs" />
     <Compile Include="Core\RegionalProcessingImage.cs" />
+    <Compile Include="Core\TemplateMatching\DistanceTransform.cs" />
+    <Compile Include="Core\TemplateMatching\TemplateMatchingImage.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

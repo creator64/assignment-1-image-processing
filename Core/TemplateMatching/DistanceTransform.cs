@@ -4,7 +4,7 @@ using System.Linq;
 using INFOIBV.Core.Main;
 using INFOIBV.Helper_Code;
 
-namespace INFOIBV.Core
+namespace INFOIBV.Core.TemplateMatching
 {
     public abstract class AbstractDistanceTransform : ProcessingImage
     {

@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using INFOIBV;
 using INFOIBV.Core.Main;
+using INFOIBV.Core.TemplateMatching;
 using INFOIBV.Helper_Code;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
+
 namespace INFOIBV.Core
 {
     public static class Pipelines
@@ -111,7 +106,7 @@ namespace INFOIBV.Core
             //  Step 3: Segmentation (Detect regions of text)
             //--------------------------------------------------------
             String baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-            ProcessingImage templateImage = new ProcessingImage(ConverterMethods.convertToGrayscale(
+            TemplateMatchingImage templateImage = new TemplateMatchingImage(ConverterMethods.convertToGrayscale(
                 ConverterMethods.convertBitmapToColor(
                     new Bitmap(
                         Path.Combine(baseDirectory, "images", "cunei_alphabet_template.bmp")
@@ -124,7 +119,7 @@ namespace INFOIBV.Core
             //  Step 4: Feature Extraction (Template Matching)
             //--------------------------------------------------------
 
-            return binaryEdgeMap.visualiseMatchesBinary(templateImage,
+            return binaryEdgeMap.toTemplateMatchingImage().visualiseMatchesBinary(templateImage,
                 threshold: 2,
                 pointsToCheck: segments
             );

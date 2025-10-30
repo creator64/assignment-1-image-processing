@@ -5,8 +5,6 @@ using System.Linq;
 using INFOIBV.Helper_Code;
 using System.Numerics;
 using System.Windows.Forms;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace INFOIBV.Core.Main
 {
@@ -15,13 +13,13 @@ namespace INFOIBV.Core.Main
     {
         Bitmap getImage();
     }
-    
+
     public partial class ProcessingImage : IImage
     {
         public readonly int width;
         public readonly int height;
         protected byte[,] inputImage;
-        
+
         public ProcessingImage(byte[,] inputImage)
         {
             width = inputImage.GetLength(0);
@@ -38,8 +36,9 @@ namespace INFOIBV.Core.Main
         {
             // create temporary grayscale image
             byte[,] tempImage = new byte[width, height];
-            
-            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+
+            for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
                 tempImage[x, y] = (byte)(255 - inputImage[x, y]);
 
             return new ProcessingImage(tempImage);
@@ -54,18 +53,19 @@ namespace INFOIBV.Core.Main
         public ProcessingImage adjustContrast()
         {
             int alow = int.MaxValue, ahigh = int.MinValue;
-            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
-            { 
+            for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+            {
                 if (inputImage[x, y] > ahigh) ahigh = inputImage[x, y];
-                if (inputImage[x, y] < alow) alow = inputImage[x, y]; 
+                if (inputImage[x, y] < alow) alow = inputImage[x, y];
             }
 
             // create temporary grayscale image
             byte[,] tempImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            
+
             for (int x = 0; x < width; x++)
-                for (int y = 0; y < height; y++)
-                    tempImage[x, y] = (byte)((inputImage[x, y] - alow) * 255 / (ahigh - alow));
+            for (int y = 0; y < height; y++)
+                tempImage[x, y] = (byte)((inputImage[x, y] - alow) * 255 / (ahigh - alow));
 
             return new ProcessingImage(tempImage);
         }
@@ -80,20 +80,23 @@ namespace INFOIBV.Core.Main
         {
             if (size % 2 == 0) throw new Exception("size of gaussian filter cannot be even");
             int halfSize = size / 2;
-            
+
             // create temporary grayscale image
             float[,] filter = new float[size, size];
 
-            for (int x = -halfSize; x <= halfSize; x++) for (int y = -halfSize; y <= halfSize; y++)
+            for (int x = -halfSize; x <= halfSize; x++)
+            for (int y = -halfSize; y <= halfSize; y++)
                 filter[x + halfSize, y + halfSize] = (float)Math.Exp(
                     (-Math.Pow(x, 2) - Math.Pow(y, 2)) / (2 * Math.Pow(sigma, 2))
                 );
 
             float sum = 0;
-            for (int x = 0; x < size; x++) for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            for (int y = 0; y < size; y++)
                 sum += filter[x, y];
-            
-            for (int x = 0; x < size; x++) for (int y = 0; y < size; y++)
+
+            for (int x = 0; x < size; x++)
+            for (int y = 0; y < size; y++)
                 filter[x, y] /= sum;
 
             return filter;
@@ -171,8 +174,9 @@ namespace INFOIBV.Core.Main
             float[,] tempImage = new float[inputImage.GetLength(0), inputImage.GetLength(1)];
 
             #region test values
+
             //change these around later for the horizontalKernel and verticalKernel parameters
-            
+
             #endregion
 
             Padder horizontalPadder = new CopyPerimeterPadder(horizontalKernel);
@@ -185,7 +189,8 @@ namespace INFOIBV.Core.Main
             float max = float.MinValue;
 
             // calculate edge magnitude
-            for (int i = 0; i < tempImage.GetLength(0); i++) for (int j = 0; j < tempImage.GetLength(1); j++)
+            for (int i = 0; i < tempImage.GetLength(0); i++)
+            for (int j = 0; j < tempImage.GetLength(1); j++)
             {
                 float result = (float)Math.Sqrt(Math.Pow(Dx[i, j], 2) + Math.Pow(Dy[i, j], 2));
 
@@ -199,12 +204,13 @@ namespace INFOIBV.Core.Main
             // and copy to the resulting image
             float trueRange = max - min; //the entire range of values that's currently used
 
-            for (int i = 0; i < tempImage.GetLength(0); i++) for (int j = 0; j < tempImage.GetLength(1); j++)
+            for (int i = 0; i < tempImage.GetLength(0); i++)
+            for (int j = 0; j < tempImage.GetLength(1); j++)
                 resultImage[i, j] = (byte)(255.0f * ((tempImage[i, j] - min) / trueRange));
 
             return new ProcessingImage(resultImage);
         }
-        
+
 
         /*
          * thresholdImage: threshold a grayscale image
@@ -215,13 +221,14 @@ namespace INFOIBV.Core.Main
         {
             // create temporary grayscale image
             byte[,] tempImage = new byte[width, height];
-            
-            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+
+            for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
                 tempImage[x, y] = (byte)(inputImage[x, y] > threshold ? 255 : 0);
 
             return new ProcessingImage(tempImage);
         }
-        
+
         public ProcessingImage otsuThreshold()
         {
             ImageData data = getImageData();
@@ -232,18 +239,19 @@ namespace INFOIBV.Core.Main
             int N_low = 0;
             int N_high;
 
-            for(int i = 0; i <= 255; i++)
+            for (int i = 0; i <= 255; i++)
             {
                 N_low += data.histogram[i];
                 N_high = N - N_low;
 
-                if(N_low > 0 && N_high > 0) 
+                if (N_low > 0 && N_high > 0)
                 {
 
                     float mu_low = data.calculateMean(0, (byte)i);
                     float mu_high = data.calculateMean((byte)(i + 1), 255);
 
-                    decimal variance = (1.0m / ((long)N * (long)N)) * N_low * N_high * (decimal)((mu_low - mu_high) * (mu_low - mu_high));
+                    decimal variance = (1.0m / ((long)N * (long)N)) * N_low * N_high *
+                                       (decimal)((mu_low - mu_high) * (mu_low - mu_high));
                     if (variance > maxVariance)
                     {
                         maxVariance = variance;
@@ -259,8 +267,9 @@ namespace INFOIBV.Core.Main
         {
             // create temporary grayscale image
             byte[,] tempImage = new byte[width, height];
-            
-            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+
+            for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
                 tempImage[x, y] = (byte)(inputImage[x, y] > threshold ? inputImage[x, y] : 0);
 
             return new ProcessingImage(tempImage);
@@ -278,7 +287,8 @@ namespace INFOIBV.Core.Main
         {
             if (getImageData().amountDistinctValues > 2)
             {
-                MessageBox.Show("You can only perform binary morphology over binary images. Threshold this image first");
+                MessageBox.Show(
+                    "You can only perform binary morphology over binary images. Threshold this image first");
                 return new ProcessingImage(inputImage);
             }
             else
@@ -307,7 +317,7 @@ namespace INFOIBV.Core.Main
                 return new ProcessingImage(
                     BinaryMorphologyHelpers.pointSetToImage(
                         resultSet, new Vector2(inputImage.GetLength(0), inputImage.GetLength(1)))
-                    );
+                );
             }
         }
 
@@ -319,14 +329,14 @@ namespace INFOIBV.Core.Main
          */
         public ProcessingImage binaryDilateImage(bool[,] structElem)
         {
-            
+
             HashSet<Vector2> imageSet = BinaryMorphologyHelpers.pointSetFromImage(inputImage);
             HashSet<Vector2> structSet = BinaryMorphologyHelpers.pointSetFromFilter(structElem);
 
             HashSet<Vector2> resultSet = new HashSet<Vector2>();
-            foreach(Vector2 pixel in imageSet)
-                foreach(Vector2 element in structSet)
-                    resultSet.Add(pixel + element);
+            foreach (Vector2 pixel in imageSet)
+            foreach (Vector2 element in structSet)
+                resultSet.Add(pixel + element);
 
             return new ProcessingImage(
                 BinaryMorphologyHelpers.pointSetToImage(
@@ -369,7 +379,8 @@ namespace INFOIBV.Core.Main
             float[,] floatStructElem = HelperFunctions.floatifyIntArray(structElem);
             Padder padder = new ConstantValuePadder(floatStructElem, 0);
 
-            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Min<float>, (x, y) => x - y);
+            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder,
+                Enumerable.Min<float>, (x, y) => x - y);
 
             byte[,] output = ConverterMethods.convertToBytes(floatyresult);
 
@@ -387,13 +398,14 @@ namespace INFOIBV.Core.Main
             float[,] floatStructElem = HelperFunctions.floatifyIntArray(structElem);
             Padder padder = new ConstantValuePadder(floatStructElem, 0);
 
-            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder, Enumerable.Max<float>, (x, y) => x + y);
+            float[,] floatyresult = HelperFunctions.applyMorphologicalFilter(inputImage, floatStructElem, padder,
+                Enumerable.Max<float>, (x, y) => x + y);
 
             byte[,] output = ConverterMethods.convertToBytes(floatyresult);
 
             return new ProcessingImage(output);
         }
-        
+
         /*
          * histogramEqualization: create the histogram-equalized version of the image
          * input:   inputImage          single-channel (byte) image
@@ -404,13 +416,14 @@ namespace INFOIBV.Core.Main
             int[] cumulativeHistogram = HelperFunctions.calculateCumulativeHistogram(inputImage);
             int amountOfPixels = inputImage.GetLength(0) * inputImage.GetLength(1);
             int K = cumulativeHistogram.Length;
-            
+
             int[] mappedPixels = new int[K];
             for (int i = 0; i < K; i++)
                 mappedPixels[i] = (int)Math.Floor((K - 1d) * cumulativeHistogram[i] / amountOfPixels);
 
             byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
-            for (int x = 0; x < inputImage.GetLength(0); x++) for (int y = 0; y < inputImage.GetLength(1); y++)
+            for (int x = 0; x < inputImage.GetLength(0); x++)
+            for (int y = 0; y < inputImage.GetLength(1); y++)
                 outputImage[x, y] = (byte)mappedPixels[inputImage[x, y]];
 
             return new ProcessingImage(outputImage);
@@ -436,48 +449,8 @@ namespace INFOIBV.Core.Main
             };
 
             return new ProcessingImage(
-                    HelperFunctions.applyNonLinearFilter(inputImage, padder, f)
-                );
-        }
-
-        public RGBImage drawRectangles(List<Rectangle> rectangles)
-        {
-            Bitmap output = getImage();
-
-            foreach (Rectangle rectangle in rectangles)
-            {
-                double endX = Math.Min(rectangle.X + rectangle.Width, width - 1);
-                double endY = Math.Min(rectangle.Y + rectangle.Height, height - 1);
-                
-                for (int i = rectangle.X; i <= endX; i++)
-                {
-                    output.SetPixel(i, rectangle.Y, Color.Red);
-                    output.SetPixel(i, (int)endY, Color.Red);
-                }
-
-                for (int j = rectangle.Y; j <= endY; j++)
-                {
-                    output.SetPixel(rectangle.X, j, Color.Red);
-                    output.SetPixel((int)endX, j, Color.Red);
-                }
-            }
-
-            return new RGBImage(output);
-        }
-
-        public RGBImage visualiseMatchesBinary(ProcessingImage templateImage, int threshold = -1, List<SubImage> pointsToCheck = null)
-        {
-            return drawRectangles(
-                findMatchesBinary(templateImage, pointsToCheck, threshold).Keys
-                    .Select(s => s.toRectangle())
-                    .ToList()
+                HelperFunctions.applyNonLinearFilter(inputImage, padder, f)
             );
-        }
-
-        public RGBImage visualiseBestMatchBinary(ProcessingImage templateImage)
-        {
-            Point bestMatch = findBestMatchBinary(templateImage);
-            return drawRectangles(new List<Rectangle> { new Rectangle(bestMatch.X, bestMatch.Y, templateImage.width, templateImage.height) });
         }
     }
 

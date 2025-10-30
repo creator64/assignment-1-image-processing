@@ -8,6 +8,7 @@ using INFOIBV.Core;
 using INFOIBV.Helper_Code;
 using System.IO;
 using INFOIBV.Core.Main;
+using INFOIBV.Core.TemplateMatching;
 
 namespace INFOIBV
 {
@@ -341,12 +342,12 @@ namespace INFOIBV
                 
                 case ProcessingFunctions.TestTemplateMatching:
                     string baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-                    ProcessingImage templateImage = new ProcessingImage(ConverterMethods.convertToGrayscale(
+                    TemplateMatchingImage templateImage = new TemplateMatchingImage(ConverterMethods.convertToGrayscale(
                         ConverterMethods.convertBitmapToColor(
                         new Bitmap(
                         Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
                     )))); // TODO: Maybe find a way to not hardcode this
-                    return processingImage.visualiseBestMatchBinary(templateImage);
+                    return processingImage.toTemplateMatchingImage().visualiseBestMatchBinary(templateImage);
                 
                 case ProcessingFunctions.OtsuThreshold:
                     return processingImage.otsuThreshold();
@@ -364,7 +365,7 @@ namespace INFOIBV
                 
                 case ProcessingFunctions.SegmentationTest:
                     baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-                    templateImage = new ProcessingImage(ConverterMethods.convertToGrayscale(
+                    templateImage = new TemplateMatchingImage(ConverterMethods.convertToGrayscale(
                         ConverterMethods.convertBitmapToColor(
                         new Bitmap(
                         Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
