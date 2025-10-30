@@ -34,8 +34,6 @@ namespace INFOIBV.Core.Main
             DistanceStyle ds = new ManhattanDistance();
             float[,] distances = new ChamferDistanceTransform(inputImage, 3).toDistances(ds);
             Dictionary<Point, float> scores = new Dictionary<Point, float>();
-            
-            // TODO: deal with check edges
 
             for (int r = 0; r < width; r++)
             for (int s = 0; s < height; s++)
