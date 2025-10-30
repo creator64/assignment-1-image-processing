@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using INFOIBV.Core;
 using INFOIBV.Core.Main;
+using static System.Windows.Forms.LinkLabel;
 
 namespace INFOIBV.Helper_Code
 {
@@ -107,99 +108,167 @@ namespace INFOIBV.Helper_Code
     /// </summary>
     public class ProjectionSegmentator : Segmentator
     {
-        public List<SubImage> lines { get; private set; }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="binaryData">Binarised form of inscription with the glyps being foreground pixels (pixels of value 255)</param>
         public ProjectionSegmentator(ProcessingImage binaryData) : base(binaryData)
         {
-            visualisedSegmentation = visualiseSegments();
+            this.segments = segmentImage();
+            this.visualisedSegmentation = visualiseSegments();
         }
 
         protected override List<SubImage> segmentImage()
         {
-            throw new NotImplementedException(); //Implement later, could be a decent solution but is not very robust with Template matching
+            int[] rowHistogram = rowProjection();
+            int rowThreshold = getProjectionThreshold(rowHistogram);
+
+            Color[] colors = new Color[] { Color.Red, Color.Orange, Color.Violet, Color.ForestGreen };
+            List<Line> horizontalLines = getLinesFromHistogram(rowHistogram, rowThreshold);
+
+            horizontalLines = filter(horizontalLines, (line) =>
+            {
+                double upper_amountStDevs = 2.0f;
+                double lower_amountStDevs = 0.75f;
+
+                double meanHeight = horizontalLines.Average((Line a) => a.Height);
+                double stDev = Math.Sqrt(horizontalLines.Sum((Line a) => (a.Height - meanHeight) * (a.Height - meanHeight)) / (double)horizontalLines.Count);
+
+                return (line.Height >= (meanHeight - (lower_amountStDevs * stDev)) && line.Height <= (meanHeight + (upper_amountStDevs * stDev)))    // line height has to be roughly similar to the mean
+                        && line.foregroundRatio >= 0.03                                                                                              // line must contain a certain ratio of foreground pixels
+                        && line.foregroundRatio <= 0.60;
+            });
+
+            List<SubImage> segments = new List<SubImage>();
+
+            
+            foreach(Line line in horizontalLines)
+            {
+                List<SubImage> characters = getCharactersFromLine(line);
+                Debug.WriteLine("------------------------------------");
+                characters = filter(characters, (SubImage ch) =>
+                {
+                    Debug.WriteLine($"foreground ratio: {ch.foregroundRatio}");
+                    return ch.foregroundRatio >= 0.05;
+                });
+                Debug.WriteLine("------------------------------------");
+
+                segments.AddRange(characters);
+            }
+
+            return segments;
         }
 
         protected override RGBImage visualiseSegments()
         {
-            return visualiseTextLines();
-            
+            Bitmap image = binaryData.getImage();
+
+            foreach (SubImage s in segments)
+            {
+                for (int x = s.startPos.X; x <= s.endPos.X; x++)
+                    foreach (int y in new int[] { s.startPos.Y, s.endPos.Y })
+                        if (x >= 0 && x < image.Width && y >= 0 && y < image.Height)
+                            image.SetPixel(x, y, Color.Red);
+
+                for (int y = s.startPos.Y; y <= s.endPos.Y; y++)
+                    foreach (int x in new int[] { s.startPos.X, s.endPos.X })
+                        if (x >= 0 && x < image.Width && y >= 0 && y < image.Height)
+                            image.SetPixel(x, y, Color.Red);
+            }
+
+            return new RGBImage(image);
+        }
+
+        private RGBImage visualiseCharacters()
+        {
+            Bitmap image = binaryData.getImage();
+
+            int[] rowHistogram = rowProjection();
+            int rowThreshold = getProjectionThreshold(rowHistogram);
+
+            Color[] colors = new Color[] { Color.Red, Color.Orange, Color.Violet, Color.ForestGreen };
+            List<Line> horizontalLines = getLinesFromHistogram(rowHistogram, rowThreshold);
+
+            horizontalLines = filter(horizontalLines, (line) =>
+            {
+                double upper_amountStDevs = 2.0f;
+                double lower_amountStDevs = 0.75f;
+
+                double meanHeight = horizontalLines.Average((Line a) => a.Height);
+                double stDev = Math.Sqrt(horizontalLines.Sum((Line a) => (a.Height - meanHeight) * (a.Height - meanHeight)) / (double)horizontalLines.Count);
+
+                return (line.Height >= (meanHeight - (lower_amountStDevs * stDev)) && line.Height <= (meanHeight + (upper_amountStDevs * stDev)))    // line height has to be roughly similar to the mean
+                        && line.foregroundRatio >= 0.03                                                                                              // line must contain a certain ratio of foreground pixels
+                        && line.foregroundRatio <= 0.60;
+            });
+
+            List<SubImage> segments = new List<SubImage>();
+
+            foreach (Line line in horizontalLines)
+            {
+                int[] colHistogram = colProjection(line.startRow, line.endRow);
+                int colThreshold = getProjectionThreshold(colHistogram);
+
+                List<Interval> whiteSpaces = getWhiteSpaces(colHistogram, colThreshold);
+                foreach(Interval whiteSpace in whiteSpaces)
+                {
+                    for(int i = whiteSpace.start; i <= whiteSpace.end; i++)
+                    {
+                        for(int j  = line.startRow; j <= line.endRow; j++)
+                        {
+                            image.SetPixel(i, j, Color.Red);
+                        }
+                    }
+                }
+            }
+
+            return new RGBImage(image);
         }
 
         private  RGBImage visualiseTextLines()
         {
-            bool flag = true;
-
 
             Bitmap image = binaryData.getImage();
 
             int[] histogram = rowProjection();
-            int threshold = getRowThreshold(histogram);
+            int threshold = getProjectionThreshold(histogram);
 
-            if (flag)
+            Color[] colors = new Color[] { Color.Red, Color.Orange, Color.Violet, Color.ForestGreen };
+            int ind = 0;
+            List<Line> lines = getLinesFromHistogram(histogram, threshold);
+            lines = filter(lines, (line) =>
             {
-                Color[] colors = new Color[] { Color.Red, Color.Orange, Color.Violet, Color.ForestGreen };
-                int ind = 0;
-                List<Line> lines = getLinesOfText(histogram, threshold);
-                lines = filter(lines, (line) =>
-                {
-                    double upper_amountStDevs = 2.0f;
-                    double lower_amountStDevs = 0.75f;
+                double upper_amountStDevs = 2.0f;
+                double lower_amountStDevs = 0.75f;
 
-                    double meanHeight = lines.Average((Line a) => a.Height);
-                    double stDev = Math.Sqrt(lines.Sum((Line a) => (a.Height - meanHeight) * (a.Height - meanHeight)) / (double)lines.Count);
+                double meanHeight = lines.Average((Line a) => a.Height);
+                double stDev = Math.Sqrt(lines.Sum((Line a) => (a.Height - meanHeight) * (a.Height - meanHeight)) / (double)lines.Count);
 
-                    return (line.Height >= (meanHeight - (lower_amountStDevs * stDev)) && line.Height <= (meanHeight + (upper_amountStDevs * stDev)))    // line height has to be roughly similar to the mean
-                            && line.foregroundRatio >= 0.03                                                 // line must contain a certain ratio of foreground pixels
-                            && line.foregroundRatio <= 0.60;
-                });
+                return (line.Height >= (meanHeight - (lower_amountStDevs * stDev)) && line.Height <= (meanHeight + (upper_amountStDevs * stDev)))    // line height has to be roughly similar to the mean
+                        && line.foregroundRatio >= 0.03                                                                                              // line must contain a certain ratio of foreground pixels
+                        && line.foregroundRatio <= 0.60;
+            });
 
-                foreach (Line line in lines)
-                {
-                    for (int i = 0; i < binaryData.width; i++)
-                    {
-                        for (int j = line.startRow; j <= line.endRow; j++)
-                        {
-                            //if (j == line.startRow || j == line.endRow || i == 0 || i == binaryData.width - 1)
-
-                            if (binaryData.toArray()[i, j] != 255 && !(j == line.startRow || j == line.endRow || i == 0 || i == binaryData.width - 1))
-                                image.SetPixel(i, j, colors[ind % 4]);
-                            else if (j == line.startRow || j == line.endRow || i == 0 || i == binaryData.width - 1)
-                                image.SetPixel(i, j, Color.Blue);
-
-
-                        }
-                    }
-                    ind++;
-                }
-
-                return new RGBImage(image);
-            }
-            else
+            foreach (Line line in lines)
             {
-                List<Interval> whiteSpaces = getWhiteSpaces(histogram, threshold);
-                double meanSpaceSize = whiteSpaces.Average((Interval a) => a.Size);
-                whiteSpaces = whiteSpaces = filter(whiteSpaces, (Interval a) => a.Size > 0.75 * meanSpaceSize);
-
-
-                Color[] colors = new Color[] { Color.Red, Color.Orange, Color.Blue, Color.Yellow };
-                int ind = 0;
-                foreach (Interval whiteSpace in whiteSpaces)
+                for (int i = 0; i < binaryData.width; i++)
                 {
-                    for (int i = 0; i < binaryData.width; i++)
+                    for (int j = line.startRow; j <= line.endRow; j++)
                     {
-                        for (int j = whiteSpace.start; j < whiteSpace.end; j++)
-                        {
+                        //if (j == line.startRow || j == line.endRow || i == 0 || i == binaryData.width - 1)
+
+                        if (binaryData.toArray()[i, j] != 255 && !(j == line.startRow || j == line.endRow || i == 0 || i == binaryData.width - 1))
                             image.SetPixel(i, j, colors[ind % 4]);
-                        }
-                    }
-                    ind++;
-                }
+                        else if (j == line.startRow || j == line.endRow || i == 0 || i == binaryData.width - 1)
+                            image.SetPixel(i, j, Color.Blue);
 
-                return new RGBImage(image);
+
+                    }
+                }
+                ind++;
             }
+
+            return new RGBImage(image);
         }
 
         private List<T> filter<T>(IEnumerable<T> list, Func<T, bool> filter)
@@ -215,7 +284,7 @@ namespace INFOIBV.Helper_Code
             return filtered;
         }
 
-        private List<Line> getLinesOfText(int[] histogram, int threshold)
+        private List<Line> getLinesFromHistogram(int[] histogram, int threshold)
         {
             List<Interval> whiteSpaces = getWhiteSpaces(histogram, threshold);
             double meanSpaceSize = whiteSpaces.Average((Interval a) => a.Size);
@@ -259,26 +328,73 @@ namespace INFOIBV.Helper_Code
             return lines;
         }
 
+        private List<SubImage> getCharactersFromLine(Line line)
+        {
+            int[] histogram = colProjection(line.startRow, line.endRow);
+            int threshold = getProjectionThreshold(histogram);
+
+            List<Interval> whiteSpaces = getWhiteSpaces(histogram, threshold);
+            double meanSpaceSize = whiteSpaces.Average((Interval a) => a.Size);
+            whiteSpaces = filter<Interval>(whiteSpaces, (Interval a) => a.Size > 0.75 * meanSpaceSize);
+            HashSet<int> lineBorders = new HashSet<int>();
+            lineBorders.Add(0);
+            List<SubImage> characters = new List<SubImage>();
+
+            foreach (Interval whiteSpace in whiteSpaces)
+            {
+                int minVal = int.MaxValue;
+                for (int i = whiteSpace.start; i <= whiteSpace.end; i++)
+                {
+                    if (histogram[i] < minVal)
+                    {
+                        minVal = histogram[i];
+                    }
+                }
+
+                List<int> candidates = new List<int>();
+
+                for (int i = whiteSpace.start; i <= whiteSpace.end; i++)
+                    if (histogram[i] == minVal)
+                        candidates.Add(i);
+
+                if (candidates.Count > 1)
+                {
+                    lineBorders.Add(candidates.First());
+                    lineBorders.Add(candidates.Last());
+                }
+                else
+                    lineBorders.Add(candidates[0]);
+
+            }
+            lineBorders.Add(binaryData.width - 1);
+            List<int> lineBrdrList = lineBorders.ToList();
+            lineBrdrList.Sort();
+            for (int i = 1; i < lineBrdrList.Count; i++)
+                characters.Add(binaryData.createSubImage((lineBrdrList[i - 1], line.startRow), (lineBrdrList[i], line.endRow)));
+
+            return characters;
+        }
+
         /// <summary>
         /// Method that determines a threshold for when a row is determined as an empty line between lines of text.
         /// It does this via otsu thresholding.
         /// </summary>
-        /// <param name="rowHistogram"></param>
+        /// <param name="projection"></param>
         /// <returns>Threshold for when a row qualifies as whitespace (or in our case blackspace)</returns>
-        private int getRowThreshold(int[] rowHistogram)
+        private int getProjectionThreshold(int[] projection)
         {
-            HashSet<int> ValuesSet = new HashSet<int>(rowHistogram); //all unique values in the rowHistogram
+            HashSet<int> ValuesSet = new HashSet<int>(projection); //all unique values in the rowHistogram
             List<int> uniqueValues = ValuesSet.ToList();
             uniqueValues.Sort();
 
-            int N = rowHistogram.Length;
+            int N = projection.Length;
             int N_high;
             decimal maxVar = 0.0m;
             int qMax = 0;
 
             foreach (int q in uniqueValues) //maximise variance between the high and low class
             {
-                (List<int> highs, List<int> lows, int N_low) = getHighLowClasses(rowHistogram, q, (x, y) => x - y);
+                (List<int> highs, List<int> lows, int N_low) = getHighLowClasses(projection, q, (x, y) => x - y);
                 N_high = N - N_low;
 
                 if (N_low > 0 && N_high > 0)
@@ -331,9 +447,9 @@ namespace INFOIBV.Helper_Code
             Interval currentInterval = null;
             for(int i = 0; i < projection.Length; i++)
             {
-                if (projection[i] < threshold && currentInterval == null)
+                if (projection[i] <= threshold && currentInterval == null)
                         currentInterval = new Interval(i, i);
-                else if (projection[i] < threshold)
+                else if (projection[i] <= threshold)
                     currentInterval.append(i);
                 else if (currentInterval != null && i - currentInterval.end > maxGap)
                 {
@@ -380,13 +496,13 @@ namespace INFOIBV.Helper_Code
             if (endRow < 0 || endRow >= binaryData.height) throw new ArgumentException($"endRow argument was out of range: was {endRow} whilst image height was {binaryData.height}");
             if (startRow > endRow) throw new ArgumentException($"startRow must be greater than endRow: startRow was {startRow} whilst endRow was {endRow}");
             #endregion 
-            int[] result = new int[endRow - startRow];
+            int[] result = new int[binaryData.width];
 
             for (int i = 0; i < binaryData.width; i++)
             {
-                for (int j = startRow; j < endRow; j++)
+                for (int j = startRow; j <= endRow; j++)
                 {
-                    result[j] += binaryData.toArray()[i, j] == 255 ? 1 : 0; //increment if foreground pixel
+                    result[i] += binaryData.toArray()[i, j] == 255 ? 1 : 0; //increment if foreground pixel
                 }
             }
 

@@ -5,6 +5,8 @@ using System.Linq;
 using INFOIBV.Helper_Code;
 using System.Numerics;
 using System.Windows.Forms;
+using System.Security.Policy;
+using System.Runtime.CompilerServices;
 
 namespace INFOIBV.Core.Main
 {
@@ -462,11 +464,18 @@ namespace INFOIBV.Core.Main
 
         public (int X, int Y) endPos { get; private set; }
 
+        public HashSet<(int X, int Y)> foregroundPixels { get; private set; }
+
+        public int totalAmountOfPixels { get; private set; }
+        public float foregroundRatio { get; private set; }
+        public int amountForegroundPixels => foregroundPixels.Count;
+
+
         public static SubImage create(ProcessingImage processingImage, (int X, int Y) startPos, (int X, int Y) endPos)
         {
             byte[,] subImageArray = new byte[endPos.X - startPos.X, endPos.Y - startPos.Y];
             byte[,] inputImage = processingImage.toArray();
-
+            
             for (int u = startPos.X; u <= endPos.X; u++)
                 for (int v = startPos.Y; v <= endPos.Y; v++)
                 {
@@ -487,6 +496,18 @@ namespace INFOIBV.Core.Main
             this.parentImage = parentImage;
             this.startPos = startPos;
             this.endPos = endPos;
+            this.foregroundPixels = new HashSet<(int X, int Y)>();
+            this.totalAmountOfPixels = this.width * this.height;
+
+            for(int i = 0; i < subImageArray.GetLength(0); i++)
+            {
+                for(int j = 0; j < subImageArray.GetLength(1); j++)
+                {
+                    if (subImageArray[i, j] == 255) foregroundPixels.Add((i, j));
+                }
+            }
+            
+            this.foregroundRatio = (float)this.amountForegroundPixels / this.totalAmountOfPixels;
         }
 
         public Rectangle toRectangle()
