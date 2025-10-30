@@ -91,7 +91,7 @@ namespace INFOIBV.Core
             return htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
         }
 
-        public static RGBImage simpleCuneiDetection(ProcessingImage processingImage, byte t_mag, bool[,] structElem)
+        public static RGBImage simpleCuneiDetection(ProcessingImage processingImage)
         {
             //--------------------------------------------------------
             //  Step 1 & 2: Binarisation (thresholding) & Pre-processing (despeckling via bilateralSmoothing)

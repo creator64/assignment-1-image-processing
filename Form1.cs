@@ -355,12 +355,7 @@ namespace INFOIBV
                     return processingImage.bilateralSmoothing(2, 50);
                 
                 case ProcessingFunctions.SimpleCuneiDetection:
-                    t_mag = (byte)t_magInput.Value;
-                    gaussianMatrixSize = gaussianSize.Value;
-                    sigma = sigmaInput.Value;
-                    bool[,] A3StructElem = FilterGenerators.createSquareFilter<bool>(3, FilterValueGenerators.createRoundStructuringElement);
-
-                    return Pipelines.simpleCuneiDetection(processingImage, t_mag, A3StructElem);
+                    return Pipelines.simpleCuneiDetection(processingImage);
                 
                 case ProcessingFunctions.SegmentationTest:
                     baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
