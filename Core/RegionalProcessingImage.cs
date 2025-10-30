@@ -7,11 +7,28 @@ using INFOIBV.Helper_Code;
 
 namespace INFOIBV.Core
 {
+    public class Region
+    {
+        public int id;
+        public List<Vector2> coordinates;
+        public int Size => coordinates.Count;
+
+        public Region(int id, List<Vector2> regions)
+        {
+            this.id = id;
+            this.coordinates = new List<Vector2>(regions);
+        }
+
+        public void addCoordinate(Vector2 vector2)
+        {
+            coordinates.Add(vector2);
+        }
+    }
     public class RegionalProcessingImage : ProcessingImage
     {
         public int amountOfRegions => regions.Count;
         private readonly int[,] regionGrid;
-        public Dictionary<int, List<Vector2>> regions { get; private set; }
+        public List<Region> regions { get; private set; }
 
         public RegionalProcessingImage(byte[,] inputImage, ImageRegionFinder regionFinder) : base(inputImage)
         {
@@ -19,8 +36,13 @@ namespace INFOIBV.Core
                 throw new Exception("Regional Processing Images must be binary");
             
             regionGrid = regionFinder.findRegions(inputImage);
-            regions = new Dictionary<int, List<Vector2>>();
+            regions = new List<Region>();
             getRegionsFromGrid();
+        }
+
+        private Region getRegion(int id)
+        {
+            return regions.Find(r => r.id == id);
         }
 
         private void getRegionsFromGrid()
@@ -29,8 +51,10 @@ namespace INFOIBV.Core
             for (int y = 0; y < regionGrid.GetLength(1); y++)
             {
                 if (regionGrid[x, y] == 0) continue;
-                if (!regions.ContainsKey(regionGrid[x, y])) regions.Add(regionGrid[x, y], new List<Vector2>() {new Vector2(x, y)});
-                else regions[regionGrid[x, y]].Add(new Vector2(x, y));
+                if (getRegion(regionGrid[x, y]) == null)
+                    regions.Add(new Region(regionGrid[x, y], new List<Vector2>()));
+                // if (!regions.ContainsKey(regionGrid[x, y])) regions.Add(regionGrid[x, y], new List<Vector2>() {new Vector2(x, y)});
+                else getRegion(regionGrid[x, y]).addCoordinate(new Vector2(x, y));
             }
         }
         
@@ -38,8 +62,9 @@ namespace INFOIBV.Core
         {
             byte[,] outputImage = new byte[inputImage.GetLength(0), inputImage.GetLength(1)];
 
-            int largestRegion = regions.Select(region => new KeyValuePair<int, int>(region.Key, region.Value.Count))
-                .Aggregate((r1, r2) => r1.Value > r2.Value ? r1 : r2).Key;
+            int largestRegion = regions
+                // .Select(region => new KeyValuePair<int, int>(region.Key, region.Value.Count))
+                .Aggregate((r1, r2) => r1.Size > r2.Size ? r1 : r2).id;
             
             for (int x = 0; x < regionGrid.GetLength(0); x++)
             for (int y = 0; y < regionGrid.GetLength(1); y++) 
@@ -76,7 +101,7 @@ namespace INFOIBV.Core
             // TODO: maybe this is not the best way of finding the centers of the regions
             return regions
                 .Select(region => 
-                    new KeyValuePair<int, Vector2>(region.Key, region.Value[region.Value.Count / 2]))
+                    new KeyValuePair<int, Vector2>(region.id, region.coordinates[region.Size / 2]))
                 .ToDictionary(p => p.Key, p => p.Value);
         }
     }
