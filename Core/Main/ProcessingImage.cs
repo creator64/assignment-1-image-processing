@@ -70,27 +70,6 @@ namespace INFOIBV.Core.Main
             return new ProcessingImage(tempImage);
         }
 
-        public SubImage createSubImage((int X, int Y) startPos, (int X, int Y) endPos)
-        {
-            byte[,] subImageArray = new byte[endPos.X - startPos.X, endPos.Y - startPos.Y];
-
-            for (int u = startPos.X; u <= endPos.X; u++)
-            {
-                for (int v = startPos.Y; v <= endPos.Y; v++)
-                {
-                    if (    (u - startPos.X < 0 || u - startPos.X >= subImageArray.GetLength(0))
-                        ||  (v - startPos.Y < 0 || v - startPos.Y >= subImageArray.GetLength(1))
-                        ||  (u < 0 || u >= inputImage.GetLength(0))
-                        ||  (v < 0 || v >= inputImage.GetLength(1))) // out of array bounds check
-                        continue;
-
-                    subImageArray[u - startPos.X, v - startPos.Y] = inputImage[u, v];
-                }
-            }
-
-            return new SubImage(this, subImageArray, startPos, endPos);
-        }
-
         /*
          * createGaussianFilter: create a Gaussian filter of specific square size and with a specified sigma
          * input:   size                length and width of the Gaussian filter (only odd sizes)
@@ -461,22 +440,44 @@ namespace INFOIBV.Core.Main
                 );
         }
 
+        public RGBImage drawRectangles(List<Rectangle> rectangles)
+        {
+            Bitmap output = getImage();
+
+            foreach (Rectangle rectangle in rectangles)
+            {
+                double endX = Math.Min(rectangle.X + rectangle.Width, width - 1);
+                double endY = Math.Min(rectangle.Y + rectangle.Height, height - 1);
+                
+                for (int i = rectangle.X; i <= endX; i++)
+                {
+                    output.SetPixel(i, rectangle.Y, Color.Red);
+                    output.SetPixel(i, (int)endY, Color.Red);
+                }
+
+                for (int j = rectangle.Y; j <= endY; j++)
+                {
+                    output.SetPixel(rectangle.X, j, Color.Red);
+                    output.SetPixel((int)endX, j, Color.Red);
+                }
+            }
+
+            return new RGBImage(output);
+        }
+
+        public RGBImage visualiseMatchesBinary(ProcessingImage templateImage, int threshold = -1, List<SubImage> pointsToCheck = null)
+        {
+            return drawRectangles(
+                findMatchesBinary(templateImage, pointsToCheck, threshold).Keys
+                    .Select(s => s.toRectangle())
+                    .ToList()
+            );
+        }
+
         public RGBImage visualiseBestMatchBinary(ProcessingImage templateImage)
         {
             Point bestMatch = findBestMatchBinary(templateImage);
-            Bitmap output = getImage();
-            
-            // outlined square
-            for (int i = bestMatch.X; i < bestMatch.X + templateImage.width; i++)
-                output.SetPixel(i, bestMatch.Y, Color.Red);
-            for (int i = bestMatch.X; i < bestMatch.X + templateImage.width; i++)
-                output.SetPixel(i, bestMatch.Y + templateImage.height, Color.Red);
-            for (int j = bestMatch.Y; j < bestMatch.Y + templateImage.height; j++)
-                output.SetPixel(bestMatch.X, j, Color.Red);
-            for (int j = bestMatch.Y; j < bestMatch.Y + templateImage.height; j++)
-                output.SetPixel(bestMatch.X + templateImage.width, j, Color.Red);
-
-            return new RGBImage(output);
+            return drawRectangles(new List<Rectangle> { new Rectangle(bestMatch.X, bestMatch.Y, templateImage.width, templateImage.height) });
         }
     }
 
@@ -488,6 +489,26 @@ namespace INFOIBV.Core.Main
 
         public (int X, int Y) endPos { get; private set; }
 
+        public static SubImage create(ProcessingImage processingImage, (int X, int Y) startPos, (int X, int Y) endPos)
+        {
+            byte[,] subImageArray = new byte[endPos.X - startPos.X, endPos.Y - startPos.Y];
+            byte[,] inputImage = processingImage.toArray();
+
+            for (int u = startPos.X; u <= endPos.X; u++)
+                for (int v = startPos.Y; v <= endPos.Y; v++)
+                {
+                    if (    (u - startPos.X < 0 || u - startPos.X >= subImageArray.GetLength(0))
+                            ||  (v - startPos.Y < 0 || v - startPos.Y >= subImageArray.GetLength(1))
+                            ||  (u < 0 || u >= processingImage.width)
+                            ||  (v < 0 || v >= processingImage.height)) // out of array bounds check
+                        continue;
+
+                    subImageArray[u - startPos.X, v - startPos.Y] = inputImage[u, v];
+                }
+
+            return new SubImage(processingImage, subImageArray, startPos, endPos);
+        }
+
         public SubImage(ProcessingImage parentImage, byte[,] subImageArray, (int X, int Y) startPos, (int X, int Y) endPos) : base(subImageArray)
         {
             this.parentImage = parentImage;
@@ -495,6 +516,10 @@ namespace INFOIBV.Core.Main
             this.endPos = endPos;
         }
 
+        public Rectangle toRectangle()
+        {
+            return new Rectangle(startPos.X, startPos.Y, endPos.X - startPos.X, endPos.Y - startPos.Y);
+        }
     }
 
     public class RGBImage : IImage

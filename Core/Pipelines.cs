@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -95,9 +96,8 @@ namespace INFOIBV.Core
             return htDrawLines.houghLineSegments(peaks, minIntensity, minSegLength, maxGap);
         }
 
-        public static ProcessingImage simpleCuneiDetection(ProcessingImage processingImage, byte t_mag, bool[,] structElem)
+        public static RGBImage simpleCuneiDetection(ProcessingImage processingImage, byte t_mag, bool[,] structElem)
         {
-
             //--------------------------------------------------------
             //  Step 1 & 2: Binarisation (thresholding) & Pre-processing (despeckling via bilateralSmoothing)
             //--------------------------------------------------------
@@ -110,12 +110,24 @@ namespace INFOIBV.Core
             //--------------------------------------------------------
             //  Step 3: Segmentation (Detect regions of text)
             //--------------------------------------------------------
-            // binaryEdgeMap.toRegionalImage(new FloodFill()).
+            String baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
+            ProcessingImage templateImage = new ProcessingImage(ConverterMethods.convertToGrayscale(
+                ConverterMethods.convertBitmapToColor(
+                    new Bitmap(
+                        Path.Combine(baseDirectory, "images", "cunei_alphabet_template.bmp")
+                    ))));
+            
+            Segmentator segmentator = new SimpleConnectionSegmentator(binaryEdgeMap, (templateImage.width, templateImage.height));
+            List<SubImage> segments = segmentator.segments;
+            
             //--------------------------------------------------------
             //  Step 4: Feature Extraction (Template Matching)
             //--------------------------------------------------------
 
-            return binaryEdgeMap;
+            return binaryEdgeMap.visualiseMatchesBinary(templateImage,
+                threshold: 2,
+                pointsToCheck: segments
+            );
         }
     }
 }

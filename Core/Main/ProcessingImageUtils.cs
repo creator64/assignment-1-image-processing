@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using INFOIBV.Helper_Code;
@@ -12,39 +13,61 @@ namespace INFOIBV.Core.Main
             return x < 0 || x >= width || y < 0 || y >= height;
         }
         
-        public Dictionary<Point, float> findMatchesBinary(ProcessingImage templateImage, int threshold = 0, bool checkEdges = false, List<Point> pointsToCheck = null)
+        public Dictionary<SubImage, float> findMatchesBinary(ProcessingImage templateImage, List<SubImage> subImages, int threshold = -1)
         {
             DistanceStyle ds = new ManhattanDistance();
             float[,] distances = new ChamferDistanceTransform(inputImage, 3).toDistances(ds);
-            int K = templateImage.getImageData().amountForegroundPixels;
+            Dictionary<SubImage, float> scores = new Dictionary<SubImage, float>();
+
+            foreach (SubImage subImage in subImages)
+            {
+                (int r, int s) = subImage.startPos;
+                float score = calculateScore(r, s, templateImage, distances);
+                if (threshold <= 0 || score < threshold) scores.Add(subImage, score);
+            }
+
+            return scores;
+        }
+        
+        public Dictionary<Point, float> findMatchesBinaryAllPixels(ProcessingImage templateImage, int threshold = -1)
+        {
+            DistanceStyle ds = new ManhattanDistance();
+            float[,] distances = new ChamferDistanceTransform(inputImage, 3).toDistances(ds);
             Dictionary<Point, float> scores = new Dictionary<Point, float>();
             
+            // TODO: deal with check edges
+
             for (int r = 0; r < width; r++)
             for (int s = 0; s < height; s++)
             {
-                if ((width - r < templateImage.width || height - s < templateImage.height) && !checkEdges) continue;
-                if (pointsToCheck != null && !pointsToCheck.Contains(new Point(r, s))) continue;
-                
-                float score = 0;
-                for (int k = 0; k < templateImage.width; k++)
-                for (int l = 0; l < templateImage.height; l++)
-                {
-                    if (templateImage.inputImage[k, l] != 255) continue;
-                    int x = r + k, y = s + l; if (outOfBounds(x, y)) continue;
-                    score += distances[x, y];
-                }
-
-                score /= K;
-
-                if (score > threshold) scores.Add(new Point(r, s), score);
+                if (r + templateImage.width >= width || s + templateImage.height > height) continue;
+                float score = calculateScore(r, s, templateImage, distances);
+                if (threshold <= 0 || score < threshold) scores.Add(new Point(r, s), score);
             }
-            
+
             return scores;
+        }
+
+        public float calculateScore(int r, int s, ProcessingImage templateImage, float[,] distances)
+        {
+            int K = templateImage.getImageData().amountForegroundPixels;
+            float score = 0;
+            for (int k = 0; k < templateImage.width; k++)
+            for (int l = 0; l < templateImage.height; l++)
+            {
+                if (templateImage.inputImage[k, l] != 255) continue;
+                int x = r + k, y = s + l; if (outOfBounds(x, y)) continue;
+                score += distances[x, y];
+            }
+
+            score /= K;
+
+            return score;
         }
 
         public Point findBestMatchBinary(ProcessingImage templateImage)
         {
-            Dictionary<Point, float> scores = findMatchesBinary(templateImage, 0);
+            Dictionary<Point, float> scores = findMatchesBinaryAllPixels(templateImage);
             return scores.Aggregate(
                     (s1, s2) => s1.Value < s2.Value ? s1 : s2)
                 .Key;
@@ -58,6 +81,11 @@ namespace INFOIBV.Core.Main
         public HoughTransform toHoughTransform(int thetaDetail, int rDetail)
         {
             return new HoughTransform(inputImage, thetaDetail, rDetail);
+        }
+        
+        public SubImage createSubImage((int X, int Y) startPos, (int X, int Y) endPos)
+        {
+            return SubImage.create(this, startPos, endPos);
         }
 
         public Bitmap getImage()
