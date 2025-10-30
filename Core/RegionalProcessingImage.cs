@@ -52,8 +52,8 @@ namespace INFOIBV.Core
             {
                 if (regionGrid[x, y] == 0) continue;
                 if (getRegion(regionGrid[x, y]) == null)
-                    regions.Add(new Region(regionGrid[x, y], new List<Vector2>()));
-                // if (!regions.ContainsKey(regionGrid[x, y])) regions.Add(regionGrid[x, y], new List<Vector2>() {new Vector2(x, y)});
+                    regions.Add(new Region(regionGrid[x, y], new List<Vector2>{new Vector2(x, y)}));
+                
                 else getRegion(regionGrid[x, y]).addCoordinate(new Vector2(x, y));
             }
         }
