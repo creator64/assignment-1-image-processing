@@ -124,9 +124,15 @@ namespace INFOIBV.Helper_Code
 
         protected override RGBImage visualiseSegments()
         {
+            return visualiseTextLines();
+            
+        }
+
+        private  RGBImage visualiseTextLines()
+        {
             bool flag = true;
 
-            
+
             Bitmap image = binaryData.getImage();
 
             int[] histogram = rowProjection();
@@ -136,12 +142,25 @@ namespace INFOIBV.Helper_Code
             {
                 Color[] colors = new Color[] { Color.Red, Color.Orange, Color.Violet, Color.ForestGreen };
                 int ind = 0;
-                List<Line> lines = getLines();
-                foreach(Line line in lines)
+                List<Line> lines = getLinesOfText(histogram, threshold);
+                lines = filter(lines, (line) =>
                 {
-                    for(int i = 0; i < binaryData.width; i++)
+                    double upper_amountStDevs = 2.0f;
+                    double lower_amountStDevs = 0.75f;
+
+                    double meanHeight = lines.Average((Line a) => a.Height);
+                    double stDev = Math.Sqrt(lines.Sum((Line a) => (a.Height - meanHeight) * (a.Height - meanHeight)) / (double)lines.Count);
+
+                    return (line.Height >= (meanHeight - (lower_amountStDevs * stDev)) && line.Height <= (meanHeight + (upper_amountStDevs * stDev)))    // line height has to be roughly similar to the mean
+                            && line.foregroundRatio >= 0.03                                                 // line must contain a certain ratio of foreground pixels
+                            && line.foregroundRatio <= 0.60;
+                });
+
+                foreach (Line line in lines)
+                {
+                    for (int i = 0; i < binaryData.width; i++)
                     {
-                        for(int j = line.startRow; j <= line.endRow; j++)
+                        for (int j = line.startRow; j <= line.endRow; j++)
                         {
                             //if (j == line.startRow || j == line.endRow || i == 0 || i == binaryData.width - 1)
 
@@ -162,11 +181,12 @@ namespace INFOIBV.Helper_Code
             {
                 List<Interval> whiteSpaces = getWhiteSpaces(histogram, threshold);
                 double meanSpaceSize = whiteSpaces.Average((Interval a) => a.Size);
-                whiteSpaces = filterWhiteSpaces(whiteSpaces, (Interval a) => a.Size > 0.75 * meanSpaceSize);
+                whiteSpaces = whiteSpaces = filter(whiteSpaces, (Interval a) => a.Size > 0.75 * meanSpaceSize);
+
 
                 Color[] colors = new Color[] { Color.Red, Color.Orange, Color.Blue, Color.Yellow };
                 int ind = 0;
-                foreach(Interval whiteSpace in whiteSpaces)
+                foreach (Interval whiteSpace in whiteSpaces)
                 {
                     for (int i = 0; i < binaryData.width; i++)
                     {
@@ -182,17 +202,25 @@ namespace INFOIBV.Helper_Code
             }
         }
 
-
-        private List<Line> getLines()
+        private List<T> filter<T>(IEnumerable<T> list, Func<T, bool> filter)
         {
+            List<T> filtered = new List<T>();
 
-            int[] histogram = rowProjection();
-            int threshold = getRowThreshold(histogram);
+            foreach(T obj in list)
+            {
+                if (filter(obj))
+                    filtered.Add(obj);
+            }
 
+            return filtered;
+        }
+
+        private List<Line> getLinesOfText(int[] histogram, int threshold)
+        {
             List<Interval> whiteSpaces = getWhiteSpaces(histogram, threshold);
             double meanSpaceSize = whiteSpaces.Average((Interval a) => a.Size);
-            whiteSpaces = filterWhiteSpaces(whiteSpaces, (Interval a) => a.Size > 0.75 * meanSpaceSize);
-            List<int> lineBorders = new List<int>();
+            whiteSpaces = filter<Interval>(whiteSpaces, (Interval a) => a.Size > 0.75 * meanSpaceSize);
+            HashSet<int> lineBorders = new HashSet<int>();
             lineBorders.Add(0);
             List<Line> lines = new List<Line>();
 
@@ -215,22 +243,18 @@ namespace INFOIBV.Helper_Code
 
                 if (candidates.Count > 1)
                 {
-                    if (minVal == 0)
-                        lineBorders.Add(candidates[candidates.Count / 2]); //take the middle one;
-                    else
-                    {
-                        lineBorders.Add(candidates.First());
-                        lineBorders.Add(candidates.Last());                    }
-
-
+                    lineBorders.Add(candidates.First());
+                    lineBorders.Add(candidates.Last());
                 }
                 else
                     lineBorders.Add(candidates[0]);
 
             }
-
-            for(int i = 1; i < lineBorders.Count; i++)
-                lines.Add(new Line(lineBorders[i - 1], lineBorders[i]));
+            lineBorders.Add(binaryData.height - 1);
+            List<int> lineBrdrList = lineBorders.ToList();
+            lineBrdrList.Sort();
+            for(int i = 1; i < lineBrdrList.Count; i++)
+                lines.Add(new Line(lineBrdrList[i - 1], lineBrdrList[i], binaryData));
             
             return lines;
         }
@@ -323,26 +347,6 @@ namespace INFOIBV.Helper_Code
             return whiteSpaces;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="whiteSpaces">list of intervals of whitespace</param>
-        /// <param name="filter">Function that returns true when the whitespace is considered "valid" and false when it isn't</param>
-        /// <returns>The list of whitespaces that make the filter return true</returns>
-        private List<Interval> filterWhiteSpaces(List<Interval> whiteSpaces, Func<Interval, bool> filter)
-        {
-            List<Interval> filteredWhiteSpaces = new List<Interval>();
-
-            foreach(Interval whiteSpace in whiteSpaces)
-            {
-                if(filter(whiteSpace))
-                    filteredWhiteSpaces.Add(whiteSpace);
-            }
-
-            return filteredWhiteSpaces;
-        }
-
-
 
         /// <summary>
         /// This method traverses each row of the image and aggregates how many foreground pixels said row has.
@@ -396,6 +400,7 @@ namespace INFOIBV.Helper_Code
 
             public int Size => this.end - this.start;
 
+
             public Interval(int start, int end)
             {
                 if (start > end) throw new ArgumentException("end variable must be greater than start variable");
@@ -419,11 +424,41 @@ namespace INFOIBV.Helper_Code
         {
             public int startRow { get; private set; }
             public int endRow { get; private set; }
-            public Line(int startRow, int endRow)
+            public int amountForegroundPixels { get; private set; }
+
+            public int Height => endRow - startRow;
+
+            /// <summary>
+            /// Ratio of foreground pixels to Total
+            /// </summary>
+            public float foregroundRatio { get; private set; }
+            public Line(int startRow, int endRow, ProcessingImage binaryData)
             {
                 this.startRow = startRow;
                 this.endRow = endRow;
+                this.amountForegroundPixels = getAmountForegroundPixels(binaryData, startRow, endRow);
+                this.foregroundRatio = getForegroundRatio(binaryData, startRow, endRow, amountForegroundPixels);
             }
+            private int getAmountForegroundPixels(ProcessingImage binaryData, int start, int end)
+            {
+                int total = 0;
+
+                for (int i = 0; i < binaryData.width; i++)
+                {
+                    for (int j = start; j <= end; j++)
+                    {
+                        if (binaryData.toArray()[i, j] == 255) total++;
+                    }
+                }
+
+                return total;
+            }
+
+            private float getForegroundRatio(ProcessingImage binaryData, int startRow, int endRow, int nfgPixels)
+            {
+                return (float)nfgPixels / (float)((endRow - startRow) * binaryData.width);
+            }
+
         }
     }
 }
