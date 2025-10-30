@@ -120,7 +120,7 @@ namespace INFOIBV.Core
             //--------------------------------------------------------
 
             return binaryEdgeMap.toTemplateMatchingImage().visualiseMatchesBinary(templateImage,
-                threshold: 2,
+                threshold: 1,
                 pointsToCheck: segments
             );
         }

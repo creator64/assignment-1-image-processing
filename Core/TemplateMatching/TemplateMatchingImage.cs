@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using INFOIBV.Core.Main;
 using INFOIBV.Helper_Code;
 
@@ -41,8 +42,10 @@ namespace INFOIBV.Core.TemplateMatching
 
             foreach (SubImage subImage in subImages)
             {
+                TemplateMatchingImage optimizedTemplateImage = templateImage.optimize(subImage);
                 (int r, int s) = subImage.startPos;
-                float score = calculateScore(r, s, templateImage, distances);
+                
+                float score = calculateScore(r, s, optimizedTemplateImage, distances);
                 if (threshold <= 0 || score < threshold) scores.Add(subImage, score);
             }
 
@@ -53,22 +56,22 @@ namespace INFOIBV.Core.TemplateMatching
         {
             DistanceStyle ds = new ManhattanDistance();
             float[,] distances = new ChamferDistanceTransform(inputImage, 3).toDistances(ds);
+            float K = templateImage.getImageData().amountForegroundPixels;
             Dictionary<Point, float> scores = new Dictionary<Point, float>();
 
             for (int r = 0; r < width; r++)
             for (int s = 0; s < height; s++)
             {
                 if (r + templateImage.width >= width || s + templateImage.height > height) continue;
-                float score = calculateScore(r, s, templateImage, distances);
+                float score = calculateScore(r, s, templateImage, distances, K);
                 if (threshold <= 0 || score < threshold) scores.Add(new Point(r, s), score);
             }
 
             return scores;
         }
 
-        public float calculateScore(int r, int s, TemplateMatchingImage templateImage, float[,] distances)
+        public float calculateScore(int r, int s, TemplateMatchingImage templateImage, float[,] distances, float K = -1)
         {
-            int K = templateImage.getImageData().amountForegroundPixels;
             float score = 0;
             for (int k = 0; k < templateImage.width; k++)
             for (int l = 0; l < templateImage.height; l++)
@@ -78,6 +81,7 @@ namespace INFOIBV.Core.TemplateMatching
                 score += distances[x, y];
             }
 
+            K = K <= 0 ? templateImage.getImageData().amountForegroundPixels : K;
             score /= K;
 
             return score;
@@ -104,6 +108,24 @@ namespace INFOIBV.Core.TemplateMatching
         {
             Point bestMatch = findBestMatchBinary(templateImage);
             return drawRectangles(new List<Rectangle> { new Rectangle(bestMatch.X, bestMatch.Y, templateImage.width, templateImage.height) });
+        }
+
+        public TemplateMatchingImage optimize(SubImage subImage)
+        {
+            int threshold = 15;
+            List<Region> regions = subImage.toRegionalImage(new FloodFill()).regions;
+            List<Vector2> foregroundPixels = regions
+                .Where(r => r.Size > threshold) // remove noise regions
+                .Aggregate(new List<Vector2>(), (list, region) => list.Concat(region.coordinates).ToList());
+
+            int minX = foregroundPixels.Min(v => (int)v.X);
+            int minY = foregroundPixels.Min(v => (int)v.Y);
+            int maxX = foregroundPixels.Max(v => (int)v.X);
+            int maxY = foregroundPixels.Max(v => (int)v.Y);
+
+            return fromBitmap(
+                new Bitmap(getImage(), new Size(maxX - minX, maxY - minY))
+            ).toTemplateMatchingImage();
         }
     }
 }
