@@ -51,6 +51,7 @@ namespace INFOIBV
             TestTemplateMatching,
             OtsuThreshold,
             BilateralSmoothing,
+            PreProcessingTest,
             SegmentationTest,
             SimpleCuneiDetection
         }
@@ -371,9 +372,15 @@ namespace INFOIBV
                         Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
                     ))));
 
-                    Segmentator segmentator = new SimpleConnectionSegmentator(processingImage, (templateImage.width, templateImage.height));
+                    //Segmentator segmentator = new SimpleConnectionSegmentator(processingImage, (templateImage.width, templateImage.height));
+                    Segmentator segmentator = new ProjectionSegmentator(processingImage);
                     return segmentator.visualisedSegmentation;
-
+                case ProcessingFunctions.PreProcessingTest:
+                    return processingImage
+                            .adjustContrast()
+                            .bilateralSmoothing(2, 50)
+                            .otsuThreshold()
+                            .invertImage();
                 default:
                     return processingImage;
             }
