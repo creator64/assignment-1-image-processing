@@ -89,6 +89,27 @@ namespace INFOIBV.Helper_Code
         }
     }
 
+    public class TestSegmentator : Segmentator
+    {
+        public TestSegmentator(ProcessingImage binaryData) : base(binaryData)
+        {
+            this.segments = segmentImage();
+        }
+
+        protected override List<SubImage> segmentImage()
+        {
+            return new List<SubImage>
+            {
+                SubImage.create(binaryData, (50, 91), (77, 111))
+            };
+        }
+
+        protected override RGBImage visualiseSegments()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     /// <summary>
     /// NOT YET IMPLEMENTED
     /// 

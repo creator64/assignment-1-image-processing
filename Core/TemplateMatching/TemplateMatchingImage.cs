@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
-using System.Numerics;
 using INFOIBV.Core.Main;
 using INFOIBV.Helper_Code;
 
@@ -33,25 +33,7 @@ namespace INFOIBV.Core.TemplateMatching
 
             return null;
         }
-        
-        public Dictionary<SubImage, float> findMatchesBinary(TemplateMatchingImage templateImage, List<SubImage> subImages, int threshold = -1)
-        {
-            DistanceStyle ds = new ManhattanDistance();
-            float[,] distances = getDistanceTransform().toDistances(ds);
-            Dictionary<SubImage, float> scores = new Dictionary<SubImage, float>();
 
-            foreach (SubImage subImage in subImages)
-            {
-                TemplateMatchingImage optimizedTemplateImage = templateImage.optimize(subImage);
-                (int r, int s) = subImage.startPos;
-                
-                float score = calculateScore(r, s, optimizedTemplateImage, distances);
-                if (threshold <= 0 || score < threshold) scores.Add(subImage, score);
-            }
-
-            return scores;
-        }
-        
         public Dictionary<Point, float> findMatchesBinaryAllPixels(TemplateMatchingImage templateImage, int threshold = -1)
         {
             DistanceStyle ds = new ManhattanDistance();
@@ -65,6 +47,26 @@ namespace INFOIBV.Core.TemplateMatching
                 if (r + templateImage.width >= width || s + templateImage.height > height) continue;
                 float score = calculateScore(r, s, templateImage, distances, K);
                 if (threshold <= 0 || score < threshold) scores.Add(new Point(r, s), score);
+            }
+
+            return scores;
+        }
+        
+        public Dictionary<SubImage, float> findMatchesBinary(TemplateMatchingImage templateImage, List<SubImage> subImages, int threshold = -1)
+        {
+            DistanceStyle ds = new ManhattanDistance();
+            float[,] distances = getDistanceTransform().toDistances(ds);
+            Dictionary<SubImage, float> scores = new Dictionary<SubImage, float>();
+
+            foreach (SubImage subImage in subImages)
+            {
+                SubImage unpaddedSubImage = subImage.removePadding();
+                TemplateMatchingImage optimizedTemplateImage = templateImage.optimize(unpaddedSubImage);
+                optimizedTemplateImage.getImage().Save("optimized.bmp");
+                (int r, int s) = unpaddedSubImage.startPos;
+                
+                float score = calculateScore(r, s, optimizedTemplateImage, distances);
+                if (threshold <= 0 || score < threshold) scores.Add(unpaddedSubImage, score);
             }
 
             return scores;
@@ -83,6 +85,8 @@ namespace INFOIBV.Core.TemplateMatching
 
             K = K <= 0 ? templateImage.getImageData().amountForegroundPixels : K;
             score /= K;
+            
+            File.WriteAllText("test.txt", score.ToString());
 
             return score;
         }
@@ -112,19 +116,8 @@ namespace INFOIBV.Core.TemplateMatching
 
         public TemplateMatchingImage optimize(SubImage subImage)
         {
-            int threshold = 15;
-            List<Region> regions = subImage.toRegionalImage(new FloodFill()).regions;
-            List<Vector2> foregroundPixels = regions
-                .Where(r => r.Size > threshold) // remove noise regions
-                .Aggregate(new List<Vector2>(), (list, region) => list.Concat(region.coordinates).ToList());
-
-            int minX = foregroundPixels.Min(v => (int)v.X);
-            int minY = foregroundPixels.Min(v => (int)v.Y);
-            int maxX = foregroundPixels.Max(v => (int)v.X);
-            int maxY = foregroundPixels.Max(v => (int)v.Y);
-
             return fromBitmap(
-                new Bitmap(getImage(), new Size(maxX - minX, maxY - minY))
+                new Bitmap(getImage(), new Size(subImage.subWidth, subImage.subHeight))
             ).toTemplateMatchingImage();
         }
     }

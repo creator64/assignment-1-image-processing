@@ -108,11 +108,12 @@ namespace INFOIBV.Core
             String baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
             TemplateMatchingImage templateImage = ProcessingImage.fromBitmap(
                 new Bitmap(
-                    Path.Combine(baseDirectory, "images", "cunei_alphabet_template.bmp")
+                    Path.Combine(baseDirectory, "images", "cunei_template_type_1.bmp")
                 )
             ).toTemplateMatchingImage();
             
-            Segmentator segmentator = new SimpleConnectionSegmentator(binaryEdgeMap, (templateImage.width, templateImage.height));
+            // Segmentator segmentator = new SimpleConnectionSegmentator(binaryEdgeMap, (templateImage.width, templateImage.height));
+            Segmentator segmentator = new TestSegmentator(binaryEdgeMap);
             List<SubImage> segments = segmentator.segments;
             
             //--------------------------------------------------------
@@ -120,7 +121,7 @@ namespace INFOIBV.Core
             //--------------------------------------------------------
 
             return binaryEdgeMap.toTemplateMatchingImage().visualiseMatchesBinary(templateImage,
-                threshold: 1,
+                threshold: -1,
                 pointsToCheck: segments
             );
         }
