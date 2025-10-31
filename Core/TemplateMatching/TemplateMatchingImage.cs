@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using INFOIBV.Core.Main;
 using INFOIBV.Helper_Code;
@@ -32,6 +33,24 @@ namespace INFOIBV.Core.TemplateMatching
 
             return null;
         }
+
+        public Dictionary<Point, float> findMatchesBinaryAllPixels(TemplateMatchingImage templateImage, int threshold = -1)
+        {
+            DistanceStyle ds = new ManhattanDistance();
+            float[,] distances = new ChamferDistanceTransform(inputImage, 3).toDistances(ds);
+            float K = templateImage.getImageData().amountForegroundPixels;
+            Dictionary<Point, float> scores = new Dictionary<Point, float>();
+
+            for (int r = 0; r < width; r++)
+            for (int s = 0; s < height; s++)
+            {
+                if (r + templateImage.width >= width || s + templateImage.height > height) continue;
+                float score = calculateScore(r, s, templateImage, distances, K);
+                if (threshold <= 0 || score < threshold) scores.Add(new Point(r, s), score);
+            }
+
+            return scores;
+        }
         
         public Dictionary<SubImage, float> findMatchesBinary(TemplateMatchingImage templateImage, List<SubImage> subImages, int threshold = -1)
         {
@@ -41,34 +60,20 @@ namespace INFOIBV.Core.TemplateMatching
 
             foreach (SubImage subImage in subImages)
             {
-                (int r, int s) = subImage.startPos;
-                float score = calculateScore(r, s, templateImage, distances);
-                if (threshold <= 0 || score < threshold) scores.Add(subImage, score);
-            }
-
-            return scores;
-        }
-        
-        public Dictionary<Point, float> findMatchesBinaryAllPixels(TemplateMatchingImage templateImage, int threshold = -1)
-        {
-            DistanceStyle ds = new ManhattanDistance();
-            float[,] distances = new ChamferDistanceTransform(inputImage, 3).toDistances(ds);
-            Dictionary<Point, float> scores = new Dictionary<Point, float>();
-
-            for (int r = 0; r < width; r++)
-            for (int s = 0; s < height; s++)
-            {
-                if (r + templateImage.width >= width || s + templateImage.height > height) continue;
-                float score = calculateScore(r, s, templateImage, distances);
-                if (threshold <= 0 || score < threshold) scores.Add(new Point(r, s), score);
+                SubImage unpaddedSubImage = subImage.removePadding();
+                TemplateMatchingImage optimizedTemplateImage = templateImage.optimize(unpaddedSubImage);
+                optimizedTemplateImage.getImage().Save("optimized.bmp");
+                (int r, int s) = unpaddedSubImage.startPos;
+                
+                float score = calculateScore(r, s, optimizedTemplateImage, distances);
+                if (threshold <= 0 || score < threshold) scores.Add(unpaddedSubImage, score);
             }
 
             return scores;
         }
 
-        public float calculateScore(int r, int s, TemplateMatchingImage templateImage, float[,] distances)
+        public float calculateScore(int r, int s, TemplateMatchingImage templateImage, float[,] distances, float K = -1)
         {
-            int K = templateImage.getImageData().amountForegroundPixels;
             float score = 0;
             for (int k = 0; k < templateImage.width; k++)
             for (int l = 0; l < templateImage.height; l++)
@@ -78,7 +83,10 @@ namespace INFOIBV.Core.TemplateMatching
                 score += distances[x, y];
             }
 
+            K = K <= 0 ? templateImage.getImageData().amountForegroundPixels : K;
             score /= K;
+            
+            File.WriteAllText("test.txt", score.ToString());
 
             return score;
         }
@@ -104,6 +112,13 @@ namespace INFOIBV.Core.TemplateMatching
         {
             Point bestMatch = findBestMatchBinary(templateImage);
             return drawRectangles(new List<Rectangle> { new Rectangle(bestMatch.X, bestMatch.Y, templateImage.width, templateImage.height) });
+        }
+
+        public TemplateMatchingImage optimize(SubImage subImage)
+        {
+            return fromBitmap(
+                new Bitmap(getImage(), new Size(subImage.subWidth, subImage.subHeight))
+            ).toTemplateMatchingImage();
         }
     }
 }

@@ -463,6 +463,8 @@ namespace INFOIBV.Core.Main
         public (int X, int Y) startPos { get; private set; }
 
         public (int X, int Y) endPos { get; private set; }
+        public int subWidth => endPos.X - startPos.X;
+        public int subHeight => endPos.Y - startPos.Y;
 
         public HashSet<(int X, int Y)> foregroundPixels { get; private set; }
 
@@ -510,9 +512,27 @@ namespace INFOIBV.Core.Main
             this.foregroundRatio = (float)this.amountForegroundPixels / this.totalAmountOfPixels;
         }
 
+        public SubImage removePadding(double thresholdRate = 1/50d)
+        {
+            if (!getImageData().isBinary())
+                throw new Exception("Cannot remove padding from a non-binary subImage");
+            
+            List<Region> regions = toRegionalImage(new FloodFill()).regions;
+            List<Vector2> foregroundPixels = regions
+                .Where(r => r.Size > thresholdRate * subWidth * subHeight) // remove noise regions
+                .Aggregate(new List<Vector2>(), (list, region) => list.Concat(region.coordinates).ToList());
+
+            int minX = foregroundPixels.Min(v => (int)v.X) + startPos.X;
+            int minY = foregroundPixels.Min(v => (int)v.Y) + startPos.Y;
+            int maxX = foregroundPixels.Max(v => (int)v.X) + startPos.X;
+            int maxY = foregroundPixels.Max(v => (int)v.Y) + startPos.Y;
+
+            return SubImage.create(this.parentImage, (minX, minY), (maxX, maxY));
+        }
+
         public Rectangle toRectangle()
         {
-            return new Rectangle(startPos.X, startPos.Y, endPos.X - startPos.X, endPos.Y - startPos.Y);
+            return new Rectangle(startPos.X, startPos.Y, subWidth, subHeight);
         }
     }
 

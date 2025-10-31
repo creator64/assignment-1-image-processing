@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -12,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using INFOIBV.Core;
 using INFOIBV.Core.Main;
+using Region = INFOIBV.Core.Region;
 using static System.Windows.Forms.LinkLabel;
 
 namespace INFOIBV.Helper_Code
@@ -60,16 +60,16 @@ namespace INFOIBV.Helper_Code
 
         protected override List<SubImage> segmentImage()
         {
-            Dictionary<int, List<Vector2>> regions = binaryData.
+            List<Region> regions = binaryData.
                 toRegionalImage(new FloodFill())
                 .regions;
 
             List<SubImage> result = new List<SubImage>();
 
-            foreach(List<Vector2> region in regions.Values)
+            foreach(Region region in regions)
             {
-                int minX = (int)Math.Floor(region.Min(v => v.X));
-                int minY = (int)Math.Floor(region.Min(v => v.Y));
+                int minX = (int)Math.Floor(region.coordinates.Min(v => v.X));
+                int minY = (int)Math.Floor(region.coordinates.Min(v => v.Y));
 
                 result.Add(binaryData.createSubImage((minX, minY), (minX + glyphDimensions.Width, minY + glyphDimensions.Height)));
             }
@@ -95,6 +95,27 @@ namespace INFOIBV.Helper_Code
             }
 
             return new RGBImage(image);
+        }
+    }
+
+    public class TestSegmentator : Segmentator
+    {
+        public TestSegmentator(ProcessingImage binaryData) : base(binaryData)
+        {
+            this.segments = segmentImage();
+        }
+
+        protected override List<SubImage> segmentImage()
+        {
+            return new List<SubImage>
+            {
+                SubImage.create(binaryData, (50, 91), (77, 111))
+            };
+        }
+
+        protected override RGBImage visualiseSegments()
+        {
+            throw new NotImplementedException();
         }
     }
 

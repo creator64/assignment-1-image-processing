@@ -343,11 +343,10 @@ namespace INFOIBV
                 
                 case ProcessingFunctions.TestTemplateMatching:
                     string baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-                    TemplateMatchingImage templateImage = new TemplateMatchingImage(ConverterMethods.convertToGrayscale(
-                        ConverterMethods.convertBitmapToColor(
+                    TemplateMatchingImage templateImage = ProcessingImage.fromBitmap(
                         new Bitmap(
                         Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
-                    )))); // TODO: Maybe find a way to not hardcode this
+                    )).toTemplateMatchingImage(); // TODO: Maybe find a way to not hardcode this
                     return processingImage.toTemplateMatchingImage().visualiseBestMatchBinary(templateImage);
                 
                 case ProcessingFunctions.OtsuThreshold:
@@ -357,20 +356,14 @@ namespace INFOIBV
                     return processingImage.bilateralSmoothing(2, 50);
                 
                 case ProcessingFunctions.SimpleCuneiDetection:
-                    t_mag = (byte)t_magInput.Value;
-                    gaussianMatrixSize = gaussianSize.Value;
-                    sigma = sigmaInput.Value;
-                    bool[,] A3StructElem = FilterGenerators.createSquareFilter<bool>(3, FilterValueGenerators.createRoundStructuringElement);
-
-                    return Pipelines.simpleCuneiDetection(processingImage, t_mag, A3StructElem);
+                    return Pipelines.simpleCuneiDetection(processingImage);
                 
                 case ProcessingFunctions.SegmentationTest:
                     baseDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-                    templateImage = new TemplateMatchingImage(ConverterMethods.convertToGrayscale(
-                        ConverterMethods.convertBitmapToColor(
+                    templateImage = ProcessingImage.fromBitmap(
                         new Bitmap(
                         Path.Combine(baseDirectory, "images", "alphabet_B.bmp")
-                    ))));
+                    )).toTemplateMatchingImage();
 
                     //Segmentator segmentator = new SimpleConnectionSegmentator(processingImage, (templateImage.width, templateImage.height));
                     Segmentator segmentator = new ProjectionSegmentator(processingImage);
