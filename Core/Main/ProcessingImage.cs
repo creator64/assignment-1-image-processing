@@ -5,8 +5,6 @@ using System.Linq;
 using INFOIBV.Helper_Code;
 using System.Numerics;
 using System.Windows.Forms;
-using System.Security.Policy;
-using System.Runtime.CompilerServices;
 
 namespace INFOIBV.Core.Main
 {
@@ -475,6 +473,7 @@ namespace INFOIBV.Core.Main
 
         public static SubImage create(ProcessingImage processingImage, (int X, int Y) startPos, (int X, int Y) endPos)
         {
+            if (startPos.X == endPos.X) endPos.X++; if (startPos.Y == endPos.Y) endPos.Y++;
             byte[,] subImageArray = new byte[endPos.X - startPos.X, endPos.Y - startPos.Y];
             byte[,] inputImage = processingImage.toArray();
             
