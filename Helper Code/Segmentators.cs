@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using INFOIBV.Core;
 using INFOIBV.Core.Main;
 using Region = INFOIBV.Core.Region;
-using static System.Windows.Forms.LinkLabel;
 
 namespace INFOIBV.Helper_Code
 {
