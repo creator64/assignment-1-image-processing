@@ -7,6 +7,8 @@ using System.Numerics;
 using System.Windows.Forms;
 using System.Security.Policy;
 using System.Runtime.CompilerServices;
+using System.Runtime.ConstrainedExecution;
+using System.Diagnostics;
 
 namespace INFOIBV.Core.Main
 {
@@ -464,11 +466,16 @@ namespace INFOIBV.Core.Main
 
         public (int X, int Y) endPos { get; private set; }
 
-        public HashSet<(int X, int Y)> foregroundPixels { get; private set; }
+        public HashSet<Vector2> foregroundPixels { get; private set; }
 
         public int totalAmountOfPixels { get; private set; }
         public float foregroundRatio { get; private set; }
         public int amountForegroundPixels => foregroundPixels.Count;
+
+        /// <summary>
+        /// The width as a fraction of the height
+        /// </summary>
+        public float widthHeightRatio => (float)this.width / this.height;
 
 
         public static SubImage create(ProcessingImage processingImage, (int X, int Y) startPos, (int X, int Y) endPos)
@@ -496,14 +503,14 @@ namespace INFOIBV.Core.Main
             this.parentImage = parentImage;
             this.startPos = startPos;
             this.endPos = endPos;
-            this.foregroundPixels = new HashSet<(int X, int Y)>();
+            this.foregroundPixels = new HashSet<Vector2>();
             this.totalAmountOfPixels = this.width * this.height;
 
             for(int i = 0; i < subImageArray.GetLength(0); i++)
             {
                 for(int j = 0; j < subImageArray.GetLength(1); j++)
                 {
-                    if (subImageArray[i, j] == 255) foregroundPixels.Add((i, j));
+                    if (subImageArray[i, j] == 255) foregroundPixels.Add(new Vector2(i, j));
                 }
             }
             
@@ -513,6 +520,53 @@ namespace INFOIBV.Core.Main
         public Rectangle toRectangle()
         {
             return new Rectangle(startPos.X, startPos.Y, endPos.X - startPos.X, endPos.Y - startPos.Y);
+        }
+
+        public List<Vector2> getLargestRegion()
+        {
+            List<Vector2> maxReg = this.toRegionalImage(new FloodFill())
+                            .regions.Values
+                            .OrderBy((List<Vector2> a) => a.Count)
+                            .ToList().First(); //take the largest region
+
+            return maxReg;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>The left most foreground pixel</returns>
+        public Vector2 getLeftMostPixel(IEnumerable<Vector2> region)
+        {
+            Vector2 leftPixel = new Vector2(int.MaxValue, 0);
+            foreach(Vector2 p in region)
+            {
+                if (p.X < leftPixel.X) leftPixel = p;
+            }
+
+            return leftPixel;
+        }
+
+        public Vector2 getRightMostPixel(IEnumerable<Vector2> region)
+        {
+            Vector2 rightPixel = new Vector2(int.MinValue, 0);
+            foreach (Vector2 p in region)
+            {
+                if (p.X > rightPixel.X) rightPixel = p;
+            }
+
+            return rightPixel;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is SubImage)
+            {
+                SubImage sub = (SubImage)obj;
+
+                return sub.startPos == this.startPos && sub.endPos == this.endPos && sub.parentImage == this.parentImage;
+            }
+            else
+                return false;
         }
     }
 
