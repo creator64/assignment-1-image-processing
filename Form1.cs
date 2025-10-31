@@ -53,7 +53,8 @@ namespace INFOIBV
             BilateralSmoothing,
             PreProcessingTest,
             SegmentationTest,
-            SimpleCuneiDetection
+            SimpleCuneiDetection,
+            boundaries
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -368,12 +369,17 @@ namespace INFOIBV
                     //Segmentator segmentator = new SimpleConnectionSegmentator(processingImage, (templateImage.width, templateImage.height));
                     Segmentator segmentator = new ProjectionSegmentator(processingImage);
                     return segmentator.visualisedSegmentation;
+                
                 case ProcessingFunctions.PreProcessingTest:
                     return processingImage
                             .adjustContrast()
                             .bilateralSmoothing(2, 50)
                             .otsuThreshold()
-                            .invertImage();
+                            .invertImage(); // TODO: make this a pipeline
+                
+                case ProcessingFunctions.boundaries:
+                    return processingImage.showBoundaries();
+                
                 default:
                     return processingImage;
             }

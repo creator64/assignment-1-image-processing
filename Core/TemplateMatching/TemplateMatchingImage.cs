@@ -52,7 +52,7 @@ namespace INFOIBV.Core.TemplateMatching
             return scores;
         }
         
-        public Dictionary<SubImage, float> findMatchesBinary(TemplateMatchingImage templateImage, List<SubImage> subImages, int threshold = -1)
+        public Dictionary<SubImage, float> findMatchesBinary(TemplateMatchingImage templateImage, List<SubImage> subImages, double threshold = -1)
         {
             DistanceStyle ds = new ManhattanDistance();
             float[,] distances = getDistanceTransform().toDistances(ds);
@@ -62,11 +62,11 @@ namespace INFOIBV.Core.TemplateMatching
             {
                 SubImage unpaddedSubImage = subImage.removePadding();
                 TemplateMatchingImage optimizedTemplateImage = templateImage.optimize(unpaddedSubImage);
-                optimizedTemplateImage.getImage().Save("optimized.bmp");
+                // optimizedTemplateImage.getImage().Save("optimized.bmp");
                 (int r, int s) = unpaddedSubImage.startPos;
                 
                 float score = calculateScore(r, s, optimizedTemplateImage, distances);
-                if (threshold <= 0 || score < threshold) scores.Add(unpaddedSubImage, score);
+                if (score < threshold) scores.Add(unpaddedSubImage, score);
             }
 
             return scores;
@@ -85,8 +85,8 @@ namespace INFOIBV.Core.TemplateMatching
 
             K = K <= 0 ? templateImage.getImageData().amountForegroundPixels : K;
             score /= K;
-            
-            File.WriteAllText("test.txt", score.ToString());
+
+            // File.WriteAllText("test.txt", score.ToString());
 
             return score;
         }
@@ -99,7 +99,7 @@ namespace INFOIBV.Core.TemplateMatching
                 .Key;
         }
         
-        public RGBImage visualiseMatchesBinary(TemplateMatchingImage templateImage, int threshold = -1, List<SubImage> pointsToCheck = null)
+        public RGBImage visualiseMatchesBinary(TemplateMatchingImage templateImage, double threshold = -1, List<SubImage> pointsToCheck = null)
         {
             return drawRectangles(
                 findMatchesBinary(templateImage, pointsToCheck, threshold).Keys
@@ -114,10 +114,10 @@ namespace INFOIBV.Core.TemplateMatching
             return drawRectangles(new List<Rectangle> { new Rectangle(bestMatch.X, bestMatch.Y, templateImage.width, templateImage.height) });
         }
 
-        public TemplateMatchingImage optimize(SubImage subImage)
+        public TemplateMatchingImage optimize(ProcessingImage image)
         {
             return fromBitmap(
-                new Bitmap(getImage(), new Size(subImage.subWidth, subImage.subHeight))
+                new Bitmap(getImage(), new Size(image.width, image.height))
             ).toTemplateMatchingImage();
         }
     }

@@ -113,15 +113,16 @@ namespace INFOIBV.Core
             ).toTemplateMatchingImage();
             
             // Segmentator segmentator = new SimpleConnectionSegmentator(binaryEdgeMap, (templateImage.width, templateImage.height));
-            Segmentator segmentator = new TestSegmentator(binaryEdgeMap);
+            // Segmentator segmentator = new TestSegmentator(binaryEdgeMap);
+            Segmentator segmentator = new ProjectionSegmentator(binaryEdgeMap);
             List<SubImage> segments = segmentator.segments;
-            
+
             //--------------------------------------------------------
             //  Step 4: Feature Extraction (Template Matching)
             //--------------------------------------------------------
 
             return binaryEdgeMap.toTemplateMatchingImage().visualiseMatchesBinary(templateImage,
-                threshold: -1,
+                threshold: 0.45,
                 pointsToCheck: segments
             );
         }

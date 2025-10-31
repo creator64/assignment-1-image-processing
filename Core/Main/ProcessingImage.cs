@@ -428,6 +428,30 @@ namespace INFOIBV.Core.Main
 
             return new ProcessingImage(outputImage);
         }
+        
+        public ProcessingImage showBoundaries()
+        {
+            if (!getImageData().isBinary()) throw new Exception("cannot show boundaries in non binary image");
+            bool[,] structElem = new bool[,]
+            {
+                { false, true, false },
+                { true, false, true },
+                { false, true, false }
+            };
+            return binaryDilateImage(structElem).intersect(invertImage());
+        }
+
+        public ProcessingImage intersect(ProcessingImage other)
+        {
+            if (!getImageData().isBinary()) throw new Exception("cannot perform intersection in non binary image");
+            byte[,] output = new byte[width, height];
+            for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
+                if (other.inputImage[i, j] == 255 && inputImage[i, j] == 255)
+                    output[i, j] = 255;
+
+            return new ProcessingImage(output);
+        }
 
         public ProcessingImage medianFilter(int filterSize)
         {
@@ -522,6 +546,7 @@ namespace INFOIBV.Core.Main
                 throw new Exception("Cannot remove padding from a non-binary subImage");
             
             List<Region> regions = toRegionalImage(new FloodFill()).regions;
+            if (regions.Count == 0) return this;
             List<Vector2> foregroundPixels = regions
                 .Where(r => r.Size > thresholdRate * subWidth * subHeight) // remove noise regions
                 .Aggregate(new List<Vector2>(), (list, region) => list.Concat(region.coordinates).ToList());
@@ -542,7 +567,7 @@ namespace INFOIBV.Core.Main
         public List<Vector2> getLargestRegion()
         {
             List<Vector2> maxReg = this.toRegionalImage(new FloodFill())
-                            .regions.Values
+                            .regions.Select(r => r.coordinates)
                             .OrderBy((List<Vector2> a) => a.Count)
                             .ToList().First(); //take the largest region
 
