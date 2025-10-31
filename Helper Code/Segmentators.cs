@@ -447,9 +447,9 @@ namespace INFOIBV.Helper_Code
             Interval currentInterval = null;
             for(int i = 0; i < projection.Length; i++)
             {
-                if (projection[i] <= threshold && currentInterval == null)
+                if (projection[i] < threshold && currentInterval == null)
                         currentInterval = new Interval(i, i);
-                else if (projection[i] <= threshold)
+                else if (projection[i] < threshold)
                     currentInterval.append(i);
                 else if (currentInterval != null && i - currentInterval.end > maxGap)
                 {
