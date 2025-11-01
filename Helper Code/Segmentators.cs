@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -129,6 +130,7 @@ namespace INFOIBV.Helper_Code
         float minForegroundRatio = 0.03f;       //The minimum percentage of foreground pixels a line must hold to qualify as a line
         float maxForegroundRatio = 0.60f;       //The maximum percentage of foreground pixels a line must have to qualify as a line
         float minCharForegroundRatio = 0.05f;   //The minimum percentage of foreground pixels a character must have to qualify as a character.
+        float maxCharForegroundRatio = 0.60f;   //The minimum percentage of foreground pixels a character must have to qualify as a character.
 
         float minWhiteSpaceRatio = 0.75f;       //The minimum percentage of the mean whitespace-size a whitespace must have to qualify as a valid whitespace.
 
@@ -161,7 +163,7 @@ namespace INFOIBV.Helper_Code
                 double meanHeight = horizontalLines.Average((Line a) => a.Height);
                 double stDev = Math.Sqrt(horizontalLines.Sum((Line a) => (a.Height - meanHeight) * (a.Height - meanHeight)) / (double)horizontalLines.Count);
 
-                return (line.Height >= (meanHeight - (lower_amountStDevs * stDev)) && line.Height <= (meanHeight + (upper_amountStDevs * stDev)))    // line height has to be roughly similar to the mean
+                return (line.Height >= (meanHeight - (lower_amountStDevs * stDev)) && line.Height <= (meanHeight + (upper_amountStDevs * stDev)))    // line heigi tght has to be roughly similar to the mean
                         && line.foregroundRatio >= minForegroundRatio                                                                                              // line must contain a certain ratio of foreground pixels
                         && line.foregroundRatio <= maxForegroundRatio;
             });
@@ -174,7 +176,9 @@ namespace INFOIBV.Helper_Code
                 List<SubImage> characters = getCharactersFromLine(line);
                 characters = filter(characters, (SubImage ch) =>
                 {
-                    return ch.foregroundRatio >= minCharForegroundRatio;
+                    return  ch.foregroundRatio >= minCharForegroundRatio 
+                            && ch.foregroundRatio <= maxCharForegroundRatio;
+
                 });
 
                 characters = correctErroneousSegments(characters);
@@ -355,13 +359,6 @@ namespace INFOIBV.Helper_Code
                     for (int y = s.startPos.Y; y <= s.endPos.Y; y++)
                             if(binaryData.toArray()[x, y] != 255) image.SetPixel(x, y, currentCol);
 
-
-                //Debug.WriteLine($"-----------------------------------");
-                //Debug.WriteLine($"Character: {index}");
-                //Debug.WriteLine($"current width: {s.width}");
-                //Debug.WriteLine($"current height: {s.height}");
-                //Debug.WriteLine($"current width height ratio: {s.widthHeightRatio}");
-                //Debug.WriteLine($"-----------------------------------");
                 index++;
             }
 
@@ -514,6 +511,8 @@ namespace INFOIBV.Helper_Code
 
             return characters;
         }
+
+       
 
         /// <summary>
         /// Method that determines a threshold for when a row is determined as an empty line between lines of text.
