@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using INFOIBV.Core.Main;
 using INFOIBV.Helper_Code;
@@ -13,7 +12,7 @@ namespace INFOIBV.Core.TemplateMatching
         RegularDistanceTransform
     }
     
-    public class TemplateMatchingImage : ProcessingImage
+    public partial class TemplateMatchingImage : ProcessingImage
     {
         private DistanceTransformType distanceTransformType = DistanceTransformType.ChamferMatching;
         public TemplateMatchingImage(byte[,] inputImage) : base(inputImage) {}

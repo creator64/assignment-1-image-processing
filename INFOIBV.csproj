@@ -83,8 +83,10 @@
     <Compile Include="Core\Main\ProcessingImage.cs" />
     <Compile Include="Core\Main\ProcessingImageUtils.cs" />
     <Compile Include="Core\RegionalProcessingImage.cs" />
+    <Compile Include="Core\TemplateMatching\CuneiATemplates.cs" />
     <Compile Include="Core\TemplateMatching\DistanceTransform.cs" />
     <Compile Include="Core\TemplateMatching\TemplateMatchingImage.cs" />
+    <Compile Include="Core\TemplateMatching\TemplateMatchingImageFeatureExtraction.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
