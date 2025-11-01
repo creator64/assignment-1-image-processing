@@ -61,7 +61,7 @@ namespace INFOIBV.Core.TemplateMatching
             foreach (SubImage subImage in subImages)
             {
                 SubImage unpaddedSubImage = subImage.removePadding();
-                TemplateMatchingImage optimizedTemplateImage = templateImage.optimize(unpaddedSubImage);
+                TemplateMatchingImage optimizedTemplateImage = templateImage.adaptTo(unpaddedSubImage);
                 (int r, int s) = unpaddedSubImage.startPos;
                 
                 float score = calculateScore(r, s, optimizedTemplateImage, distances);
@@ -111,7 +111,7 @@ namespace INFOIBV.Core.TemplateMatching
             return drawRectangles(new List<Rectangle> { new Rectangle(bestMatch.X, bestMatch.Y, templateImage.width, templateImage.height) });
         }
 
-        public TemplateMatchingImage optimize(ProcessingImage image)
+        public TemplateMatchingImage adaptTo(ProcessingImage image)
         {
             return fromBitmap(
                 new Bitmap(getImage(), new Size(image.width, image.height))
