@@ -546,11 +546,12 @@ namespace INFOIBV.Core.Main
                 throw new Exception("Cannot remove padding from a non-binary subImage");
             
             List<Region> regions = toRegionalImage(new FloodFill()).regions;
-            if (regions.Count == 0) return this;
             List<Vector2> foregroundPixels = regions
                 .Where(r => r.Size > thresholdRate * subWidth * subHeight) // remove noise regions
                 .Aggregate(new List<Vector2>(), (list, region) => list.Concat(region.coordinates).ToList());
 
+            if (foregroundPixels.Count == 0) return this;
+            
             int minX = foregroundPixels.Min(v => (int)v.X) + startPos.X;
             int minY = foregroundPixels.Min(v => (int)v.Y) + startPos.Y;
             int maxX = foregroundPixels.Max(v => (int)v.X) + startPos.X;
