@@ -58,6 +58,13 @@ namespace INFOIBV.Core.Main
             return new RGBImage(output);
         }
 
+        public ProcessingImage resize(int newWidth, int newHeight)
+        {
+            return fromBitmap(
+                new Bitmap(getImage(), new Size(newWidth, newHeight))
+            );
+        }
+
         public Bitmap getImage()
         {
             Bitmap OutputImage = new Bitmap(inputImage.GetLength(0), inputImage.GetLength(1)); // create new output image

@@ -70,13 +70,13 @@ namespace INFOIBV.Core.TemplateMatching
             return scores;
         }
 
-        public float calculateScore(int r, int s, TemplateMatchingImage templateImage, float[,] distances, float K = -1)
+        public float calculateScore(int r, int s, ProcessingImage templateImage, float[,] distances, float K = -1)
         {
             float score = 0;
             for (int k = 0; k < templateImage.width; k++)
             for (int l = 0; l < templateImage.height; l++)
             {
-                if (templateImage.inputImage[k, l] != 255) continue;
+                if (templateImage.toArray()[k, l] != 255) continue;
                 int x = r + k, y = s + l; if (outOfBounds(x, y)) continue;
                 score += distances[x, y];
             }
@@ -112,9 +112,7 @@ namespace INFOIBV.Core.TemplateMatching
 
         public TemplateMatchingImage adaptTo(ProcessingImage image)
         {
-            return fromBitmap(
-                new Bitmap(getImage(), new Size(image.width, image.height))
-            ).toTemplateMatchingImage();
+            return resize(image.width, image.height).toTemplateMatchingImage();
         }
     }
 }

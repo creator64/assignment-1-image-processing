@@ -12,6 +12,12 @@ namespace INFOIBV.Core
         public int id;
         public List<Vector2> coordinates;
         public int Size => coordinates.Count;
+        public int minX => (int)coordinates.Min(v => v.X);
+        public int minY => (int)coordinates.Min(v => v.Y);
+        public int maxX => (int)coordinates.Max(v => v.X);
+        public int maxY => (int)coordinates.Max(v => v.Y);
+        public int width => maxX - minX;
+        public int height => maxY - minY;
 
         public Region(int id, List<Vector2> coordinates)
         {

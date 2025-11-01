@@ -54,7 +54,8 @@ namespace INFOIBV
             PreProcessingTest,
             SegmentationTest,
             SimpleCuneiDetection,
-            boundaries
+            boundaries,
+            CuneiDetectionFeatureExtraction
         }
         /*
          * these are the parameters for your processing functions, you should add more as you see fit
@@ -383,6 +384,9 @@ namespace INFOIBV
                 
                 case ProcessingFunctions.boundaries:
                     return processingImage.showBoundaries();
+                
+                case ProcessingFunctions.CuneiDetectionFeatureExtraction:
+                    return Pipelines.cuneiDetectionFeatureExtraction(processingImage);
                 
                 default:
                     return processingImage;
