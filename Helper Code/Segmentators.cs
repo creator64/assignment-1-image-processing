@@ -203,18 +203,29 @@ namespace INFOIBV.Helper_Code
                     //Debug.WriteLine("merging");
                     (bool anyMerge, bool mergedToRight) changes = mergeSmallSegment(cur, i, characters, processed);
 
+                    SubImage mergedChar = processed.Last();
+
                     if(changes.anyMerge)
-                        characters[i] = processed.Last();
+                        characters[i] = mergedChar;
                     if (changes.mergedToRight)
-                        characters[i + 1] = processed.Last();   
+                        characters[i + 1] = mergedChar;
+
+                    if (mergedChar.widthHeightRatio > maxWidthHeightRatio && changes.anyMerge)
+                    {
+                        splitLargeSegment(mergedChar, processed);
+                        processed.RemoveAt(processed.Count - 2);
+                        characters[i] = processed.Last();
+                        if(changes.mergedToRight) characters[i + 1] = processed.Last();
+                    }
 
                 }
                 else
                 {
-                    splitLargeSegment(cur, i, characters, processed);
+                    splitLargeSegment(cur, processed);
                     characters[i] = processed.Last();
                 }
             }
+
 
             return processed;
         }
@@ -249,6 +260,10 @@ namespace INFOIBV.Helper_Code
                 {
                     //merge subimages
                     SubImage mergedImage = parent.createSubImage(leftChar.startPos, cur.endPos);
+                    if(mergedImage.widthHeightRatio > maxWidthHeightRatio)
+                    {
+
+                    }
                     processed.RemoveAll((SubImage s) => s.startPos == leftChar.startPos && s.endPos == leftChar.endPos);
                     processed.Add(mergedImage);
                     return (true, false);
@@ -280,7 +295,7 @@ namespace INFOIBV.Helper_Code
             return (false, false);
         }
 
-        private void splitLargeSegment(SubImage cur, int index, List<SubImage> characters, List<SubImage> processed)
+        private void splitLargeSegment(SubImage cur, List<SubImage> processed)
         {
             ProcessingImage parent = cur.parentImage;
             int[] curProjection = new int[cur.width];
