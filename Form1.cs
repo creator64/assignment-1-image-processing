@@ -367,7 +367,11 @@ namespace INFOIBV
                     )).toTemplateMatchingImage();
 
                     //Segmentator segmentator = new SimpleConnectionSegmentator(processingImage, (templateImage.width, templateImage.height));
-                    Segmentator segmentator = new ProjectionSegmentator(processingImage);
+                    Segmentator segmentator = new ProjectionSegmentator(processingImage
+                            .adjustContrast()
+                            .bilateralSmoothing(2, 50)
+                            .otsuThreshold()
+                            .invertImage());
                     return segmentator.visualisedSegmentation;
                 
                 case ProcessingFunctions.PreProcessingTest:
