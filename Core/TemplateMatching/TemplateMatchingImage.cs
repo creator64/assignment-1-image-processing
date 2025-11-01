@@ -62,7 +62,6 @@ namespace INFOIBV.Core.TemplateMatching
             {
                 SubImage unpaddedSubImage = subImage.removePadding();
                 TemplateMatchingImage optimizedTemplateImage = templateImage.optimize(unpaddedSubImage);
-                // optimizedTemplateImage.getImage().Save("optimized.bmp");
                 (int r, int s) = unpaddedSubImage.startPos;
                 
                 float score = calculateScore(r, s, optimizedTemplateImage, distances);
@@ -85,8 +84,6 @@ namespace INFOIBV.Core.TemplateMatching
 
             K = K <= 0 ? templateImage.getImageData().amountForegroundPixels : K;
             score /= K;
-
-            // File.WriteAllText("test.txt", score.ToString());
 
             return score;
         }

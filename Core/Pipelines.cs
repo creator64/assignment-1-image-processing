@@ -112,8 +112,6 @@ namespace INFOIBV.Core
                 )
             ).toTemplateMatchingImage();
             
-            // Segmentator segmentator = new SimpleConnectionSegmentator(binaryEdgeMap, (templateImage.width, templateImage.height));
-            // Segmentator segmentator = new TestSegmentator(binaryEdgeMap);
             Segmentator segmentator = new ProjectionSegmentator(binaryEdgeMap);
             List<SubImage> segments = segmentator.segments;
 
