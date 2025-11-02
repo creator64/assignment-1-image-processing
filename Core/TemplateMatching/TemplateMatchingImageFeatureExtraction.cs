@@ -26,11 +26,19 @@ namespace INFOIBV.Core.TemplateMatching
             new qpp_II(),
             new qpp_III(),
         };
-        
-        public RGBImage cuneiADetection(List<SubImage> pointsToCheck = null)
+
+        public RGBImage cuneiADetection()
         {
+            ProcessingImage binaryEdgeMap = adjustContrast()
+                .bilateralSmoothing(2, 50)
+                .otsuThreshold()
+                .invertImage();
+
+            Segmentator segmentator = new ProjectionSegmentator(binaryEdgeMap);
+            List<SubImage> segments = segmentator.segments;
+            
             return drawRectangles(
-                filterSegments(pointsToCheck)
+                filterSegments(segments)
                     .Select(s => s.toRectangle())
                     .ToList()
             );

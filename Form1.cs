@@ -386,7 +386,7 @@ namespace INFOIBV
                     return processingImage.showBoundaries();
                 
                 case ProcessingFunctions.CuneiDetectionFeatureExtraction:
-                    return Pipelines.cuneiDetectionFeatureExtraction(processingImage);
+                    return processingImage.toTemplateMatchingImage().cuneiADetection();
                 
                 default:
                     return processingImage;

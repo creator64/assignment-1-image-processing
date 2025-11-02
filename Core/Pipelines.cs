@@ -124,19 +124,5 @@ namespace INFOIBV.Core
                 pointsToCheck: segments
             );
         }
-        
-        public static RGBImage cuneiDetectionFeatureExtraction(ProcessingImage processingImage)
-        {
-            ProcessingImage binaryEdgeMap = processingImage
-                .adjustContrast()
-                .bilateralSmoothing(2, 50)
-                .otsuThreshold()
-                .invertImage();
-
-            Segmentator segmentator = new ProjectionSegmentator(binaryEdgeMap);
-            List<SubImage> segments = segmentator.segments;
-
-            return binaryEdgeMap.toTemplateMatchingImage().cuneiADetection(segments);
-        }
     }
 }
