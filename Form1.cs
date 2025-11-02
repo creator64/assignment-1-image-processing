@@ -386,7 +386,10 @@ namespace INFOIBV
                     return processingImage.showBoundaries();
                 
                 case ProcessingFunctions.CuneiDetectionFeatureExtraction:
-                    return processingImage.toTemplateMatchingImage().cuneiADetection();
+                    return new RGBImage(InputImage).drawRectangles(
+                        processingImage.toTemplateMatchingImage().cuneiADetection(),
+                        Color.DarkRed
+                    );
                 
                 default:
                     return processingImage;

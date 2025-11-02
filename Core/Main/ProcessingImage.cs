@@ -625,5 +625,30 @@ namespace INFOIBV.Core.Main
         {
             return rgbImage;
         }
+        
+        public RGBImage drawRectangles(List<Rectangle> rectangles, Color color)
+        {
+            Bitmap output = new Bitmap(getImage());
+
+            foreach (Rectangle rectangle in rectangles)
+            {
+                double endX = Math.Min(rectangle.X + rectangle.Width, output.Width - 1);
+                double endY = Math.Min(rectangle.Y + rectangle.Height, output.Height - 1);
+
+                for (int i = rectangle.X; i <= endX; i++)
+                {
+                    output.SetPixel(i, rectangle.Y, color);
+                    output.SetPixel(i, (int)endY, color);
+                }
+
+                for (int j = rectangle.Y; j <= endY; j++)
+                {
+                    output.SetPixel(rectangle.X, j, color);
+                    output.SetPixel((int)endX, j, color);
+                }
+            }
+
+            return new RGBImage(output);
+        }
     }
 }
