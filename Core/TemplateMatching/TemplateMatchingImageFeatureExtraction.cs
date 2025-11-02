@@ -63,15 +63,13 @@ namespace INFOIBV.Core.TemplateMatching
             double scoreThreshold = 0.1;
             List<Region> regions = segment.toRegionalImage(new FloodFill()).regions
                 .Where(r => r.Size > regionThreshold).ToList();
-
-            float[,] distances = getDistanceTransform().toDistances(new EuclidianDistance());
+            
             Dictionary<Region, CuneiATemplate> regionsToTemplate = new Dictionary<Region, CuneiATemplate>();
 
             // string ss = "";
             foreach (Region region in regions)
             {
                 (float bestScore, CuneiATemplate chosenTemplate) = (int.MinValue, null);
-                int r = region.minX, s = region.minY;
 
                 // ss += "region: (" + region.minX + ", " + region.minY + "), " + region.Size + "\n";
                 
