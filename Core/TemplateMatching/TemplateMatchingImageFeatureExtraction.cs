@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Security.AccessControl;
 using INFOIBV.Core.Main;
 using INFOIBV.Helper_Code;
 
@@ -12,7 +9,7 @@ namespace INFOIBV.Core.TemplateMatching
 {
     public partial class TemplateMatchingImage
     {
-        private static List<CuneiATemplate> _templates = new List<CuneiATemplate>
+        private readonly static List<CuneiATemplate> _templates = new List<CuneiATemplate>
         {
             new all(),
             new p(),
@@ -36,38 +33,40 @@ namespace INFOIBV.Core.TemplateMatching
 
             Segmentator segmentator = new ProjectionSegmentator(binaryEdgeMap);
             List<SubImage> segments = segmentator.segments;
-            
-            return filterSegments(segments)
-                    .Select(s => s.toRectangle())
-                    .ToList();
+
+            return filterSegments(segments);
         }
         
-        private List<SubImage> filterSegments(List<SubImage> segments)
+        private List<Rectangle> filterSegments(List<SubImage> segments)
         {
-            List<SubImage> detectedSegments = new List<SubImage>();
+            List<Rectangle> detectedSegments = new List<Rectangle>();
             foreach (SubImage subImage in segments)
             {
                 SubImage unpadded = subImage.removePadding();
-                if (validateSegment(unpadded)) detectedSegments.Add(unpadded);
+                Rectangle? segmentRectangle = validateSegment(unpadded);
+                if (segmentRectangle != null) detectedSegments.Add(segmentRectangle.Value);
             }
 
             return detectedSegments;
         }
 
-        private bool validateSegment(SubImage segment)
+        private Rectangle? validateSegment(SubImage segment)
         {
-            Dictionary<Point, LetterPart> letters = extractLetters(segment);
+            Dictionary<Point, LetterPart> letters = extractLetters(segment, out List<Region> regionsUsed);
             var Ps = letters.Where(kvp => kvp.Value == LetterPart.P);
             var Qs = letters.Where(kvp => kvp.Value == LetterPart.Q);
 
-            if (Ps.Count() != 3 || Qs.Count() != 1) return false;
+            if (Ps.Count() != 3 || Qs.Count() != 1) return null;
             var Q = Qs.First();
-            if (Ps.Any(p => p.Key.Y < Q.Key.Y)) return false;
+            if (Ps.Any(p => p.Key.Y < Q.Key.Y)) return null;
+            
+            int minX = regionsUsed.Min(r => r.minX), minY = regionsUsed.Min(r => r.minY),
+                maxX = regionsUsed.Max(r => r.maxX), maxY = regionsUsed.Max(r => r.maxY);
 
-            return true;
+            return new Rectangle(minX + segment.startPos.X, minY + segment.startPos.Y, (maxX - minX), (maxY - minY));
         }
 
-        private Dictionary<Point, LetterPart> extractLetters(SubImage segment)
+        private Dictionary<Point, LetterPart> extractLetters(SubImage segment, out List<Region> regionsUsed)
         {
             int regionSizeThreshold = 29, regionheightThreshold = 3;
             double scoreThreshold = 0.1;
@@ -75,27 +74,22 @@ namespace INFOIBV.Core.TemplateMatching
                 .Where(r => r.Size > regionSizeThreshold && r.height > regionheightThreshold).ToList();
             
             Dictionary<Region, CuneiATemplate> regionsToTemplate = new Dictionary<Region, CuneiATemplate>();
-
-            // string ss = "";
+            
             foreach (Region region in regions)
             {
                 (float bestScore, CuneiATemplate chosenTemplate) = (int.MinValue, null);
 
-                // ss += "region: (" + region.minX + ", " + region.minY + "), " + region.Size + "\n";
-                
                 foreach (CuneiATemplate template in _templates)
                 {
                     float score = letterScore(region, template);
-                    // ss += "template: " + template + ", score: " + score + "\n";
                     if (score > bestScore) 
                         (bestScore, chosenTemplate) = (score, template);
                 }
                 
                 if (bestScore > scoreThreshold) regionsToTemplate.Add(region, chosenTemplate);
             }
-            
-            // File.WriteAllText("test.txt", ss);
 
+            regionsUsed = regionsToTemplate.Keys.ToList();
             return regionsToTemplate
                 .Select(pair => pair.Value.extractLetters(pair.Key))
                 .Aggregate(new Dictionary<Point, LetterPart>(), (a, b) => a
