@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Security.AccessControl;
 using INFOIBV.Core.Main;
 using INFOIBV.Helper_Code;
 
@@ -49,11 +51,12 @@ namespace INFOIBV.Core.TemplateMatching
         private bool validateSegment(SubImage segment)
         {
             Dictionary<Point, LetterPart> letters = extractLetters(segment);
-            int amountP = 0, amountQ = 0;
-            foreach (LetterPart letterPart in letters.Values)
-                if (letterPart == LetterPart.P) amountP++; else amountQ++;
+            var Ps = letters.Where(kvp => kvp.Value == LetterPart.P);
+            var Qs = letters.Where(kvp => kvp.Value == LetterPart.Q);
 
-            if (amountP != 3 || amountQ != 1) return false;
+            if (Ps.Count() != 3 || Qs.Count() != 1) return false;
+            var Q = Qs.First();
+            if (Ps.Any(p => p.Key.Y < Q.Key.Y)) return false;
 
             return true;
         }
