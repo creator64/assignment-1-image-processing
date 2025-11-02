@@ -113,7 +113,7 @@ namespace INFOIBV.Core.TemplateMatching
             return new Dictionary<Point, LetterPart>
             {
                 { new Point(region.minX, y1), LetterPart.Q },
-                { new Point(region.minX, y2), LetterPart.P }
+                { new Point(region.minX, y2 + 1), LetterPart.P }
             };
         }
     }
@@ -149,7 +149,7 @@ namespace INFOIBV.Core.TemplateMatching
             return new Dictionary<Point, LetterPart>
             {
                 { new Point(region.minX, y1), LetterPart.Q },
-                { new Point(region.minX + 2 * region.width / 3, y2), LetterPart.P }
+                { new Point(region.minX + 2 * region.width / 3, y2 - 1), LetterPart.P }
             };
         }
     }
@@ -167,7 +167,7 @@ namespace INFOIBV.Core.TemplateMatching
             return new Dictionary<Point, LetterPart>
             {
                 { new Point(region.minX, y1), LetterPart.Q },
-                { new Point(region.minX, y2), LetterPart.P },
+                { new Point(region.minX, y2 + 1), LetterPart.P },
                 { new Point(region.minX + region.width / 3, y2), LetterPart.P }
             };
         }
@@ -186,8 +186,8 @@ namespace INFOIBV.Core.TemplateMatching
             return new Dictionary<Point, LetterPart>
             {
                 { new Point(region.minX, y1), LetterPart.Q },
-                { new Point(region.minX, y2), LetterPart.P },
-                { new Point(region.minX + 2 * region.width / 3, y2), LetterPart.P }
+                { new Point(region.minX, y2 + 1), LetterPart.P },
+                { new Point(region.minX + 2 * region.width / 3, y2 - 1), LetterPart.P }
             };
         }
     }
@@ -206,7 +206,7 @@ namespace INFOIBV.Core.TemplateMatching
             {
                 { new Point(region.minX, y1), LetterPart.Q },
                 { new Point(region.minX + 1 * region.width / 3, y2), LetterPart.P },
-                { new Point(region.minX + 2 * region.width / 3, y2), LetterPart.P }
+                { new Point(region.minX + 2 * region.width / 3, y2 - 1), LetterPart.P }
             };
         }
     }

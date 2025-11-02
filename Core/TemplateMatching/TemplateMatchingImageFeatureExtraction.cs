@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using INFOIBV.Core.Main;
 using INFOIBV.Helper_Code;
 
@@ -58,32 +59,34 @@ namespace INFOIBV.Core.TemplateMatching
 
         private Dictionary<Point, LetterPart> extractLetters(SubImage segment)
         {
-            int regionThreshold = 40;
-            double scoreThreshold = 50;
+            int regionThreshold = 29;
+            double scoreThreshold = 0.1;
             List<Region> regions = segment.toRegionalImage(new FloodFill()).regions
                 .Where(r => r.Size > regionThreshold).ToList();
 
-            float[,] distances = getDistanceTransform().toDistances(new ManhattanDistance());
+            float[,] distances = getDistanceTransform().toDistances(new EuclidianDistance());
             Dictionary<Region, CuneiATemplate> regionsToTemplate = new Dictionary<Region, CuneiATemplate>();
 
+            // string ss = "";
             foreach (Region region in regions)
             {
-                (float bestScore, CuneiATemplate chosenTemplate) = (int.MaxValue, null);
+                (float bestScore, CuneiATemplate chosenTemplate) = (int.MinValue, null);
                 int r = region.minX, s = region.minY;
+
+                // ss += "region: (" + region.minX + ", " + region.minY + "), " + region.Size + "\n";
                 
                 foreach (CuneiATemplate template in _templates)
                 {
-                    float score = calculateScore(
-                        r, s, 
-                        template.templateImage.resize(region.width, region.height), 
-                        distances
-                    );
-                    if (score < bestScore) 
+                    float score = letterScore(region, template);
+                    // ss += "template: " + template + ", score: " + score + "\n";
+                    if (score > bestScore) 
                         (bestScore, chosenTemplate) = (score, template);
                 }
                 
-                if (bestScore < scoreThreshold) regionsToTemplate.Add(region, chosenTemplate);
+                if (bestScore > scoreThreshold) regionsToTemplate.Add(region, chosenTemplate);
             }
+            
+            // File.WriteAllText("test.txt", ss);
 
             return regionsToTemplate
                 .Select(pair => pair.Value.extractLetters(pair.Key))
@@ -91,6 +94,27 @@ namespace INFOIBV.Core.TemplateMatching
                     .Concat(b)
                     .ToDictionary(x=>x.Key,x=>x.Value)
                 );
+        }
+
+        private float letterScore(Region region, CuneiATemplate template)
+        {
+            (int x, int y) = (region.minX, region.minY);
+            TemplateMatchingImage templateImage = template.templateImage.resize(region.width, region.height).toTemplateMatchingImage();
+            float score = 0;
+
+            for (int i = 0; i < templateImage.width; i++)
+            for (int j = 0; j < templateImage.height; j++)
+            {
+                bool inRegion = region.coordinates.Contains(new Vector2(x + i, y + j)); 
+                if (templateImage.inputImage[i, j] == 255)
+                    score += inRegion ? .5f : -1;
+                else if (templateImage.inputImage[i, j] == 0)
+                    score += !inRegion ? .5f : -1;
+            }
+
+            score /= templateImage.width * templateImage.height;
+
+            return score;
         }
     }
 }
