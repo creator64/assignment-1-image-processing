@@ -79,6 +79,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\HoughTransform.cs" />
+    <Compile Include="Core\Main\Image.cs" />
+    <Compile Include="Core\Main\SubImage.cs" />
     <Compile Include="Core\Pipelines.cs" />
     <Compile Include="Core\Main\ProcessingImage.cs" />
     <Compile Include="Core\Main\ProcessingImageUtils.cs" />
