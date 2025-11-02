@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using INFOIBV.Core.Main;
@@ -59,10 +60,10 @@ namespace INFOIBV.Core.TemplateMatching
 
         private Dictionary<Point, LetterPart> extractLetters(SubImage segment)
         {
-            int regionThreshold = 29;
+            int regionSizeThreshold = 29, regionheightThreshold = 3;
             double scoreThreshold = 0.1;
             List<Region> regions = segment.toRegionalImage(new FloodFill()).regions
-                .Where(r => r.Size > regionThreshold).ToList();
+                .Where(r => r.Size > regionSizeThreshold && r.height > regionheightThreshold).ToList();
             
             Dictionary<Region, CuneiATemplate> regionsToTemplate = new Dictionary<Region, CuneiATemplate>();
 
