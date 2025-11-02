@@ -8,6 +8,8 @@ using INFOIBV.Core;
 using INFOIBV.Helper_Code;
 using System.IO;
 using INFOIBV.Core.Main;
+using Image = INFOIBV.Core.Main.Image;
+using DrawingImage = System.Drawing.Image;
 using INFOIBV.Core.TemplateMatching;
 
 namespace INFOIBV
@@ -100,7 +102,7 @@ namespace INFOIBV
                     InputImage.Size.Height > 512 || InputImage.Size.Width > 512*/) // dimension check (may be removed or altered)
                     MessageBox.Show("Error in image dimensions (have to be > 0 and <= 512)");
                 else
-                    pictureBox1.Image = (Image) InputImage;                 // display input image
+                    pictureBox1.Image = (DrawingImage)InputImage;                 // display input image
            }
         }
 
@@ -130,10 +132,10 @@ namespace INFOIBV
                 MessageBox.Show("The current image you've selected isn't a binary image, hence you can't perform this operation on it. Threshold it first to turn it into a binary image.");
             else
             { 
-                IImage image = applyProcessingFunction(workingImage);           // processing functions
+                Image image = applyProcessingFunction(workingImage);           // processing functions
 
                 OutputImage = image.getImage();
-                pictureBox2.Image = (Image)OutputImage;                         // display output image
+                pictureBox2.Image = (DrawingImage)OutputImage;                         // display output image
             }
         }
 
@@ -151,7 +153,7 @@ namespace INFOIBV
         /*
          * applyProcessingFunction: defines behavior of function calls when "Apply" is pressed
          */
-        private IImage applyProcessingFunction(byte[,] workingImage)
+        private Image applyProcessingFunction(byte[,] workingImage)
         {
             x++;
             float[,] horizontalKernel = {

@@ -32,31 +32,6 @@ namespace INFOIBV.Core.Main
         {
             return SubImage.create(this, startPos, endPos);
         }
-        
-        public RGBImage drawRectangles(List<Rectangle> rectangles)
-        {
-            Bitmap output = getImage();
-
-            foreach (Rectangle rectangle in rectangles)
-            {
-                double endX = Math.Min(rectangle.X + rectangle.Width, width - 1);
-                double endY = Math.Min(rectangle.Y + rectangle.Height, height - 1);
-
-                for (int i = rectangle.X; i <= endX; i++)
-                {
-                    output.SetPixel(i, rectangle.Y, Color.Red);
-                    output.SetPixel(i, (int)endY, Color.Red);
-                }
-
-                for (int j = rectangle.Y; j <= endY; j++)
-                {
-                    output.SetPixel(rectangle.X, j, Color.Red);
-                    output.SetPixel((int)endX, j, Color.Red);
-                }
-            }
-
-            return new RGBImage(output);
-        }
 
         public ProcessingImage resize(int newWidth, int newHeight)
         {
@@ -65,7 +40,7 @@ namespace INFOIBV.Core.Main
             );
         }
 
-        public Bitmap getImage()
+        public override Bitmap getImage()
         {
             Bitmap OutputImage = new Bitmap(inputImage.GetLength(0), inputImage.GetLength(1)); // create new output image
             for (int x = 0; x < inputImage.GetLength(0); x++)             // loop over columns

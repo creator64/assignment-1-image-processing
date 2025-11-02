@@ -9,15 +9,41 @@ using System.Windows.Forms;
 namespace INFOIBV.Core.Main
 {
 
-    interface IImage
+    public abstract class Image
     {
-        Bitmap getImage();
+        public int width;
+        public int height;
+        public abstract Bitmap getImage();
+
+        public RGBImage drawRectangles(List<Rectangle> rectangles, Color color = new Color())
+        {
+            if (color.IsEmpty) color = Color.Red;
+            Bitmap output = new Bitmap(getImage());
+
+            foreach (Rectangle rectangle in rectangles)
+            {
+                double endX = Math.Min(rectangle.X + rectangle.Width, width - 1);
+                double endY = Math.Min(rectangle.Y + rectangle.Height, height - 1);
+
+                for (int i = rectangle.X; i <= endX; i++)
+                {
+                    output.SetPixel(i, rectangle.Y, color);
+                    output.SetPixel(i, (int)endY, color);
+                }
+
+                for (int j = rectangle.Y; j <= endY; j++)
+                {
+                    output.SetPixel(rectangle.X, j, color);
+                    output.SetPixel((int)endX, j, color);
+                }
+            }
+
+            return new RGBImage(output);
+        }
     }
 
-    public partial class ProcessingImage : IImage
+    public partial class ProcessingImage : Image
     {
-        public readonly int width;
-        public readonly int height;
         protected byte[,] inputImage;
 
         public ProcessingImage(byte[,] inputImage)
@@ -613,42 +639,19 @@ namespace INFOIBV.Core.Main
         }
     }
 
-    public class RGBImage : IImage
+    public class RGBImage : Image
     {
         public Bitmap rgbImage { get; private set; }
         public RGBImage(Bitmap inputRGB)
         {
             this.rgbImage = inputRGB;
+            this.width = rgbImage.Width;
+            this.height = rgbImage.Height;
         }
 
-        public Bitmap getImage()
+        public override Bitmap getImage()
         {
             return rgbImage;
-        }
-        
-        public RGBImage drawRectangles(List<Rectangle> rectangles, Color color)
-        {
-            Bitmap output = new Bitmap(getImage());
-
-            foreach (Rectangle rectangle in rectangles)
-            {
-                double endX = Math.Min(rectangle.X + rectangle.Width, output.Width - 1);
-                double endY = Math.Min(rectangle.Y + rectangle.Height, output.Height - 1);
-
-                for (int i = rectangle.X; i <= endX; i++)
-                {
-                    output.SetPixel(i, rectangle.Y, color);
-                    output.SetPixel(i, (int)endY, color);
-                }
-
-                for (int j = rectangle.Y; j <= endY; j++)
-                {
-                    output.SetPixel(rectangle.X, j, color);
-                    output.SetPixel((int)endX, j, color);
-                }
-            }
-
-            return new RGBImage(output);
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Diagnostics;
 using System.Collections.Generic;
 using INFOIBV.Core.Main;
+using DrawingImage = System.Drawing.Image;
 
 namespace INFOIBV
 {
@@ -43,7 +44,7 @@ namespace INFOIBV
                 if (!Directory.Exists(outputPath))
                     Directory.CreateDirectory(outputPath);
 
-                Image outputImage = processedImage.getImage();
+                DrawingImage outputImage = processedImage.getImage();
                 outputImage.Save(Path.Combine(outputPath, "B" + (i + 1) + ".bmp"), ImageFormat.Bmp);
                 outputImage.Save(Path.Combine(outputPath, "B" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report
 
@@ -77,7 +78,7 @@ namespace INFOIBV
                 string jsonString = JsonSerializer.Serialize(data);
                 File.WriteAllText(Path.Combine(dataPath, "image_data_C" + (i + 1) + ".json"), jsonString);
 
-                Image outputImage = processedImage.getImage();
+                DrawingImage outputImage = processedImage.getImage();
 
                 outputImage.Save(Path.Combine(imgPath, "C" + (i + 1) + ".bmp"), ImageFormat.Bmp);
                 outputImage.Save(Path.Combine(imgPath, "C" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report
@@ -102,7 +103,7 @@ namespace INFOIBV
             if (!Directory.Exists(dataPath))
                 Directory.CreateDirectory(dataPath);
 
-            Image img_imageF = imageF.getImage();
+            DrawingImage img_imageF = imageF.getImage();
             img_imageF.Save(Path.Combine(imgPath, "Image_F.bmp"), ImageFormat.Bmp);
 
             int[] sizes = { 3, 13, 23, 33 };
@@ -116,7 +117,7 @@ namespace INFOIBV
                 string jsonString = JsonSerializer.Serialize(data);
                 File.WriteAllText(Path.Combine(dataPath, "image_data_G" + (i + 1) + ".json"), jsonString);
 
-                Image outputImage = processedImage.getImage();
+                DrawingImage outputImage = processedImage.getImage();
 
                 outputImage.Save(Path.Combine(imgPath, "G" + (i + 1) + ".bmp"), ImageFormat.Bmp);
                 outputImage.Save(Path.Combine(imgPath, "G" + (i + 1) + ".png"), ImageFormat.Png); //also create a png image for the report
@@ -163,7 +164,7 @@ namespace INFOIBV
                 string jsonString = JsonSerializer.Serialize(config);
                 File.WriteAllText(Path.Combine(dataPath, "config_" + config.name + ".json"), jsonString);
 
-                Image output = processedImage.getImage();
+                DrawingImage output = processedImage.getImage();
 
                 output.Save(Path.Combine(imgPath, config.name + ".png"), ImageFormat.Png);
             }
@@ -207,7 +208,7 @@ namespace INFOIBV
                 string jsonString = JsonSerializer.Serialize(config);
                 File.WriteAllText(Path.Combine(dataPath, "config_" + config.name + ".json"), jsonString);
 
-                Image output = processedImage.getImage();
+                DrawingImage output = processedImage.getImage();
 
                 output.Save(Path.Combine(imgPath, config.name + ".png"), ImageFormat.Png);
             }
