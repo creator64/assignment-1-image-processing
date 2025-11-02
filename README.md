@@ -1,7 +1,7 @@
 # Assignment 3
 
 Our target images are located in the folder `images\Tomb of Darius I DNa Inscription\Good Examples` 
-and our distractor images are located in the folder `Tomb of Darius I DNa Inscription\Distractors`.
+and our distractor images are located in the folder `images\Tomb of Darius I DNa Inscription\Distractors`.
 You can load them in the GUI and then click the last option _Cunei Detection Feature Extraction_ to test the
 whole pipeline on our images. Most of the relevant code can be found in 
 `Core/TemplateMatching/TemplateMatchingImageFeatureExtraction.cs` and `Segmentators.cs`, however there is also other
